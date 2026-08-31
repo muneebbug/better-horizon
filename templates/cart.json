@@ -83,7 +83,7 @@
                 "heading": "Recommended for you",
                 "type_preset": "h4",
                 "alignment": "left",
-                "layout": "list",
+                "layout": "slider",
                 "products_to_show": 4,
                 "padding-block-start": 16,
                 "padding-block-end": 16,
