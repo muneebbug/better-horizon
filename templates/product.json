@@ -233,7 +233,7 @@
               "settings": {
                 "content_direction": "row",
                 "vertical_on_mobile": true,
-                "horizontal_alignment": "flex-start",
+                "horizontal_alignment": "space-between",
                 "vertical_alignment": "center",
                 "align_baseline": false,
                 "horizontal_alignment_flex_direction_column": "flex-start",
@@ -356,6 +356,15 @@
               },
               "block_order": []
             },
+            "frequently_bought_together_VBWnqk": {
+              "type": "frequently-bought-together",
+              "name": "Frequently bought together",
+              "settings": {
+                "heading": "Frequently Bought Together",
+                "button_label": "Add Bundle to Cart"
+              },
+              "blocks": {}
+            },
             "payment_icons_L7CUcR": {
               "type": "payment-icons",
               "name": "Payment methods",
@@ -419,6 +428,7 @@
             "back_in_stock_Ab76JE",
             "group_6br3kT",
             "buy_buttons_eYQEYi",
+            "frequently_bought_together_VBWnqk",
             "payment_icons_L7CUcR",
             "trust_badge_bar_dRtmVT",
             "text_aEtTtq"
