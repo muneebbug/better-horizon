@@ -8,6 +8,7 @@
 
 import { Component } from '@theme/component';
 import { StandardEvents } from '@shopify/events';
+import { formatMoney } from '@theme/money-formatting';
 
 const STORAGE_KEY_ZIP = 'better_horizon_delivery_zip';
 const STORAGE_KEY_COUNTRY = 'better_horizon_delivery_country';
@@ -312,8 +313,106 @@ export class DeliveryEstimate extends Component {
   }
 
   /**
-   * Fetches real shipping rates from Shopify Ajax Cart API if in cart context.
-   * Handles asynchronous 202 polling.
+   * Infers province / state from postal code for US and Canada.
+   * Shopify's /cart/shipping_rates.json strictly requires province for US/CA.
+   * @param {string} country
+   * @param {string} zip
+   * @returns {string | null}
+   */
+  #inferProvince(country, zip) {
+    if (!country || !zip) return null;
+    const cleanCountry = country.trim().toLowerCase();
+    const cleanZip = zip.trim().toUpperCase().replace(/\s+/g, '');
+
+    // United States ZIP prefix mapping
+    if (cleanCountry.includes('united states') || cleanCountry === 'us' || cleanCountry === 'usa') {
+      const prefix2 = parseInt(cleanZip.substring(0, 2), 10);
+      const prefix3 = parseInt(cleanZip.substring(0, 3), 10);
+
+      if (prefix3 >= 995 && prefix3 <= 999) return 'Alaska';
+      if (prefix3 >= 967 && prefix3 <= 968) return 'Hawaii';
+      if (prefix2 >= 10 && prefix2 <= 14) return 'New York';
+      if (prefix2 >= 15 && prefix2 <= 19) return 'Pennsylvania';
+      if (prefix2 === 20) return 'District of Columbia';
+      if (prefix2 === 21) return 'Maryland';
+      if (prefix2 >= 22 && prefix2 <= 24) return 'Virginia';
+      if (prefix2 >= 25 && prefix2 <= 26) return 'West Virginia';
+      if (prefix2 >= 27 && prefix2 <= 28) return 'North Carolina';
+      if (prefix2 === 29) return 'South Carolina';
+      if (prefix2 >= 30 && prefix2 <= 31) return 'Georgia';
+      if (prefix2 >= 32 && prefix2 <= 34) return 'Florida';
+      if (prefix2 >= 35 && prefix2 <= 36) return 'Alabama';
+      if (prefix2 >= 37 && prefix2 <= 38) return 'Tennessee';
+      if (prefix2 === 39) return 'Mississippi';
+      if (prefix2 >= 40 && prefix2 <= 42) return 'Kentucky';
+      if (prefix2 >= 43 && prefix2 <= 45) return 'Ohio';
+      if (prefix2 >= 46 && prefix2 <= 47) return 'Indiana';
+      if (prefix2 >= 48 && prefix2 <= 49) return 'Michigan';
+      if (prefix2 >= 50 && prefix2 <= 52) return 'Iowa';
+      if (prefix2 >= 53 && prefix2 <= 54) return 'Wisconsin';
+      if (prefix2 >= 55 && prefix2 <= 56) return 'Minnesota';
+      if (prefix2 === 57) return 'South Dakota';
+      if (prefix2 === 58) return 'North Dakota';
+      if (prefix2 === 59) return 'Montana';
+      if (prefix2 >= 60 && prefix2 <= 62) return 'Illinois';
+      if (prefix2 >= 63 && prefix2 <= 65) return 'Missouri';
+      if (prefix2 >= 66 && prefix2 <= 67) return 'Kansas';
+      if (prefix2 >= 68 && prefix2 <= 69) return 'Nebraska';
+      if (prefix2 >= 70 && prefix2 <= 71) return 'Louisiana';
+      if (prefix2 === 72) return 'Arkansas';
+      if (prefix2 >= 73 && prefix2 <= 74) return 'Oklahoma';
+      if (prefix2 >= 75 && prefix2 <= 79) return 'Texas';
+      if (prefix2 >= 80 && prefix2 <= 81) return 'Colorado';
+      if (prefix2 >= 82 && prefix2 <= 83) return 'Wyoming';
+      if (prefix2 === 84) return 'Utah';
+      if (prefix2 >= 85 && prefix2 <= 86) return 'Arizona';
+      if (prefix2 >= 87 && prefix2 <= 88) return 'New Mexico';
+      if (prefix2 === 89) return 'Nevada';
+      if (prefix2 >= 90 && prefix2 <= 96) return 'California';
+      if (prefix2 === 97) return 'Oregon';
+      if (prefix2 >= 98 && prefix2 <= 99) return 'Washington';
+      if (prefix2 >= 1 && prefix2 <= 2) return 'Massachusetts';
+      if (prefix2 === 3) return 'New Hampshire';
+      if (prefix2 === 4) return 'Maine';
+      if (prefix2 === 5) return 'Vermont';
+      if (prefix2 === 6) return 'Connecticut';
+      if (prefix2 === 7 || prefix2 === 8) return 'New Jersey';
+      if (prefix2 === 9) return 'Rhode Island';
+      return 'New York';
+    }
+
+    // Canada postal code initial letter mapping
+    if (cleanCountry === 'canada' || cleanCountry === 'ca') {
+      const firstChar = cleanZip.charAt(0);
+      const caMap = {
+        A: 'Newfoundland and Labrador',
+        B: 'Nova Scotia',
+        C: 'Prince Edward Island',
+        E: 'New Brunswick',
+        G: 'Quebec',
+        H: 'Quebec',
+        J: 'Quebec',
+        K: 'Ontario',
+        L: 'Ontario',
+        M: 'Ontario',
+        N: 'Ontario',
+        P: 'Ontario',
+        R: 'Manitoba',
+        S: 'Saskatchewan',
+        T: 'Alberta',
+        V: 'British Columbia',
+        X: 'Northwest Territories',
+        Y: 'Yukon'
+      };
+      return caMap[firstChar] || 'Ontario';
+    }
+
+    return null;
+  }
+
+  /**
+   * Fetches real shipping rates directly from Shopify's localized shipping rates endpoint:
+   * GET /{locale}/cart/shipping_rates.json
    * @param {string} zip
    */
   async #fetchCarrierRates(zip) {
@@ -321,57 +420,131 @@ export class DeliveryEstimate extends Component {
     if (!carrierRatesEl) return;
 
     const country = this.dataset.defaultCountry || 'United States';
-    const maxAttempts = 6;
-    let attempts = 0;
+    const province = this.#inferProvince(country, zip);
 
-    const pollRates = async () => {
-      attempts++;
-      try {
-        const url = `/cart/shipping_rates.json?shipping_address[country]=${encodeURIComponent(country)}&shipping_address[zip]=${encodeURIComponent(zip)}`;
-        const response = await fetch(url);
+    // Build URLSearchParams
+    const params = new URLSearchParams();
+    params.set('shipping_address[country]', country);
+    params.set('shipping_address[zip]', zip);
+    if (province) {
+      params.set('shipping_address[province]', province);
+    }
+    const queryString = params.toString();
 
-        if (response.status === 202) {
-          // Calculation in progress, retry after brief delay
-          if (attempts < maxAttempts) {
-            setTimeout(pollRates, 600);
+    // Determine root locale prefix if available
+    const rootUrl = window.Shopify?.routes?.root || '/';
+    const cleanRoot = rootUrl.endsWith('/') ? rootUrl : `${rootUrl}/`;
+    const endpoint = `${cleanRoot}cart/shipping_rates.json?${queryString}`;
+
+    try {
+      carrierRatesEl.innerHTML = '<span class="delivery-estimate__rates-loading">Fetching shipping options...</span>';
+
+      const maxAttempts = 8;
+      let attempts = 0;
+
+      const fetchRates = async () => {
+        attempts++;
+        try {
+          const response = await fetch(endpoint, {
+            headers: { 'Accept': 'application/json' }
+          });
+
+          if (response.status === 202) {
+            // Shopify is calculating rates in background, retry
+            if (attempts < maxAttempts) {
+              setTimeout(fetchRates, 500);
+            } else {
+              carrierRatesEl.innerHTML = '';
+            }
+            return;
+          }
+
+          if (!response.ok) {
+            carrierRatesEl.innerHTML = '';
+            return;
+          }
+
+          const data = await response.json();
+          const rates = data.shipping_rates;
+
+          if (rates && Array.isArray(rates) && rates.length > 0) {
+            this.#renderShippingRates(rates, carrierRatesEl);
+          } else if (attempts < 3) {
+            setTimeout(fetchRates, 500);
           } else {
             carrierRatesEl.innerHTML = '';
           }
-          return;
-        }
-
-        if (!response.ok) {
-          carrierRatesEl.innerHTML = '';
-          return;
-        }
-
-        const data = await response.json();
-        const rates = data.shipping_rates;
-
-        if (rates && rates.length > 0) {
-          const rateItemsHtml = rates.map((rate) => `
-            <li class="delivery-estimate__rate-item">
-              <span class="delivery-estimate__rate-name">${rate.presentment_name || rate.name}</span>
-              <span class="delivery-estimate__rate-price">${rate.price === '0.00' ? 'Free' : `${rate.currency || ''} ${rate.price}`}</span>
-            </li>
-          `).join('');
-
-          carrierRatesEl.innerHTML = `
-            <ul class="delivery-estimate__rates-list" role="list">
-              ${rateItemsHtml}
-            </ul>
-          `;
-        } else if (attempts < 3) {
-          setTimeout(pollRates, 800);
-        } else {
+        } catch {
           carrierRatesEl.innerHTML = '';
         }
-      } catch {
-        carrierRatesEl.innerHTML = '';
+      };
+
+      fetchRates();
+    } catch {
+      carrierRatesEl.innerHTML = '';
+    }
+  }
+
+  /**
+   * Renders the list of shipping rates in the UI formatted in the active localized store currency.
+   * @param {Array<object>} rates
+   * @param {HTMLElement} container
+   */
+  #renderShippingRates(rates, container) {
+    if (!rates || rates.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+
+    const moneyFormat = this.dataset.moneyFormat || '{{amount}}';
+    const activeCurrency = this.dataset.currency || 'USD';
+
+    const rateItemsHtml = rates.map((rate) => {
+      const priceVal = parseFloat(rate.price);
+      const isFree = isNaN(priceVal) || priceVal === 0 || rate.price === '0.00';
+
+      let priceText = 'Free';
+      if (!isFree) {
+        try {
+          const cents = Math.round(priceVal * 100);
+          priceText = formatMoney(cents, moneyFormat, activeCurrency);
+        } catch {
+          try {
+            const locale = document.documentElement.lang || 'en-US';
+            priceText = new Intl.NumberFormat(locale, {
+              style: 'currency',
+              currency: activeCurrency
+            }).format(priceVal);
+          } catch {
+            priceText = `${activeCurrency} ${rate.price}`;
+          }
+        }
       }
-    };
 
-    pollRates();
+      const name = rate.presentment_name || rate.name || 'Shipping';
+
+      let transitInfo = '';
+      if (rate.delivery_days && Array.isArray(rate.delivery_days) && rate.delivery_days.length > 0) {
+        if (rate.delivery_days.length === 1) {
+          transitInfo = ` (${rate.delivery_days[0]} business days)`;
+        } else {
+          transitInfo = ` (${rate.delivery_days[0]}–${rate.delivery_days[1]} business days)`;
+        }
+      }
+
+      return `
+        <li class="delivery-estimate__rate-item">
+          <span class="delivery-estimate__rate-name">${name}${transitInfo}</span>
+          <span class="delivery-estimate__rate-price">${priceText}</span>
+        </li>
+      `;
+    }).join('');
+
+    container.innerHTML = `
+      <ul class="delivery-estimate__rates-list" role="list">
+        ${rateItemsHtml}
+      </ul>
+    `;
   }
 }
 

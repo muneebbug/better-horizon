@@ -76,6 +76,8 @@
   data-show-countdown="{{ show_countdown_val }}"
   data-context="{{ context | default: 'pdp' }}"
   data-default-country="{{ localization.country.name | default: 'United States' }}"
+  data-money-format="{{ shop.money_format | escape }}"
+  data-currency="{{ localization.country.currency.iso_code | default: cart.currency.iso_code | default: shop.currency }}"
 >
   <div
     ref="liveRegion"

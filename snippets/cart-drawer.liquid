@@ -121,9 +121,6 @@
                 </div>
 
                 <div class="cart-drawer__summary">
-                  {%- if settings.enable_cart_delivery_estimate -%}
-                    {% render 'delivery-estimate', context: 'cart_drawer' %}
-                  {%- endif -%}
                   {% render 'cart-summary', section_id: 'cart-drawer-section' %}
                 </div>
               </div>
