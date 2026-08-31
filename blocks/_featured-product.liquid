@@ -2,7 +2,18 @@
   assign product_has_swatches = false
   for product_option in closest.product.options_with_values
     assign swatch_count = product_option.values | map: 'swatch' | compact | size
-    if swatch_count > 0
+
+    assign has_variant_images = false
+    if settings.show_variant_image
+      for val in product_option.values
+        if val.variant.featured_media != blank
+          assign has_variant_images = true
+          break
+        endif
+      endfor
+    endif
+
+    if swatch_count > 0 or has_variant_images
       assign product_has_swatches = true
       break
     endif
