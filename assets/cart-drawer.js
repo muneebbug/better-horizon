@@ -66,7 +66,8 @@ class CartDrawerComponent extends Component {
    * @param {import('@shopify/events').CartLinesUpdateEvent} event
    */
   #handleCartLinesUpdate = (event) => {
-    const shouldAutoOpen = this.hasAttribute('auto-open') && event.action === 'add' && !this.#themeDrawer?.isOpen;
+    const isOtherDrawerOpen = Boolean(document.querySelector('theme-drawer[open]:not(#cart-drawer)'));
+    const shouldAutoOpen = !isOtherDrawerOpen && this.hasAttribute('auto-open') && event.action === 'add' && !this.#themeDrawer?.isOpen;
 
     // When the event originates inside an open MODAL <dialog> (e.g. quick-add),
     // defer the auto-open until that dialog's native `close` fires so its focus
@@ -85,7 +86,7 @@ class CartDrawerComponent extends Component {
       ?.then(({ detail }) => {
         const settle = () => requestAnimationFrame(() => this.#updateStickyState());
 
-        if (!shouldAutoOpen || detail?.didError) {
+        if (!shouldAutoOpen || isOtherDrawerOpen || detail?.didError) {
           settle();
           return;
         }

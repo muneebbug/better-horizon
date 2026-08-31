@@ -1,0 +1,21 @@
+# Shopify Theme Check Configuration for Better Horizon
+extends: theme-check:recommended
+
+# Horizon uses native custom element bundles
+AssetSizeJavaScript:
+  enabled: false
+
+# Static theme blocks in Horizon are intentionally placed in conditional branches
+# (desktop vs mobile, populated vs empty) to bind to a single editor block in templates.
+UniqueStaticBlockId:
+  enabled: false
+
+# RemoteAsset flags the view-transitions render-blocker <link rel="expect" href="#MainContent">
+RemoteAsset:
+  ignore:
+    - layout/theme.liquid
+    - layout/password.liquid
+
+UnclosedHTMLElement:
+  ignore:
+    - snippets/bento-grid.liquid

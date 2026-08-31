@@ -139,7 +139,8 @@
       >
         {{- 'icon-add-to-cart.svg' | inline_asset_content -}}
       </span>
-      {{- choose_options_text -}}
+      <span class="quick-add__spinner" aria-hidden="true"></span>
+      <span class="quick-add__choose-text">{{- choose_options_text -}}</span>
     </button>
   {% endif %}
 </quick-add-component>

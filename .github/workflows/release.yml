@@ -1,0 +1,56 @@
+name: Release & Distributable Packaging
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Package Theme & Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Shopify CLI & Dependencies
+        run: npm install -g @shopify/cli
+
+      - name: Run Theme Check Validation
+        run: shopify theme check
+
+      - name: Package Distributable Theme Zip
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+          ZIP_NAME="better-horizon-${VERSION}.zip"
+          
+          # Create clean archive containing only production theme directories
+          zip -r "${ZIP_NAME}" \
+            assets/ \
+            blocks/ \
+            config/ \
+            layout/ \
+            locales/ \
+            sections/ \
+            snippets/ \
+            templates/ \
+            README.md \
+            LICENSE || true
+
+          echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ZIP_NAME }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false

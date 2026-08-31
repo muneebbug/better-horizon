@@ -116,37 +116,52 @@ export class QuickAddComponent extends Component {
   handleClick = async (event) => {
     event.preventDefault();
 
-    const currentUrl = this.productPageUrl;
-
-    if (this.dataset.usesSellingPlans === 'true') {
-      if (currentUrl) window.location.href = currentUrl;
-      return;
+    const chooseButton = /** @type {HTMLButtonElement | null} */ (
+      this.querySelector('.quick-add__button--choose') || (event.currentTarget instanceof HTMLButtonElement ? event.currentTarget : null)
+    );
+    if (chooseButton) {
+      chooseButton.setAttribute('data-loading', 'true');
+      chooseButton.disabled = true;
     }
 
-    // Check if we have cached content for this URL
-    let productGrid = this.#cachedContent.get(currentUrl);
+    try {
+      const currentUrl = this.productPageUrl;
 
-    if (!productGrid) {
-      // Fetch and cache the content
-      const html = await this.fetchProductPage(currentUrl);
-      if (html) {
-        const gridElement = html.querySelector('[data-product-grid-content]');
-        if (gridElement) {
-          // Cache the cloned element to avoid modifying the original
-          productGrid = /** @type {Element} */ (gridElement.cloneNode(true));
-          this.#cachedContent.set(currentUrl, productGrid);
+      if (this.dataset.usesSellingPlans === 'true') {
+        if (currentUrl) window.location.href = currentUrl;
+        return;
+      }
+
+      // Check if we have cached content for this URL
+      let productGrid = this.#cachedContent.get(currentUrl);
+
+      if (!productGrid) {
+        // Fetch and cache the content
+        const html = await this.fetchProductPage(currentUrl);
+        if (html) {
+          const gridElement = html.querySelector('[data-product-grid-content]');
+          if (gridElement) {
+            // Cache the cloned element to avoid modifying the original
+            productGrid = /** @type {Element} */ (gridElement.cloneNode(true));
+            this.#cachedContent.set(currentUrl, productGrid);
+          }
         }
       }
-    }
 
-    if (productGrid) {
-      // Use a fresh clone from the cache
-      const freshContent = /** @type {Element} */ (productGrid.cloneNode(true));
-      await this.updateQuickAddModal(freshContent);
-      this.#updateVariantPicker(productGrid);
-    }
+      if (productGrid) {
+        // Use a fresh clone from the cache
+        const freshContent = /** @type {Element} */ (productGrid.cloneNode(true));
+        await this.updateQuickAddModal(freshContent);
+        this.#updateVariantPicker(productGrid);
+      }
 
-    this.#openQuickAddModal();
+      this.#openQuickAddModal();
+    } finally {
+      if (chooseButton) {
+        chooseButton.removeAttribute('data-loading');
+        chooseButton.disabled = false;
+      }
+    }
   };
 
   #resetScroll() {

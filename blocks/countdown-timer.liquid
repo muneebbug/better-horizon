@@ -1,0 +1,163 @@
+{% doc %}
+  Real Date Countdown Timer Block
+  Displays a countdown timer strictly bound to verified promotional or metafield dates.
+{% enddoc %}
+
+{%- liquid
+  assign product = closest.product
+  if request.visual_preview_mode and product == blank
+    assign product = collections.all.products.first
+  endif
+
+  assign end_date = product.metafields.custom.sale_end_date.value | default: block.settings.end_date
+-%}
+
+<script
+  src="{{ 'countdown-timer.js' | asset_url }}"
+  defer
+  type="module"
+></script>
+
+{%- if end_date != blank or request.design_mode -%}
+  <div
+    class="countdown-block countdown-block--{{ block.id }}"
+    {{ block.shopify_attributes }}
+  >
+    <countdown-timer
+      class="countdown-timer"
+      data-end-time="{{ end_date | default: '2028-12-31T23:59:59Z' }}"
+    >
+      {%- if block.settings.heading != blank -%}
+        <div class="countdown-timer__header">
+          <span class="svg-wrapper countdown-timer__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </span>
+          <span class="countdown-timer__heading">{{ block.settings.heading }}</span>
+        </div>
+      {%- endif -%}
+
+      <div class="countdown-timer__boxes" role="timer" aria-live="off">
+        <div class="countdown-box">
+          <span data-days class="countdown-box__num">00</span>
+          <span class="countdown-box__label">Days</span>
+        </div>
+        <span class="countdown-timer__separator">:</span>
+        <div class="countdown-box">
+          <span data-hours class="countdown-box__num">00</span>
+          <span class="countdown-box__label">Hours</span>
+        </div>
+        <span class="countdown-timer__separator">:</span>
+        <div class="countdown-box">
+          <span data-minutes class="countdown-box__num">00</span>
+          <span class="countdown-box__label">Mins</span>
+        </div>
+        <span class="countdown-timer__separator">:</span>
+        <div class="countdown-box">
+          <span data-seconds class="countdown-box__num">00</span>
+          <span class="countdown-box__label">Secs</span>
+        </div>
+      </div>
+    </countdown-timer>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .countdown-block {
+    margin: var(--margin-md, 16px) 0;
+    padding: var(--padding-md, 16px);
+    background-color: rgb(var(--color-foreground-rgb) / 0.03);
+    border: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.15));
+    border-radius: var(--style-border-radius-inputs, 8px);
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    color: var(--color-foreground);
+  }
+
+  .countdown-timer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm, 10px);
+  }
+
+  .countdown-timer__header {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs, 6px);
+    font-weight: 600;
+    font-size: var(--font-body--size, 14px);
+    color: var(--color-foreground);
+  }
+
+  .countdown-timer__icon {
+    width: 18px;
+    height: 18px;
+    color: var(--color-foreground);
+  }
+
+  .countdown-timer__boxes {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs, 6px);
+  }
+
+  .countdown-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--color-input-background, var(--color-background));
+    padding: 8px 12px;
+    border-radius: var(--style-border-radius-inputs, 6px);
+    border: var(--style-border-width, 1px) solid var(--color-input-border, rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.15)));
+    min-width: 48px;
+  }
+
+  .countdown-box__num {
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-foreground);
+  }
+
+  .countdown-box__label {
+    font-size: var(--font-size--2xs, 11px);
+    text-transform: uppercase;
+    color: var(--color-foreground-subdued, rgb(var(--color-foreground-rgb) / 0.7));
+    letter-spacing: 0.05em;
+  }
+
+  .countdown-timer__separator {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-foreground);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Countdown timer",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Limited Time Offer"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "End date (ISO format)",
+      "info": "Example: 2026-12-31T23:59:59Z. Can also be set dynamically via product metafield 'sale_end_date'."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Countdown timer"
+    }
+  ]
+}
+{% endschema %}

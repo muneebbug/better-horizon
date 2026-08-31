@@ -1,0 +1,89 @@
+{% doc %}
+  Quick View Modal Snippet
+  Hosts the accessible dynamic dialog populated when quick view triggers are pressed.
+{% enddoc %}
+
+<script
+  src="{{ 'quick-view.js' | asset_url }}"
+  defer
+  type="module"
+></script>
+
+<quick-view-modal id="QuickViewModal">
+  <dialog
+    class="quick-view-dialog"
+    aria-label="Product quick view"
+  >
+    <div class="quick-view-dialog__inner">
+      <button
+        type="button"
+        data-quick-view-close
+        class="quick-view-dialog__close"
+        aria-label="Close quick view"
+      >
+        <span class="svg-wrapper">
+          {{ 'icon-close.svg' | inline_asset_content }}
+        </span>
+      </button>
+
+      <div data-quick-view-content class="quick-view-dialog__content"></div>
+    </div>
+  </dialog>
+</quick-view-modal>
+
+{% stylesheet %}
+  .quick-view-dialog {
+    border: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.15));
+    border-radius: var(--style-border-radius-inputs, 12px);
+    padding: 0;
+    width: min(800px, 92vw);
+    max-height: 88vh;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    background: var(--color-background);
+    color: var(--color-foreground);
+    overflow: hidden;
+  }
+
+  .quick-view-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+  }
+
+  .quick-view-dialog__inner {
+    position: relative;
+    padding: var(--padding-lg, 24px);
+    overflow-y: auto;
+    max-height: 88vh;
+  }
+
+  .quick-view-dialog__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: var(--color-background);
+    border: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.15));
+    border-radius: 50%;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-foreground);
+    z-index: 10;
+    transition: background-color 0.2s ease;
+  }
+
+  .quick-view-dialog__close:hover {
+    background-color: rgb(var(--color-foreground-rgb) / 0.05);
+  }
+
+  .quick-view__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 60px 0;
+    color: var(--color-foreground-subdued, rgb(var(--color-foreground-rgb) / 0.7));
+  }
+{% endstylesheet %}

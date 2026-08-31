@@ -62,6 +62,16 @@
           },
           "blocks": {}
         },
+        "search_input_404": {
+          "type": "_search-input",
+          "name": "t:names.search_input",
+          "settings": {
+            "width": "custom",
+            "custom_width": 60,
+            "input_style": "default"
+          },
+          "blocks": {}
+        },
         "button_PAQMwR": {
           "type": "button",
           "name": "t:names.button",
@@ -81,6 +91,7 @@
       "block_order": [
         "text_GqmVFf",
         "text_Ua9XAW",
+        "search_input_404",
         "button_PAQMwR"
       ],
       "settings": {

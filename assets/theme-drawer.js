@@ -204,6 +204,13 @@ export class ThemeDrawer extends Component {
       return;
     }
 
+    // Close any other open drawers so only one drawer is active at a time
+    document.querySelectorAll('theme-drawer[open]').forEach((drawer) => {
+      if (drawer !== this && typeof drawer.close === 'function') {
+        drawer.close();
+      }
+    });
+
     const { panel } = this.refs;
 
     ThemeDrawer.#stackOrder += 1;

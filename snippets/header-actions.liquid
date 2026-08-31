@@ -38,6 +38,43 @@
   </cart-icon>
 {% endcapture %}
 
+{% capture wishlist_icon %}
+  <span
+    class="header-actions__cart-icon header-actions__wishlist-icon{% if display_style == 'text' %} header-actions__cart-icon--text{% endif %}"
+    data-testid="wishlist-icon"
+  >
+    <span class="{% if display_style == 'icon' %}hidden{% else %}mobile:hidden{% endif %}">
+      Wishlist
+    </span>
+
+    <span
+      class="svg-wrapper {% if display_style != 'icon' %}desktop:hidden{% endif %}"
+      aria-hidden="true"
+    >
+      {{ 'icon-heart.svg' | inline_asset_content }}
+    </span>
+
+    {% liquid
+      assign bubble_bg_fallback = settings.page_text_color
+      assign bubble_text_fallback = settings.page_background_color
+    %}
+    <div
+      class="cart-bubble wishlist-bubble visually-hidden"
+      style="--cart-bubble-background-fallback: {{ bubble_bg_fallback }}; --cart-bubble-text-fallback: {{ bubble_text_fallback }};"
+      data-maintain-ratio
+    >
+      <span class="cart-bubble__background"></span>
+      <span class="cart-bubble__text">
+        <wishlist-count
+          class="cart-bubble__text-count"
+          aria-hidden="true"
+          data-testid="wishlist-bubble"
+        ></wishlist-count>
+      </span>
+    </div>
+  </span>
+{% endcapture %}
+
 {% capture account_icon %}
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -111,6 +148,21 @@
         {% endif %}
       </shopify-account>
     </div>
+  {% endif %}
+
+  {% if settings.enable_wishlist %}
+    <button
+      type="button"
+      class="header-actions__action button-unstyled{% if display_style == 'text' %} header-actions__text-style{% endif %}"
+      on:click="#wishlist-drawer/toggle"
+      aria-haspopup="dialog"
+      aria-expanded="false"
+      aria-controls="wishlist-drawer"
+      aria-label="Wishlist"
+      data-testid="wishlist-drawer-trigger"
+    >
+      {{ wishlist_icon }}
+    </button>
   {% endif %}
 
   {% if settings.cart_type == 'drawer' and template.name != 'cart' %}
@@ -274,8 +326,9 @@
     font-weight: var(--font-paragraph--weight);
   }
 
-  .header-actions__cart-icon.header-actions__cart-icon--has-cart svg {
-    /* Create donut mask where the cart bubble sits */
+  .header-actions__cart-icon.header-actions__cart-icon--has-cart svg,
+  .header-actions__wishlist-icon.header-actions__wishlist-icon--has-items svg {
+    /* Create donut mask where the bubble sits */
     mask: radial-gradient(
       calc(var(--cart-bubble-size) + 2px) at calc(100% - var(--cart-bubble-right)) var(--cart-bubble-top),
       transparent 45.45%,
@@ -297,7 +350,8 @@
     animation: move-and-fade var(--animation-speed) var(--animation-easing);
   }
 
-  cart-icon:has(.cart-bubble__text-count:empty) {
+  cart-icon:has(.cart-bubble__text-count:empty),
+  .header-actions__wishlist-icon:has(.cart-bubble__text-count:empty) {
     --cart-bubble-size: 10px;
     --cart-bubble-top: 9px;
     --cart-bubble-right: 9px;
@@ -309,7 +363,8 @@
   }
 
   @media screen and (min-width: 750px) {
-    cart-icon.header-actions__cart-icon--text:has(.cart-bubble__text-count:empty) {
+    cart-icon.header-actions__cart-icon--text:has(.cart-bubble__text-count:empty),
+    .header-actions__wishlist-icon.header-actions__cart-icon--text:has(.cart-bubble__text-count:empty) {
       --cart-bubble-right: 2.5px;
     }
   }

@@ -172,6 +172,43 @@
     color: var(--quick-add-foreground, var(--color-foreground));
   }
 
+  .quick-add__spinner {
+    display: none;
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: quick-add-spin 0.6s linear infinite;
+    flex-shrink: 0;
+    margin: 0 auto;
+  }
+
+  @keyframes quick-add-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .quick-add__button[data-loading='true'] {
+    width: var(--quick-add-collapsed-width) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    opacity: 1 !important;
+    cursor: wait;
+    pointer-events: none;
+  }
+
+  .quick-add__button[data-loading='true'] .add-to-cart-icon,
+  .quick-add__button[data-loading='true'] .quick-add__choose-text {
+    display: none !important;
+  }
+
+  .quick-add__button[data-loading='true'] .quick-add__spinner {
+    display: block !important;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     button.quick-add__button {
       transition-property: scale, translate, opacity, width;

@@ -1,0 +1,45 @@
+name: 🐛 Bug Report
+description: Report a broken feature, visual defect, or Liquid syntax issue.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue in Better Horizon! Please provide as much detail as possible to help us reproduce and resolve the problem.
+  - type: input
+    id: shopify_version
+    attributes:
+      label: Shopify CLI / Environment Version
+      placeholder: e.g. Shopify CLI 3.65.0, Chrome 125, macOS Sonoma
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to reproduce the behavior.
+      placeholder: |
+        1. Open Product Page
+        2. Click on 'Wishlist Button'
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or Logs
+      description: Attach screenshots, terminal output, or theme check logs if applicable.

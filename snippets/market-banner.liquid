@@ -1,0 +1,155 @@
+{% doc %}
+  Market Suggestion Banner Snippet
+  Prompts visitors browsing from a foreign market to switch to their local regional store and currency.
+  Styled to blend seamlessly into Horizon's header design system.
+{% enddoc %}
+
+{%- if settings.enable_market_banner != false -%}
+  {%- liquid
+    assign current_country_code = localization.country.iso_code
+  -%}
+
+  <script
+    src="{{ 'market-banner.js' | asset_url }}"
+    defer
+    type="module"
+  ></script>
+
+  <market-banner
+    id="MarketSuggestionBanner"
+    class="market-banner"
+    data-current-country="{{ current_country_code }}"
+    hidden
+    aria-label="Regional store suggestion"
+  >
+    <div class="market-banner__inner" data-market-banner-inner>
+      <div class="market-banner__content">
+        <span class="svg-wrapper market-banner__icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+        </span>
+        <p class="market-banner__text">
+          Browsing from <strong data-detected-country-name>your region</strong>? Switch to your local store for regional
+          currency and delivery options.
+        </p>
+      </div>
+
+      <div class="market-banner__actions">
+        <button
+          type="button"
+          class="button button-secondary market-banner__switch-btn"
+          data-market-switch-btn
+        >
+          <span class="button-text">Switch store</span>
+        </button>
+        <button
+          type="button"
+          class="market-banner__close-btn"
+          data-market-dismiss-btn
+          aria-label="Dismiss country suggestion"
+        >
+          <span class="svg-wrapper">
+            {{- 'icon-close.svg' | inline_asset_content -}}
+          </span>
+        </button>
+      </div>
+    </div>
+  </market-banner>
+{%- endif -%}
+
+{% stylesheet %}
+  .market-banner {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    border-bottom: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.15));
+    font-size: var(--font-body--size, 13px);
+    line-height: 1.4;
+    position: relative;
+    z-index: 20;
+  }
+
+  .market-banner.is-visible {
+    display: block !important;
+  }
+
+  .market-banner__inner {
+    max-width: var(--page-width, 1200px);
+    margin: 0 auto;
+    padding: var(--padding-xs, 8px) var(--page-padding, 24px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: var(--gap-md, 16px);
+    flex-wrap: wrap;
+  }
+
+  .market-banner__content {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-xs, 8px);
+    color: var(--color-foreground);
+  }
+
+  .market-banner__icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--color-foreground);
+  }
+
+  .market-banner__text {
+    margin: 0;
+    color: var(--color-foreground);
+  }
+
+  .market-banner__text strong {
+    font-weight: 600;
+  }
+
+  .market-banner__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-xs, 8px);
+  }
+
+  .market-banner__switch-btn {
+    height: auto;
+    min-height: 32px;
+    padding: 4px 14px;
+    font-size: 12px;
+    text-transform: var(--button-text-case-secondary, none);
+    border-radius: var(--style-border-radius-buttons-secondary, 9999px);
+  }
+
+  .market-banner__close-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-foreground);
+    cursor: pointer;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+  }
+
+  .market-banner__close-btn:hover {
+    opacity: 1;
+    background-color: rgb(var(--color-foreground-rgb) / 0.08);
+  }
+{% endstylesheet %}

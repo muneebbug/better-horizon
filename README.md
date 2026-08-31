@@ -1,92 +1,104 @@
-# Horizon
+# Better Horizon 🚀
 
-[Getting started](#getting-started) |
-[Staying up to date with Horizon changes](#staying-up-to-date-with-horizon-changes) |
-[Developer tools](#developer-tools) |
-[Contributing](#contributing) |
-[License](#license)
+An enhanced, open-source Shopify theme built on Shopify's official **Horizon** architecture. **Better Horizon** extends the base theme with native, zero-paid-app merchandising utilities, advanced technical SEO, and strict WCAG 2.2 AA accessibility standards.
 
-Horizon is the flagship of a new generation of first party Shopify themes. It incorporates the latest Liquid Storefronts features, including [theme blocks](https://shopify.dev/docs/storefronts/themes/architecture/blocks/theme-blocks/quick-start?framework=liquid).
+---
 
-- **Web-native in its purest form:** Themes run on the [evergreen web](https://www.w3.org/2001/tag/doc/evergreen-web/). We leverage the latest web browsers to their fullest, while maintaining support for the older ones through progressive enhancement—not polyfills.
-- **Lean, fast, and reliable:** Functionality and design defaults to "no" until it meets this requirement. Code ships on quality. Themes must be built with purpose. They shouldn't support each and every feature in Shopify.
-- **Server-rendered:** HTML must be rendered by Shopify servers using Liquid. Business logic and platform primitives such as translations and money formatting don't belong on the client. Async and on-demand rendering of parts of the page is OK, but we do it sparingly as a progressive enhancement.
-- **Functional, not pixel-perfect:** The Web doesn't require each page to be rendered pixel-perfect by each browser engine. Using semantic markup, progressive enhancement, and clever design, we ensure that themes remain functional regardless of the browser.
+## 📌 Project Overview
 
-## Getting started
+- **Base Theme Foundation:** Shopify Horizon (Fork pinned to commit [`1c479ca`](https://github.com/Shopify/horizon/commit/1c479ca2825f0a2066a935720d6512a659fa257f) / Release v4.1.4).
+- **License:** Shopify Theme License (see [`LICENSE.md`](LICENSE.md) — original copyright retained).
+- **Distribution Model:** Distributed directly via GitHub for manual installation via Shopify CLI (`shopify theme push`) or Admin ZIP upload. (Not submitted to the Shopify Theme Store).
+- **Zero Paid App Dependency:** Everything is built using Shopify native capabilities (Liquid, Web Components, Metafields, Metaobjects, Customer Privacy API, Shopify Flow).
 
-We recommend using the Skeleton Theme as a starting point for a theme development project. [Learn more on Shopify.dev](https://shopify.dev/themes/getting-started/create).
+---
 
-To create a new theme project based on Horizon:
+## ✨ Features & Enhancements
 
-```sh
-git clone https://github.com/Shopify/horizon.git
-```
+### 🔍 Technical SEO & Performance (Phase 1)
+- **Comprehensive JSON-LD Structured Data:** Full Schema.org support for `WebSite` (with `SearchAction`), `Organization` (with social links), `BreadcrumbList`, rich `Product` (with variant offers, SKU, barcode, availability, reviews), `Article` / `BlogPosting`, and `FAQPage`.
+- **Automated Meta Descriptions:** Intelligent fallback meta descriptions generated dynamically from product, article, collection, or page content with HTML stripped.
+- **Canonical & Multi-Market Hreflang:** Automatic multi-language and multi-market alternate tags.
+- **High-Performance Media Delivery:** High-priority LCP preloading for hero and main product imagery with native lazy-loading for below-the-fold media.
+- **Enhanced 404 Experience:** Built-in search input and navigation links.
+- **CI Gated Merges:** Automated GitHub Actions running `shopify theme check`.
 
-Install the [Shopify CLI](https://shopify.dev/docs/storefronts/themes/tools/cli) to connect your local project to a Shopify store. Learn about the [theme developer tools](https://shopify.dev/docs/storefronts/themes/tools) available, and the suggested [developer tools](#developer-tools) below.
+### 🛒 Native Merchandising Utilities (Phase 2)
+- **📌 Native Wishlist System:** Zero-app, `localStorage`-backed toggle button and slide-out wishlist drawer with single-click remove and persistent state across cards and pages.
+- **⚡ Quick View Modal:** Dynamic product dialog loaded on demand without leaving collection/catalog pages.
+- **🔔 Back-in-Stock Capture:** Customer email capture form on out-of-stock items, connected to Shopify Customer / Shopify Flow notifications.
+- **📦 Frequently Bought Together / Bundles:** Automatic bundle recommendations with live total calculation and 1-click batch `/cart/add.js` addition.
+- **📏 Dynamic Size Chart:** Accessible modal dialog with semantic measurement tables and custom metaobject support.
+- **⏱️ Real Date Countdown Timer:** Promotion timer strictly bound to real timestamps and product metafields (zero fake urgency).
 
-Please note that the `main` branch may include code for features not yet released. You may encounter Liquid API properties that are not publicly documented, but will be when the feature is officially rolled out.
+### 🌍 Internationalization, Trust & Privacy (Phase 3)
+- **🌐 Geo-based Market Suggestion Banner:** Prompts shoppers from different countries/markets to switch to their regional store for local currency and shipping.
+- **🛡️ Native Cookie & Privacy Consent Banner:** Direct integration with Shopify's Customer Privacy API and Google Analytics 4 Consent Mode v2 (zero third-party app cost).
+- **🔒 Trust Badges & Guarantee Bar Block:** Composable reassurance block for Free Shipping, 30-Day Guarantees, Secure SSL Checkout, and 24/7 Support.
+- **📖 Complete RTL (Right-to-Left) Localization:** Native stylesheet support for Arabic (`ar`), Hebrew (`he`), Persian (`fa`), and Urdu (`ur`) with mirrored layouts, icon rotations, and drawer positions.
 
-### Shopify Theme Store development
+---
 
-If you're building a theme for the Shopify Theme Store, then do not use Horizon as a starting point. Themes based on, derived from, or incorporating Horizon are not eligible for submission to to the Shopify Theme Store. Use the [Skeleton Theme](https://github.com/Shopify/skeleton-theme) instead.
+## 🚀 Getting Started
 
-## Staying up to date with Horizon changes
+### Installation via Shopify CLI
 
-Say you're building a new theme off Horizon but you still want to be able to pull in the latest changes, you can add a remote `upstream` pointing to this Horizon repository.
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/muneebbug/better-horizon.git
+   cd better-horizon
+   ```
 
-1. Navigate to your local theme folder.
-2. Verify the list of remotes and validate that you have both an `origin` and `upstream`:
+2. Connect to your Shopify development store:
+   ```bash
+   shopify theme dev --store <your-store>.myshopify.com
+   ```
 
-```sh
-git remote -v
-```
+3. Push the theme to your store:
+   ```bash
+   shopify theme push --store <your-store>.myshopify.com
+   ```
 
-3. If you don't see an `upstream`, you can add one that points to Shopify's Horizon repository:
+### Installation via Shopify Admin ZIP
 
-```sh
-git remote add upstream https://github.com/Shopify/horizon.git
-```
+1. Download the repository ZIP from GitHub.
+2. In your Shopify Admin, navigate to **Online Store > Themes**.
+3. Under **Theme library**, click **Add theme > Upload zip file**.
 
-4. Pull in the latest Horizon changes into your repository:
+---
 
-```sh
-git fetch upstream
-git pull upstream main
-```
+## 🔄 Staying in Sync with Upstream Horizon
 
-## Developer tools
+To pull upstream security patches and fixes without overwriting merchant configurations:
 
-There are a number of really useful tools that the Shopify Themes team uses during development. Horizon is already set up to work with these tools.
+1. Add the upstream remote:
+   ```bash
+   git remote add upstream https://github.com/Shopify/horizon.git
+   ```
 
-### Shopify CLI
+2. Fetch upstream updates:
+   ```bash
+   git fetch upstream
+   ```
 
-[Shopify CLI](https://shopify.dev/docs/storefronts/themes/tools/cli) helps you build Shopify themes faster and is used to automate and enhance your local development workflow. It comes bundled with a suite of commands for developing Shopify themes—everything from working with themes on a Shopify store (e.g. creating, publishing, deleting themes) or launching a development server for local theme development.
+3. Deliberately merge or cherry-pick specific fixes on a dedicated branch:
+   ```bash
+   git checkout -b update/upstream-sync
+   git merge upstream/main
+   # Review diff, resolve any conflicts, and run:
+   shopify theme check
+   ```
 
-You can follow this [quick start guide for theme developers](https://shopify.dev/docs/themes/tools/cli) to get started.
+---
 
-### Theme Check
+## 🛠️ Development & Quality Standards
 
-We recommend using [Theme Check](https://github.com/shopify/theme-check) as a way to validate and lint your Shopify themes.
+- **Theme Blocks & Liquid:** We follow Shopify's latest Theme Block architecture. See [`.cursor/rules/blocks.mdc`](.cursor/rules/blocks.mdc) and [`.cursor/rules/liquid.mdc`](.cursor/rules/liquid.mdc).
+- **Web Components:** Native custom elements extending `Component` / `DeclarativeShadowElement`. See [`.cursor/rules/javascript-standards.mdc`](.cursor/rules/javascript-standards.mdc).
+- **Accessibility:** Strict adherence to WCAG 2.2 AA. All interactive elements are keyboard-accessible and screen-reader verified across Shadow DOM boundaries. See [`.cursor/rules/global-accessibility-standards.mdc`](.cursor/rules/global-accessibility-standards.mdc).
 
-We've added Theme Check to Horizon's [list of VS Code extensions](/.vscode/extensions.json) so if you're using Visual Studio Code as your code editor of choice, you'll be prompted to install the [Theme Check VS Code](https://marketplace.visualstudio.com/items?itemName=Shopify.theme-check-vscode) extension upon opening VS Code after you've forked and cloned Horizon.
+---
 
-You can also run it from a terminal with the following Shopify CLI command:
+## 📄 License
 
-```bash
-shopify theme check
-```
-
-You can follow the [theme check documentation](https://shopify.dev/docs/storefronts/themes/tools/theme-check) for more details.
-
-#### Shopify/theme-check-action
-
-Horizon runs [Theme Check](#Theme-Check) on every commit via [Shopify/theme-check-action](https://github.com/Shopify/theme-check-action).
-
-## Contributing
-
-We are not accepting contributions to Horizon at this time.
-
-## License
-
-Copyright (c) 2025-present Shopify Inc. See [LICENSE](/LICENSE.md) for further details.
+This project is licensed under the Shopify Theme License. See [LICENSE.md](LICENSE.md) for full terms.

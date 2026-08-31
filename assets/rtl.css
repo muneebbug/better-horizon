@@ -1,0 +1,89 @@
+/**
+ * Better Horizon — Right-to-Left (RTL) Stylesheet
+ * Full RTL support for Arabic (ar), Hebrew (he), Persian (fa), and Urdu (ur).
+ */
+
+[dir="rtl"],
+html[lang^="ar"],
+html[lang^="he"],
+html[lang^="fa"],
+html[lang^="ur"] {
+  direction: rtl;
+  text-align: right;
+}
+
+/* 1. Header & Navigation */
+[dir="rtl"] .header__column--right {
+  margin-inline-start: 0;
+  margin-inline-end: auto;
+}
+
+[dir="rtl"] .header-actions {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .account-button,
+[dir="rtl"] .cart-icon,
+[dir="rtl"] .search-input {
+  text-align: right;
+}
+
+/* 2. Mirrored Directional Icons */
+[dir="rtl"] .icon-arrow,
+[dir="rtl"] .icon-chevron,
+[dir="rtl"] .breadcrumb__separator svg,
+[dir="rtl"] .pagination__next svg,
+[dir="rtl"] .pagination__prev svg {
+  transform: scaleX(-1);
+}
+
+/* 3. Drawers & Modals */
+[dir="rtl"] .drawer[data-position="right"],
+[dir="rtl"] #cart-drawer,
+[dir="rtl"] #wishlist-drawer {
+  right: auto;
+  left: 0;
+  transform: translateX(-100%);
+}
+
+[dir="rtl"] .drawer[data-position="right"].is-open,
+[dir="rtl"] #cart-drawer.is-open,
+[dir="rtl"] #wishlist-drawer.is-open {
+  transform: translateX(0);
+}
+
+[dir="rtl"] .drawer__close,
+[dir="rtl"] .size-chart-dialog__close,
+[dir="rtl"] .quick-view-dialog__close {
+  right: auto;
+  left: 16px;
+}
+
+/* 4. Product Details & Variants */
+[dir="rtl"] .product-form__buttons {
+  text-align: right;
+}
+
+[dir="rtl"] .variant-picker__option {
+  text-align: right;
+}
+
+[dir="rtl"] .bundle-item__checkbox-label {
+  margin-left: 8px;
+  margin-right: 0;
+}
+
+/* 5. Cookie Consent & Market Banner */
+[dir="rtl"] .cookie-consent-banner {
+  left: auto;
+  right: 20px;
+}
+
+[dir="rtl"] .market-banner__inner {
+  flex-direction: row-reverse;
+}
+
+/* 6. Tables */
+[dir="rtl"] .size-chart-table {
+  text-align: right;
+}

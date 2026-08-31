@@ -1,9 +1,19 @@
+{%- liquid
+  assign rtl_locales = 'ar,arc,az,ckb,dv,fa,he,khw,ks,ku,ps,sd,ur,uz_AF,yi' | split: ','
+  assign is_rtl = false
+  if rtl_locales contains request.locale.iso_code
+    assign is_rtl = true
+  endif
+-%}
 <!doctype html>
 <html
   {% if request.design_mode %}
     class="shopify-design-mode"
   {% endif %}
   lang="{{ request.locale.iso_code }}"
+  {% if is_rtl %}
+    dir="rtl"
+  {% endif %}
 >
   <head>
     {%- if settings.favicon != blank -%}
@@ -36,7 +46,11 @@
     {% endif %}
 
     {%- render 'meta-tags' -%}
+    {%- render 'structured-data' -%}
     {%- render 'stylesheets' -%}
+    {%- if is_rtl -%}
+      {{ 'rtl.css' | asset_url | stylesheet_tag }}
+    {%- endif -%}
     {%- render 'card-hover-effect-styles' -%}
     {%- render 'fonts' -%}
     {%- render 'scripts' -%}
@@ -54,8 +68,12 @@
     {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
 
     {% render 'chat-drawer' %}
+    {% render 'wishlist-drawer' %}
+    {% render 'quick-view-modal' %}
+    {% render 'cookie-consent' %}
 
     <div class="page-wrapper">
+      {% render 'market-banner' %}
       <div id="header-group">
         {% sections 'header-group' %}
       </div>

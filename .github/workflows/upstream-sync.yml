@@ -1,0 +1,76 @@
+name: Upstream Sync & Tracking
+
+on:
+  schedule:
+    # Run every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-upstream:
+    name: Check & Sync Upstream Horizon
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Better Horizon
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add Upstream Remote
+        run: |
+          git remote add upstream https://github.com/Shopify/horizon.git || true
+          git fetch upstream main --tags
+
+      - name: Check for New Upstream Commits
+        id: check-commits
+        run: |
+          UPSTREAM_COMMITS=$(git log HEAD..upstream/main --oneline)
+          if [ -z "$UPSTREAM_COMMITS" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No new upstream commits found. Better Horizon is up-to-date with Shopify/horizon."
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "New upstream commits detected:"
+            echo "$UPSTREAM_COMMITS"
+          fi
+
+      - name: Create Upstream Sync Branch & PR
+        if: steps.check-commits.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git checkout -b upstream-sync-temp upstream/main
+          git checkout -B upstream-sync
+          git merge --no-commit --strategy-option theirs main || true
+
+          PR_BODY=$(cat << 'EOF'
+          ## 🔄 Upstream Synchronization from Shopify/horizon
+
+          This automated pull request brings in the latest upstream commits from official `Shopify/horizon`.
+
+          ### ⚠️ Pre-Merge Checklist
+          1. [ ] Review git diff for any schema or theme block conflicts.
+          2. [ ] Verify that all Better Horizon native utilities (Wishlist, Quick View, FBT, Back in Stock, SEO structured data) remain intact.
+          3. [ ] Run `shopify theme check` to ensure zero offenses.
+          4. [ ] Test core storefront flows on a Shopify development store.
+
+          ---
+          *Generated automatically by Better Horizon CI/CD workflow.*
+          EOF
+          )
+
+          # Create PR using GitHub CLI
+          gh pr create \
+            --base main \
+            --head upstream-sync \
+            --title "chore(upstream): sync latest changes from Shopify/horizon" \
+            --body "$PR_BODY" || echo "PR already exists or could not be created."

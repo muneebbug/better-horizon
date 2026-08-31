@@ -1,0 +1,101 @@
+{% doc %}
+  Quick View Button Block
+  Renders a trigger button that opens an accessible quick view modal for the current product.
+{% enddoc %}
+
+{%- liquid
+  assign product = closest.product
+  if request.visual_preview_mode and product == blank
+    assign product = collections.all.products.first
+  endif
+-%}
+
+<script
+  src="{{ 'quick-view.js' | asset_url }}"
+  defer
+  type="module"
+></script>
+
+<quick-view-button
+  class="quick-view-button-block quick-view-button-block--{{ block.id }}"
+  data-product-url="{{ product.url }}"
+  {{ block.shopify_attributes }}
+>
+  <button
+    type="button"
+    class="button {{ block.settings.style_class }} quick-view-trigger-btn"
+    aria-haspopup="dialog"
+    aria-label="Quick view: {{ product.title | escape }}"
+  >
+    <span class="svg-wrapper quick-view-trigger-btn__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+    </span>
+    <span>{{ block.settings.label }}</span>
+  </button>
+</quick-view-button>
+
+{% stylesheet %}
+  .quick-view-button-block {
+    display: inline-block;
+  }
+
+  .quick-view-trigger-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-xs, 6px);
+    font-size: var(--font-body--size, 13px);
+    padding: 8px 14px;
+    min-height: 40px;
+    cursor: pointer;
+  }
+
+  .quick-view-trigger-btn__icon {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Quick view button",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Button label",
+      "default": "Quick View"
+    },
+    {
+      "type": "select",
+      "id": "style_class",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "button-secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "button",
+          "label": "Primary button"
+        },
+        {
+          "value": "button-unstyled",
+          "label": "Text link"
+        }
+      ],
+      "default": "button-secondary"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quick view button"
+    }
+  ]
+}
+{% endschema %}

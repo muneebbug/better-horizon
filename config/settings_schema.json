@@ -1,11 +1,11 @@
 [
   {
     "name": "theme_info",
-    "theme_name": "Horizon",
-    "theme_version": "4.1.4",
-    "theme_author": "Shopify",
-    "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
-    "theme_support_url": "https://support.shopify.com/"
+    "theme_name": "Better Horizon",
+    "theme_version": "4.1.4-bh.1",
+    "theme_author": "Better Horizon",
+    "theme_documentation_url": "https://github.com/muneebbug/better-horizon",
+    "theme_support_url": "https://github.com/muneebbug/better-horizon/issues"
   },
   {
     "name": "t:names.logo_and_favicon",
@@ -1622,6 +1622,18 @@
     ]
   },
   {
+    "name": "Wishlist",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "enable_wishlist",
+        "label": "Enable Wishlist in header",
+        "default": true,
+        "info": "Displays the wishlist heart icon in header actions."
+      }
+    ]
+  },
+  {
     "name": "t:names.drawers",
     "settings": [
       {
@@ -1889,6 +1901,17 @@
         "id": "product_card_carousel",
         "label": "t:settings.product_card_carousel",
         "default": true
+      },
+      {
+        "type": "header",
+        "content": "Quick View"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_quick_view",
+        "label": "Enable Quick View modal",
+        "default": true,
+        "info": "Allows quick product preview modals from catalog cards."
       }
     ]
   },
@@ -2114,6 +2137,22 @@
           }
         ],
         "default": "equal-width-buttons"
+      }
+    ]
+  },
+  {
+    "name": "Localization",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Regional store suggestion"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_market_banner",
+        "label": "Enable Geo Market Suggestion banner",
+        "default": true,
+        "info": "Displays a top recommendation banner when a customer browses from a foreign market."
       }
     ]
   }

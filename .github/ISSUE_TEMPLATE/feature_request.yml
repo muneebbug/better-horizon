@@ -1,0 +1,27 @@
+name: 💡 Feature Request
+description: Suggest a new native merchandising block, accessibility improvement, or utility.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We welcome feature suggestions that eliminate the need for paid Shopify apps while keeping Better Horizon fast and accessible!
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a specific limitation in stock Horizon or a paid app replacement?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution / Block Concept
+      description: Describe what Theme Block, Web Component, or setting you would like to see.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Apps / Solutions Considered
+      description: What apps or workarounds are currently used for this?

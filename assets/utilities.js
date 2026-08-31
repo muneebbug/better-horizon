@@ -393,6 +393,10 @@ export function unlockScroll(owner) {
  * @returns {boolean} True if the click is outside the element, false otherwise.
  */
 export function isClickedOutside(event, element) {
+  if (typeof event.composedPath === 'function' && event.composedPath().includes(element)) {
+    return false;
+  }
+
   if (event.target instanceof HTMLDialogElement || !(event.target instanceof Element)) {
     return !isPointWithinElement(event.clientX, event.clientY, element);
   }
