@@ -1,0 +1,702 @@
+{% doc %}
+  Gift Note & Gift Wrap Option Block
+  Renders line-item property inputs (checkbox + note textarea) that attach directly to the product form.
+{% enddoc %}
+
+{%- liquid
+  assign block_settings = block.settings
+  assign product = closest.product
+  if request.visual_preview_mode and product == blank
+    assign product = collections.all.products.first
+  endif
+
+  assign product_form_id = 'BuyButtons-ProductForm-' | append: section.id
+  assign block_id = block.id
+
+  assign mode = block_settings.display_mode | default: 'collapsible'
+  assign wrap_enabled = block_settings.enable_gift_wrap
+  assign note_enabled = block_settings.enable_gift_note
+
+  if mode == 'wrap_only'
+    assign note_enabled = false
+    assign wrap_enabled = true
+  elsif mode == 'note_only'
+    assign wrap_enabled = false
+    assign note_enabled = true
+  endif
+
+  assign wrap_prop_name = block_settings.wrap_property_name | default: 'Gift wrap'
+  assign note_prop_name = block_settings.note_property_name | default: 'Gift note'
+  assign default_wrap_label = 'content.gift_wrap_option_label' | t
+  assign wrap_label = block_settings.wrap_label | default: default_wrap_label
+
+  assign default_note_label = 'content.gift_wrap_note_checkbox_label' | t
+  assign note_label = block_settings.note_label | default: default_note_label
+
+  assign default_note_placeholder = 'content.gift_wrap_note_placeholder' | t
+  assign note_placeholder = block_settings.note_placeholder | default: default_note_placeholder
+  assign max_chars = block_settings.max_characters | default: 200
+
+  assign checkbox_input_name = 'properties[' | append: wrap_prop_name | append: ']'
+  assign checkbox_id = 'GiftWrap-Checkbox-' | append: block_id
+  assign to_id = 'GiftWrap-To-' | append: block_id
+  assign from_id = 'GiftWrap-From-' | append: block_id
+  assign note_id = 'GiftWrap-Note-' | append: block_id
+  assign disclosure_id = 'GiftWrap-Disclosure-' | append: block_id
+
+  assign custom_input_style = false
+  if block_settings.input_style == 'custom'
+    assign custom_input_style = true
+  endif
+-%}
+
+<script
+  src="{{ 'gift-wrap.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+<div
+  class="gift-wrap-block spacing-style{% if block_settings.text_color != blank %} color-custom-{{ block.id }}{% endif %}"
+  style="
+    {% render 'spacing-style', settings: block_settings %}
+    {% if block_settings.text_color != blank %}
+      --color: {{ block_settings.text_color }};
+      --color-rgb: {{ block_settings.text_color.rgb }};
+    {% endif %}
+    {% if custom_input_style %}
+      {% render 'input-custom-styles', block_settings: block_settings %}
+      --style-border-width-inputs: {{ block_settings.border_width }}px;
+      --style-border-radius-inputs: {{ block_settings.border_radius }}px;
+    {% endif %}
+  "
+  {{ block.shopify_attributes }}
+>
+  <gift-wrap-option
+    class="gift-wrap-option"
+    data-mode="{{ mode }}"
+    data-section-id="{{ section.id }}"
+    data-block-id="{{ block.id }}"
+  >
+    <div
+      ref="liveRegion"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      class="visually-hidden"
+    ></div>
+
+    {%- if mode == 'collapsible' -%}
+      <div class="gift-wrap-option__header">
+        {% render 'checkbox',
+          name: checkbox_input_name,
+          value: 'Yes',
+          label: wrap_label,
+          id: checkbox_id,
+          checked: false,
+          disabled: false,
+          formId: product_form_id,
+          inputRef: 'toggleCheckbox'
+        %}
+      </div>
+
+      {%- if note_enabled -%}
+        <div
+          ref="disclosurePanel"
+          id="{{ disclosure_id }}"
+          class="gift-wrap-option__disclosure"
+          hidden
+        >
+          {%- if block_settings.show_recipient_fields -%}
+            <div class="gift-wrap-option__meta-row">
+              <div class="gift-wrap-option__field">
+                <label
+                  for="{{ to_id }}"
+                  class="gift-wrap-option__label"
+                >
+                  {{ 'content.gift_wrap_to_label' | t }}
+                </label>
+                <input
+                  ref="toInput"
+                  type="text"
+                  id="{{ to_id }}"
+                  name="properties[To]"
+                  class="gift-wrap-option__input"
+                  placeholder="{{ 'content.gift_wrap_to_label' | t }}"
+                  form="{{ product_form_id }}"
+                  maxlength="60"
+                  disabled
+                >
+              </div>
+
+              <div class="gift-wrap-option__field">
+                <label
+                  for="{{ from_id }}"
+                  class="gift-wrap-option__label"
+                >
+                  {{ 'content.gift_wrap_from_label' | t }}
+                </label>
+                <input
+                  ref="fromInput"
+                  type="text"
+                  id="{{ from_id }}"
+                  name="properties[From]"
+                  class="gift-wrap-option__input"
+                  placeholder="{{ 'content.gift_wrap_from_label' | t }}"
+                  form="{{ product_form_id }}"
+                  maxlength="60"
+                  disabled
+                >
+              </div>
+            </div>
+          {%- endif -%}
+
+          <div class="gift-wrap-option__textarea-wrapper">
+            <label
+              for="{{ note_id }}"
+              class="gift-wrap-option__label"
+            >
+              {{ note_label }}
+            </label>
+            <textarea
+              ref="noteTextarea"
+              id="{{ note_id }}"
+              name="properties[{{ note_prop_name }}]"
+              class="gift-wrap-option__textarea"
+              placeholder="{{ note_placeholder }}"
+              form="{{ product_form_id }}"
+              maxlength="{{ max_chars }}"
+              rows="3"
+              disabled
+            ></textarea>
+            <div class="gift-wrap-option__char-count-row">
+              <span
+                ref="characterCount"
+                class="gift-wrap-option__char-count"
+                data-template="{{ 'content.gift_wrap_character_count' | t: used_chars: '[current]', max_chars: '[max]' }}"
+              >
+                {{ 'content.gift_wrap_character_count' | t: used_chars: 0, max_chars: max_chars }}
+              </span>
+            </div>
+          </div>
+        </div>
+      {%- endif -%}
+
+    {%- elsif mode == 'always_visible' -%}
+      {%- if wrap_enabled -%}
+        <div class="gift-wrap-option__header">
+          {% render 'checkbox',
+            name: checkbox_input_name,
+            value: 'Yes',
+            label: wrap_label,
+            id: checkbox_id,
+            checked: false,
+            disabled: false,
+            formId: product_form_id
+          %}
+        </div>
+      {%- endif -%}
+
+      {%- if note_enabled -%}
+        <div class="gift-wrap-option__fields-static">
+          {%- if block_settings.show_recipient_fields -%}
+            <div class="gift-wrap-option__meta-row">
+              <div class="gift-wrap-option__field">
+                <label
+                  for="{{ to_id }}"
+                  class="gift-wrap-option__label"
+                >
+                  {{ 'content.gift_wrap_to_label' | t }}
+                </label>
+                <input
+                  type="text"
+                  id="{{ to_id }}"
+                  name="properties[To]"
+                  class="gift-wrap-option__input"
+                  placeholder="{{ 'content.gift_wrap_to_label' | t }}"
+                  form="{{ product_form_id }}"
+                  maxlength="60"
+                >
+              </div>
+              <div class="gift-wrap-option__field">
+                <label
+                  for="{{ from_id }}"
+                  class="gift-wrap-option__label"
+                >
+                  {{ 'content.gift_wrap_from_label' | t }}
+                </label>
+                <input
+                  type="text"
+                  id="{{ from_id }}"
+                  name="properties[From]"
+                  class="gift-wrap-option__input"
+                  placeholder="{{ 'content.gift_wrap_from_label' | t }}"
+                  form="{{ product_form_id }}"
+                  maxlength="60"
+                >
+              </div>
+            </div>
+          {%- endif -%}
+
+          <div class="gift-wrap-option__textarea-wrapper">
+            <label
+              for="{{ note_id }}"
+              class="gift-wrap-option__label"
+            >
+              {{ note_label }}
+            </label>
+            <textarea
+              ref="noteTextarea"
+              id="{{ note_id }}"
+              name="properties[{{ note_prop_name }}]"
+              class="gift-wrap-option__textarea"
+              placeholder="{{ note_placeholder }}"
+              form="{{ product_form_id }}"
+              maxlength="{{ max_chars }}"
+              rows="3"
+            ></textarea>
+            <div class="gift-wrap-option__char-count-row">
+              <span
+                ref="characterCount"
+                class="gift-wrap-option__char-count"
+                data-template="{{ 'content.gift_wrap_character_count' | t: used_chars: '[current]', max_chars: '[max]' }}"
+              >
+                {{ 'content.gift_wrap_character_count' | t: used_chars: 0, max_chars: max_chars }}
+              </span>
+            </div>
+          </div>
+        </div>
+      {%- endif -%}
+
+    {%- elsif mode == 'wrap_only' -%}
+      <div class="gift-wrap-option__header">
+        {% render 'checkbox',
+          name: checkbox_input_name,
+          value: 'Yes',
+          label: wrap_label,
+          id: checkbox_id,
+          checked: false,
+          disabled: false,
+          formId: product_form_id
+        %}
+      </div>
+
+    {%- elsif mode == 'note_only' -%}
+      <div class="gift-wrap-option__fields-static">
+        {%- if block_settings.show_recipient_fields -%}
+          <div class="gift-wrap-option__meta-row">
+            <div class="gift-wrap-option__field">
+              <label
+                for="{{ to_id }}"
+                class="gift-wrap-option__label"
+              >
+                {{ 'content.gift_wrap_to_label' | t }}
+              </label>
+              <input
+                type="text"
+                id="{{ to_id }}"
+                name="properties[To]"
+                class="gift-wrap-option__input"
+                placeholder="{{ 'content.gift_wrap_to_label' | t }}"
+                form="{{ product_form_id }}"
+                maxlength="60"
+              >
+            </div>
+            <div class="gift-wrap-option__field">
+              <label
+                for="{{ from_id }}"
+                class="gift-wrap-option__label"
+              >
+                {{ 'content.gift_wrap_from_label' | t }}
+              </label>
+              <input
+                type="text"
+                id="{{ from_id }}"
+                name="properties[From]"
+                class="gift-wrap-option__input"
+                placeholder="{{ 'content.gift_wrap_from_label' | t }}"
+                form="{{ product_form_id }}"
+                maxlength="60"
+              >
+            </div>
+          </div>
+        {%- endif -%}
+
+        <div class="gift-wrap-option__textarea-wrapper">
+          <label
+            for="{{ note_id }}"
+            class="gift-wrap-option__label"
+          >
+            {{ note_label }}
+          </label>
+          <textarea
+            ref="noteTextarea"
+            id="{{ note_id }}"
+            name="properties[{{ note_prop_name }}]"
+            class="gift-wrap-option__textarea"
+            placeholder="{{ note_placeholder }}"
+            form="{{ product_form_id }}"
+            maxlength="{{ max_chars }}"
+            rows="3"
+          ></textarea>
+          <div class="gift-wrap-option__char-count-row">
+            <span
+              ref="characterCount"
+              class="gift-wrap-option__char-count"
+              data-template="{{ 'content.gift_wrap_character_count' | t: used_chars: '[current]', max_chars: '[max]' }}"
+            >
+              {{ 'content.gift_wrap_character_count' | t: used_chars: 0, max_chars: max_chars }}
+            </span>
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  </gift-wrap-option>
+</div>
+
+{% stylesheet %}
+  .gift-wrap-block {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .gift-wrap-option {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: var(--gap-xs, 8px);
+  }
+
+  .gift-wrap-option__header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .gift-wrap-option__disclosure {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm, 10px);
+    width: 100%;
+    margin-top: var(--margin-2xs, 4px);
+    padding: var(--padding-sm, 12px);
+    background-color: rgb(var(--color-foreground-rgb) / 0.03);
+    border: var(--style-border-width-inputs, 1px) solid rgb(var(--color-foreground-rgb) / 0.12);
+    border-radius: var(--style-border-radius-inputs, 8px);
+    box-sizing: border-box;
+    transition: opacity var(--animation-speed, 0.2s) ease, transform var(--animation-speed, 0.2s) ease;
+  }
+
+  .gift-wrap-option__disclosure[hidden] {
+    display: none !important;
+  }
+
+  .gift-wrap-option__disclosure.is-open {
+    animation: giftWrapFadeIn var(--animation-speed, 0.2s) ease forwards;
+  }
+
+  @keyframes giftWrapFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .gift-wrap-option__fields-static {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm, 10px);
+    width: 100%;
+  }
+
+  .gift-wrap-option__meta-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gap-sm, 10px);
+  }
+
+  @media screen and (max-width: 500px) {
+    .gift-wrap-option__meta-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .gift-wrap-option__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .gift-wrap-option__label {
+    font-size: min(0.85em, var(--font-paragraph--size, 13px));
+    font-weight: 500;
+    color: var(--color-foreground);
+    line-height: 1.3;
+  }
+
+  .gift-wrap-option__input,
+  .gift-wrap-option__textarea {
+    width: 100%;
+    color: var(--color-input-text, var(--color-foreground));
+    background-color: var(--color-input-background, var(--color-background));
+    border: var(--style-border-width-inputs, 1px) solid var(--color-input-border, rgb(var(--color-foreground-rgb) / 0.2));
+    border-radius: var(--style-border-radius-inputs, 6px);
+    padding: var(--padding-xs, 8px) var(--padding-sm, 10px);
+    font-size: var(--font-size--sm, 13px);
+    box-sizing: border-box;
+    transition: border-color var(--animation-speed, 0.2s) ease, box-shadow var(--animation-speed, 0.2s) ease;
+  }
+
+  .gift-wrap-option__input:focus,
+  .gift-wrap-option__textarea:focus {
+    outline: none;
+    border-color: rgb(var(--color-foreground-rgb) / 0.6);
+    box-shadow: 0 0 0 1px rgb(var(--color-foreground-rgb) / 0.6);
+  }
+
+  .gift-wrap-option__textarea {
+    min-height: 75px;
+    resize: vertical;
+  }
+
+  .gift-wrap-option__textarea-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .gift-wrap-option__char-count-row {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  }
+
+  .gift-wrap-option__char-count {
+    font-size: 11px;
+    font-style: italic;
+    color: rgb(var(--color-foreground-rgb) / 0.6);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Gift wrap & note",
+  "tag": null,
+  "settings": [
+    {
+      "type": "select",
+      "id": "display_mode",
+      "label": "Display mode",
+      "options": [
+        {
+          "value": "collapsible",
+          "label": "Checkbox with collapsible gift note"
+        },
+        {
+          "value": "always_visible",
+          "label": "Always visible"
+        },
+        {
+          "value": "wrap_only",
+          "label": "Gift wrap checkbox only"
+        },
+        {
+          "value": "note_only",
+          "label": "Gift note only"
+        }
+      ],
+      "default": "collapsible"
+    },
+    {
+      "type": "header",
+      "content": "Gift wrap settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_gift_wrap",
+      "label": "Enable gift wrap checkbox",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "wrap_label",
+      "label": "Gift wrap checkbox label",
+      "default": "Add gift wrapping"
+    },
+    {
+      "type": "text",
+      "id": "wrap_property_name",
+      "label": "Line-item property name",
+      "default": "Gift wrap"
+    },
+    {
+      "type": "header",
+      "content": "Gift note settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_gift_note",
+      "label": "Enable gift note message",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "note_label",
+      "label": "Gift note label",
+      "default": "Include a personalized gift note"
+    },
+    {
+      "type": "text",
+      "id": "note_property_name",
+      "label": "Line-item property name",
+      "default": "Gift note"
+    },
+    {
+      "type": "textarea",
+      "id": "note_placeholder",
+      "label": "Note placeholder",
+      "default": "Write your gift message here..."
+    },
+    {
+      "type": "range",
+      "id": "max_characters",
+      "label": "Max characters",
+      "min": 50,
+      "max": 500,
+      "step": 25,
+      "default": 200
+    },
+    {
+      "type": "checkbox",
+      "id": "show_recipient_fields",
+      "label": "Show To / From fields",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:content.appearance"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:settings.text_color",
+      "placeholder": "t:settings.default"
+    },
+    {
+      "type": "select",
+      "id": "input_style",
+      "label": "t:settings.input_style",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:options.default"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "color",
+      "id": "input_background_color",
+      "label": "t:settings.background",
+      "default": "{{ settings.color_palette.background }}",
+      "visible_if": "{{ block.settings.input_style == \"custom\" }}"
+    },
+    {
+      "type": "color",
+      "id": "input_text_color",
+      "label": "t:settings.text",
+      "default": "{{ settings.color_palette.foreground }}",
+      "visible_if": "{{ block.settings.input_style == \"custom\" }}"
+    },
+    {
+      "type": "color",
+      "id": "input_border_color",
+      "label": "t:settings.borders",
+      "default": "{{ settings.color_palette.foreground }}",
+      "visible_if": "{{ block.settings.input_style == \"custom\" }}"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "t:settings.border_width",
+      "min": 0,
+      "max": 4,
+      "step": 0.5,
+      "unit": "px",
+      "default": 1,
+      "visible_if": "{{ block.settings.input_style == \"custom\" }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 6,
+      "visible_if": "{{ block.settings.input_style == \"custom\" }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Gift wrap & note"
+    }
+  ]
+}
+{% endschema %}

@@ -250,6 +250,12 @@
     "recipient_form_fields_hidden": "Los campos de destinatario en el formulario ya no son visibles",
     "recipient_form_error": "Hubo un error al enviar el formulario",
     "product_custom_property_character_count": "{{ used_chars }} de {{ max_chars }} caracteres utilizados",
+    "gift_wrap_option_label": "Add gift wrapping",
+    "gift_wrap_note_checkbox_label": "Include a personalized gift note",
+    "gift_wrap_note_placeholder": "Write your gift message here...",
+    "gift_wrap_to_label": "To (Recipient name)",
+    "gift_wrap_from_label": "From (Your name)",
+    "gift_wrap_character_count": "{{ used_chars }}/{{ max_chars }} characters used",
     "terms_and_policies": "Términos y políticas",
     "pagination": {
       "nav_label": "Paginación",

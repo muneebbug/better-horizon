@@ -287,6 +287,12 @@
     "recipient_form_fields_hidden": "שדות טופס הנמען מוסתרים עכשיו",
     "recipient_form_error": "אירעה שגיאה בשליחת הטופס",
     "product_custom_property_character_count": "נעשה שימוש ב-{{ used_chars }}/{{ max_chars }} תווים",
+    "gift_wrap_option_label": "Add gift wrapping",
+    "gift_wrap_note_checkbox_label": "Include a personalized gift note",
+    "gift_wrap_note_placeholder": "Write your gift message here...",
+    "gift_wrap_to_label": "To (Recipient name)",
+    "gift_wrap_from_label": "From (Your name)",
+    "gift_wrap_character_count": "{{ used_chars }}/{{ max_chars }} characters used",
     "inventory_low_stock_show_count": {
       "one": "נותר {{ count }}",
       "other": "נותרו {{ count }}",

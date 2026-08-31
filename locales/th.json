@@ -245,6 +245,12 @@
     "recipient_form_fields_hidden": "ซ่อนช่องข้อมูลผู้รับในแบบฟอร์มแล้ว",
     "recipient_form_error": "เกิดข้อผิดพลาดในการส่งแบบฟอร์ม",
     "product_custom_property_character_count": "ใช้ไปแล้ว {{ used_chars }}/{{ max_chars }} อักขระ",
+    "gift_wrap_option_label": "Add gift wrapping",
+    "gift_wrap_note_checkbox_label": "Include a personalized gift note",
+    "gift_wrap_note_placeholder": "Write your gift message here...",
+    "gift_wrap_to_label": "To (Recipient name)",
+    "gift_wrap_from_label": "From (Your name)",
+    "gift_wrap_character_count": "{{ used_chars }}/{{ max_chars }} characters used",
     "terms_and_policies": "ข้อกำหนดและนโยบาย",
     "pagination": {
       "nav_label": "การแบ่งหน้า",

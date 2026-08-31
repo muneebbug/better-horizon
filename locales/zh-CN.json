@@ -245,6 +245,12 @@
     "recipient_form_fields_hidden": "收件人表单字段现已隐藏",
     "recipient_form_error": "提交表单时出现错误",
     "product_custom_property_character_count": "已输入 {{ used_chars }} 个字符，最多 {{ max_chars }} 个",
+    "gift_wrap_option_label": "Add gift wrapping",
+    "gift_wrap_note_checkbox_label": "Include a personalized gift note",
+    "gift_wrap_note_placeholder": "Write your gift message here...",
+    "gift_wrap_to_label": "To (Recipient name)",
+    "gift_wrap_from_label": "From (Your name)",
+    "gift_wrap_character_count": "{{ used_chars }}/{{ max_chars }} characters used",
     "terms_and_policies": "条款和政策",
     "pagination": {
       "nav_label": "分页",
