@@ -1578,6 +1578,44 @@
       },
       {
         "type": "header",
+        "content": "Cart drawer upsell recommendations"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_cart_drawer_upsell",
+        "label": "Enable cart drawer upsells",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "cart_drawer_upsell_heading",
+        "label": "Heading",
+        "default": "You might also like",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true }}"
+      },
+      {
+        "type": "select",
+        "id": "cart_drawer_upsell_layout",
+        "label": "Layout style",
+        "options": [
+          {
+            "value": "list",
+            "label": "List"
+          },
+          {
+            "value": "grid_2",
+            "label": "2 column grid"
+          },
+          {
+            "value": "slider",
+            "label": "Horizontal carousel"
+          }
+        ],
+        "default": "list",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true }}"
+      },
+      {
+        "type": "header",
         "content": "t:content.cart_features"
       },
       {

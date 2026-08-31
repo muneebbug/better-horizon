@@ -76,12 +76,28 @@
             "border_color": "",
             "border_radius": 0
           },
-          "blocks": {}
+          "blocks": {
+            "cart_upsell": {
+              "type": "cart-upsell",
+              "settings": {
+                "heading": "Recommended for you",
+                "type_preset": "h4",
+                "alignment": "left",
+                "layout": "list",
+                "products_to_show": 4,
+                "padding-block-start": 16,
+                "padding-block-end": 16,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            }
+          },
+          "block_order": [
+            "cart_upsell"
+          ]
         }
       },
-      "block_order": [
-        "free_shipping_bar"
-      ],
+      "block_order": [],
       "settings": {
         "section_width": "page-width",
         "background_color": "",

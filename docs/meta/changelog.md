@@ -18,6 +18,7 @@ All notable changes to **Better Horizon** are documented in this file.
 - **Back in Stock:** Sold-out variant email capture block with automated customer tags.
 - **Frequently Bought Together:** Multi-item bundle recommendations with real-time price summation.
 - **Free Shipping Bar:** Dynamic cart drawer progress bar calculating remaining amount live against cart total.
+- **Cart Upsell & Recommendations:** Multi-product metafield and API-driven recommendation slots in drawer and cart page.
 - **Trust Badges Bar:** Store guarantee block with grid and horizontal layout modes.
 - **Countdown Timer:** ISO date and metafield-driven urgency countdown block.
 - **Dynamic Size Chart:** Sizing guide modal sourcing content dynamically from Shopify Pages or product metafields.

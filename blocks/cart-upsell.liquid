@@ -1,0 +1,238 @@
+{% doc %}
+  Cart Upsell Block
+  Displays product recommendations on the cart page or within sections.
+{% enddoc %}
+
+{% liquid
+  assign block_settings = block.settings
+  if block_settings.text_color != blank
+    render 'contrast-override', background_color: '', text_color: block_settings.text_color, section_id: block.id
+  endif
+  render 'button-custom-styles', block_settings: block_settings, block_id: block.id
+%}
+
+<div
+  class="cart-upsell-block spacing-style text-{{ block_settings.alignment }}{% if block_settings.text_color != blank %} color-custom-{{ block.id }}{% endif %}"
+  style="{% render 'spacing-style', settings: block_settings %}"
+  {{ block.shopify_attributes }}
+>
+  {% render 'cart-upsell',
+    context: 'page',
+    heading: block_settings.heading,
+    type_preset: block_settings.type_preset,
+    alignment: block_settings.alignment,
+    layout: block_settings.layout,
+    limit: block_settings.products_to_show,
+    style_class: block_settings.style_class,
+    block: block
+  %}
+</div>
+
+{% stylesheet %}
+  .cart-upsell-block {
+    display: block;
+    width: 100%;
+    align-self: stretch;
+    box-sizing: border-box;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Cart upsell",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "t:settings.heading",
+      "default": "Recommended for you"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout style",
+      "options": [
+        {
+          "value": "list",
+          "label": "List"
+        },
+        {
+          "value": "grid_2",
+          "label": "2 column grid"
+        },
+        {
+          "value": "slider",
+          "label": "Horizontal carousel"
+        }
+      ],
+      "default": "list"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Items to show",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "t:content.typography"
+    },
+    {
+      "type": "select",
+      "id": "type_preset",
+      "label": "t:settings.preset",
+      "options": [
+        {
+          "value": "",
+          "label": "t:options.default"
+        },
+        {
+          "value": "paragraph",
+          "label": "t:options.paragraph"
+        },
+        {
+          "value": "h1",
+          "label": "t:options.h1"
+        },
+        {
+          "value": "h2",
+          "label": "t:options.h2"
+        },
+        {
+          "value": "h3",
+          "label": "t:options.h3"
+        },
+        {
+          "value": "h4",
+          "label": "t:options.h4"
+        },
+        {
+          "value": "h5",
+          "label": "t:options.h5"
+        },
+        {
+          "value": "h6",
+          "label": "t:options.h6"
+        }
+      ],
+      "default": "h4",
+      "info": "t:info.edit_presets_in_theme_settings"
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:settings.alignment",
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "style_class",
+      "label": "t:settings.style",
+      "options": [
+        {
+          "value": "button",
+          "label": "t:options.primary"
+        },
+        {
+          "value": "button-secondary",
+          "label": "t:options.secondary"
+        },
+        {
+          "value": "button-custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "button-secondary",
+      "info": "t:info.edit_button_style_in_theme_settings"
+    },
+    {
+      "type": "header",
+      "content": "t:content.button_colors",
+      "visible_if": "{{ block.settings.style_class == \"button-custom\" }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_button_background",
+      "label": "t:settings.background",
+      "alpha": true,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_button_text",
+      "label": "t:settings.text",
+      "alpha": true,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_button_border",
+      "label": "t:settings.border",
+      "alpha": true,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.appearance"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:settings.text_color",
+      "placeholder": "t:settings.default"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cart upsell"
+    }
+  ]
+}
+{% endschema %}

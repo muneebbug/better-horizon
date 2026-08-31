@@ -43,6 +43,7 @@ You can preview the theme here:
 - [Back in Stock Capture](/features/back-in-stock) — Sold-out variant email notification forms.
 - [Frequently Bought Together](/features/frequently-bought-together) — Bundle cross-sells and multi-item cart submission.
 - [Free Shipping Bar](/features/free-shipping-bar) — Real-time progress bar in the cart drawer.
+- [Cart Drawer Upsell](/features/cart-upsell) — Smart in-drawer and cart page product recommendation slots.
 - [Trust Badges Bar](/features/trust-badges) — Store reassurance, shipping guarantees, and security badges.
 - [Countdown Timer](/features/countdown-timer) — Real-date and metafield-driven urgency timers.
 - [Dynamic Size Guide](/features/size-chart) — Dynamic sizing dialogs via Shopify Pages or Metafields.

@@ -90,3 +90,23 @@ html[lang^="ur"] {
 [dir="rtl"] .free-shipping-bar--align-right .free-shipping-bar__header {
   text-align: left;
 }
+
+/* 7. Cart Upsell */
+[dir="rtl"] .cart-upsell-card--list,
+[dir="rtl"] .cart-upsell-card--slider {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .cart-upsell-card--list .cart-upsell-card__content,
+[dir="rtl"] .cart-upsell-card--slider .cart-upsell-card__content {
+  text-align: right;
+}
+
+[dir="rtl"] .cart-upsell-card--grid_2 {
+  text-align: right;
+}
+
+[dir="rtl"] .cart-upsell__carousel-arrow--prev .svg-wrapper svg,
+[dir="rtl"] .cart-upsell__carousel-arrow--next .svg-wrapper svg {
+  transform: scaleX(-1);
+}

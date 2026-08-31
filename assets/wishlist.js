@@ -22,37 +22,56 @@ const STORAGE_KEY = 'better_horizon_wishlist';
  * @property {string} url - The product relative or absolute URL.
  */
 
+import { morphSection } from '@theme/section-renderer';
+
 /**
- * Refreshes the cart drawer section markup in the background and updates header bubbles without opening the cart drawer.
+ * Refreshes all cart section markup (cart drawer and cart page) and updates header bubbles and totals.
  *
  * @returns {Promise<void>}
  */
 export async function updateCartState() {
   try {
-    /** @type {HTMLElement | null} */
-    const cartItemsComp = document.querySelector('#cart-drawer cart-items-component') || document.querySelector('cart-items-component');
-    const sectionId = cartItemsComp?.dataset.sectionId || 'cart-drawer-section';
+    const cartComponents = Array.from(document.querySelectorAll('cart-items-component'));
+    const sectionIds = new Set();
 
-    const [sectionRes, cartRes] = await Promise.all([
-      fetch(`/?section_id=${sectionId}`),
-      fetch('/cart.js')
-    ]);
-
-    if (sectionRes.ok) {
-      const sectionHtml = await sectionRes.text();
-      const doc = new DOMParser().parseFromString(sectionHtml, 'text/html');
-
-      // Strictly target #cart-drawer
-      const newDrawerInner = doc.querySelector('#cart-drawer .cart-drawer__inner') || doc.querySelector('#cart-drawer dialog');
-      const currentDrawerInner = document.querySelector('#cart-drawer .cart-drawer__inner') || document.querySelector('#cart-drawer dialog');
-
-      if (newDrawerInner && currentDrawerInner) {
-        currentDrawerInner.innerHTML = newDrawerInner.innerHTML;
-        if (newDrawerInner.className) {
-          currentDrawerInner.className = newDrawerInner.className;
-        }
+    cartComponents.forEach((comp) => {
+      if (comp instanceof HTMLElement && comp.dataset.sectionId) {
+        sectionIds.add(comp.dataset.sectionId);
       }
+    });
+
+    if (sectionIds.size === 0) {
+      sectionIds.add('cart-drawer-section');
     }
+
+    const sectionFetches = Array.from(sectionIds).map(async (sectionId) => {
+      try {
+        const url = window.location.pathname.includes('/cart')
+          ? `${window.location.pathname}?section_id=${sectionId}`
+          : `/?section_id=${sectionId}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const sectionHtml = await res.text();
+          try {
+            await morphSection(sectionId, sectionHtml);
+          } catch {
+            const doc = new DOMParser().parseFromString(sectionHtml, 'text/html');
+            const newComp = doc.querySelector(`[data-section-id="${sectionId}"]`) || doc.querySelector('#cart-drawer .cart-drawer__inner');
+            const currentComp = document.querySelector(`[data-section-id="${sectionId}"]`) || document.querySelector('#cart-drawer .cart-drawer__inner');
+            if (newComp && currentComp) {
+              currentComp.innerHTML = newComp.innerHTML;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn(`Failed to refresh section ${sectionId}:`, e);
+      }
+    });
+
+    const [cartRes] = await Promise.all([
+      fetch('/cart.js'),
+      ...sectionFetches
+    ]);
 
     if (cartRes.ok) {
       const cartData = await cartRes.json();
@@ -73,6 +92,8 @@ export async function updateCartState() {
           }
         }
       });
+
+      document.dispatchEvent(new CustomEvent('cart:update', { detail: { cart: cartData } }));
     }
   } catch (err) {
     console.error('Error updating cart state', err);

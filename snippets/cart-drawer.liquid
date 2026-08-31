@@ -106,20 +106,24 @@
             {%- if cart.empty? -%}
               {{ empty_cart_drawer_content }}
             {%- else -%}
-              <scroll-hint
+              <div
                 class="cart-drawer__content"
                 aria-label="{{ 'accessibility.cart' | t }}"
               >
                 {% render 'free-shipping-bar' %}
 
-                <scroll-hint class="cart-drawer__items">
-                  {% render 'cart-products', context: 'drawer' %}
-                </scroll-hint>
+                <div class="cart-drawer__scrollable">
+                  <scroll-hint class="cart-drawer__items">
+                    {% render 'cart-products', context: 'drawer' %}
+                  </scroll-hint>
+
+                  {% render 'cart-upsell', context: 'drawer' %}
+                </div>
 
                 <div class="cart-drawer__summary">
                   {% render 'cart-summary', section_id: 'cart-drawer-section' %}
                 </div>
-              </scroll-hint>
+              </div>
             {%- endif -%}
           {% endcapture %}
           {% render 'cart-items-component',
@@ -162,15 +166,25 @@
     flex-direction: column;
     padding: 0;
     background-color: var(--color-background);
-    flex-grow: 1;
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .cart-drawer__scrollable {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .cart-drawer__items {
     display: flex;
     flex-direction: column;
     padding-inline: var(--cart-drawer-padding);
-    overflow-y: auto;
   }
 
   .cart-drawer__items .cart-items__table-row {
@@ -197,18 +211,19 @@
   .cart-drawer__summary {
     --cart-drawer-summary-padding: var(--padding-lg);
 
-    position: sticky;
-    bottom: 0;
-    z-index: 1;
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: var(--gap-xl);
     padding: var(--cart-drawer-summary-padding);
     margin-top: auto;
+    flex-shrink: 0;
     background-color: var(--color-background);
-    /* stylelint-disable-next-line color-named */
-    mask-image: linear-gradient(to bottom, transparent, black var(--cart-drawer-summary-padding));
+    border-top: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.12));
+    box-shadow: 0 -4px 16px rgb(0 0 0 / 0.04);
+    mask-image: none;
 
     @media screen and (min-width: 750px) {
       --cart-drawer-summary-padding: var(--padding-2xl);

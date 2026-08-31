@@ -103,16 +103,33 @@
   @media screen and (min-width: 750px) {
     .cart-page {
       grid-template-columns: 1fr min(50vw, var(--sidebar-width));
-      grid-template-rows: min-content min-content 1fr;
+      grid-template-rows: auto auto auto;
+    }
+
+    .cart-page__title {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .cart-page__items {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .cart-page__more-blocks {
+      grid-column: 1;
+      grid-row: 3;
+      width: 100%;
+      margin-top: var(--margin-2xl);
+      clear: both;
     }
 
     .cart-page__summary {
       display: grid;
       height: 100%;
       grid-column: 2;
-      grid-row: 1 / -1;
+      grid-row: 1 / span 3;
       align-self: stretch;
-      grid-template-rows: subgrid;
       padding-top: 0;
 
       /* needed to support blurred effect from hero section */
