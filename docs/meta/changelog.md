@@ -20,7 +20,6 @@ All notable changes to **Better Horizon** are documented in this file.
 - **Trust Badges Bar:** Store guarantee block with grid and horizontal layout modes.
 - **Countdown Timer:** ISO date and metafield-driven urgency countdown block.
 - **Dynamic Size Chart:** Sizing guide modal sourcing content dynamically from Shopify Pages or product metafields.
-- **Cookie Consent:** Privacy consent banner with Google Consent Mode v2 and Shopify Customer Privacy API support.
 - **Geo Market Banner:** Regional country recommendation banner with single-click market switching.
 - **RTL Support:** Native Right-to-Left bidirectional styling for Arabic, Hebrew, and Urdu.
 - **SEO Schemas:** Automated JSON-LD structured data for Organization, Product, Collection, and Breadcrumbs.

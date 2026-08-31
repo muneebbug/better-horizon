@@ -4,6 +4,13 @@ Better Horizon is a customized version of Shopify's official **Horizon** theme. 
 
 ---
 
+## Live Demo
+
+- **Link:** [https://better-horizon-theme.myshopify.com/](https://better-horizon-theme.myshopify.com/)
+- **Password:** `1`
+
+---
+
 ## Why Better Horizon?
 
 Most Shopify stores install 5 to 10 apps just to get basic features like a wishlist, size guide, or bundle discounts. These apps often slow down your website and charge monthly fees.
@@ -23,7 +30,6 @@ Better Horizon builds these features directly into the theme using clean Liquid 
 - **Payment Icons:** Shows your store's accepted payment methods with optional security headings and color settings.
 - **Trust Badges:** Highlights shipping terms, return guarantees, and customer support.
 - **Variant Image Swatches:** Shows color and variant images as clickable swatches on product pages and product cards.
-- **Cookie Consent Banner:** A privacy banner that works with Google Consent Mode and Shopify Privacy APIs.
 - **Country Switcher Banner:** Suggests local currency and regional stores to international visitors.
 - **Right-to-Left (RTL) Support:** Built-in styling for Arabic, Hebrew, and Urdu languages.
 - **Built-in SEO:** Generates structured data (JSON-LD) for Google search results and rich snippets.

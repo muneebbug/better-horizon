@@ -8,18 +8,21 @@
 
 /**
  * @typedef {object} DetectedCountry
- * @property {string} name - The human-readable name of the country.
- * @property {string} iso_code - The ISO 3166-1 alpha-2 code.
+ * @property {string} [name] - The human-readable name of the country.
+ * @property {string} [handle] - The country handle / ISO code (e.g. 'PK', 'US').
+ * @property {string} [iso_code] - The ISO 3166-1 alpha-2 code.
  */
 
 /**
  * @typedef {object} MarketSuggestion
  * @property {string} [action_url] - Direct URL for market redirect.
+ * @property {string} [country_code] - The country code for this suggestion.
+ * @property {DetectedCountry} [country] - The country object for this suggestion.
  */
 
 /**
  * @typedef {object} BrowsingContextResponse
- * @property {{ country?: DetectedCountry }} [detected_values] - Detected country details.
+ * @property {{ country?: DetectedCountry, country_name?: string, country_code?: string }} [detected_values] - Detected country details.
  * @property {MarketSuggestion[]} [suggestions] - Array of suggestions from Shopify.
  */
 
@@ -79,26 +82,52 @@ export class MarketBanner extends HTMLElement {
 
       /** @type {BrowsingContextResponse} */
       const data = await res.json();
-      const detected = data.detected_values?.country;
-      const suggestions = data.suggestions;
+      const detectedCountry = data.detected_values?.country;
 
-      if (!detected || detected.iso_code === this.currentCountry) {
+      // Extract country code from handle, iso_code, or country_code
+      const detectedCode = (
+        detectedCountry?.handle ||
+        detectedCountry?.iso_code ||
+        data.detected_values?.country_code ||
+        ''
+      ).trim().toUpperCase();
+
+      const detectedName =
+        detectedCountry?.name ||
+        data.detected_values?.country_name ||
+        'your region';
+
+      const currentCode = (this.currentCountry || '').trim().toUpperCase();
+
+      // If no valid country detected or visitor is already in the matching country, do not show
+      if (!detectedCode || detectedCode === currentCode) {
         return;
       }
 
+      const suggestions = data.suggestions || [];
+      const firstSuggestion = suggestions[0];
+      const targetCode = (
+        firstSuggestion?.country_code ||
+        firstSuggestion?.country?.handle ||
+        firstSuggestion?.country?.iso_code ||
+        detectedCode
+      ).trim().toUpperCase();
+
       if (this.countryNameEl) {
-        this.countryNameEl.textContent = detected.name;
+        this.countryNameEl.textContent = detectedName;
       }
 
       if (this.switchBtn) {
-        this.switchBtn.textContent = `Switch to ${detected.name}`;
+        this.switchBtn.textContent = `Switch to ${detectedName}`;
         this.switchBtn.addEventListener('click', () => {
           // If suggestion has a direct URL, redirect
-          if (suggestions && suggestions.length > 0 && suggestions[0].action_url) {
-            window.location.href = suggestions[0].action_url;
+          if (firstSuggestion?.action_url) {
+            sessionStorage.setItem(this.dismissKey, 'true');
+            window.location.href = firstSuggestion.action_url;
             return;
           }
-          // Otherwise submit localization form
+
+          // Otherwise submit standard localization form
           const form = document.createElement('form');
           form.method = 'POST';
           form.action = '/localization';
@@ -112,10 +141,17 @@ export class MarketBanner extends HTMLElement {
           const countryInput = document.createElement('input');
           countryInput.type = 'hidden';
           countryInput.name = 'country_code';
-          countryInput.value = detected.iso_code;
+          countryInput.value = targetCode;
           form.appendChild(countryInput);
 
+          const returnToInput = document.createElement('input');
+          returnToInput.type = 'hidden';
+          returnToInput.name = 'return_to';
+          returnToInput.value = window.location.pathname + window.location.search;
+          form.appendChild(returnToInput);
+
           document.body.appendChild(form);
+          sessionStorage.setItem(this.dismissKey, 'true');
           form.submit();
         });
       }
@@ -151,4 +187,5 @@ export class MarketBanner extends HTMLElement {
 if (!customElements.get('market-banner')) {
   customElements.define('market-banner', MarketBanner);
 }
+
 

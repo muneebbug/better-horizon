@@ -73,12 +73,7 @@ html[lang^="ur"] {
   margin-right: 0;
 }
 
-/* 5. Cookie Consent & Market Banner */
-[dir="rtl"] .cookie-consent-banner {
-  left: auto;
-  right: 20px;
-}
-
+/* 5. Market Banner */
 [dir="rtl"] .market-banner__inner {
   flex-direction: row-reverse;
 }

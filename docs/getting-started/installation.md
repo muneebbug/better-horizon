@@ -10,6 +10,14 @@ You can run **Better Horizon** locally for development using Shopify CLI or uplo
 
 ---
 
+## Live Demo
+
+You can test the theme before installing:
+- **Link:** [https://better-horizon-theme.myshopify.com/](https://better-horizon-theme.myshopify.com/)
+- **Password:** `1`
+
+---
+
 ## 🛠️ Local Development with Shopify CLI
 
 ### Prerequisites
