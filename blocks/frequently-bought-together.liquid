@@ -9,7 +9,6 @@
     assign product = collections.all.products.first
   endif
 
-  assign currency_symbol = cart.currency.symbol | default: '$'
   assign max_items = block.settings.products_to_show | default: 2
 
   assign bundle_products = product.metafields.custom.bundle_products.value
@@ -21,6 +20,16 @@
       assign bundle_products = bundle_collection.products
     endif
   endif
+
+  assign show_currency = settings.currency_code_enabled_product_pages
+  if show_currency
+    assign money_format = shop.money_with_currency_format
+  else
+    assign money_format = shop.money_format
+  endif
+
+  assign main_variant = product.selected_or_first_available_variant
+  assign bundle_total_cents = main_variant.price | default: 0
 -%}
 
 <script
@@ -37,14 +46,14 @@
     class="bundle-recommendations"
     data-product-id="{{ product.id }}"
     data-section-id="{{ section.id }}"
-    data-currency-symbol="{{ currency_symbol }}"
+    data-money-format="{{ money_format | escape }}"
+    data-currency="{{ cart.currency.iso_code }}"
     data-button-text="{{ block.settings.button_label | default: 'Add Bundle to Cart' }}"
   >
     <h3 class="bundle-block__title">{{ block.settings.heading }}</h3>
 
     <div class="bundle-block__grid" data-bundle-items>
       {%- comment -%} Main Product Item {%- endcomment -%}
-      {%- assign main_variant = product.selected_or_first_available_variant -%}
       <div class="bundle-item">
         <label class="bundle-item__checkbox-label">
           <input
@@ -85,6 +94,7 @@
             {%- assign rec_variant = rec_product.selected_or_first_available_variant -%}
             {%- if rec_variant and rec_variant.available -%}
               {%- assign rendered_count = rendered_count | plus: 1 -%}
+              {%- assign bundle_total_cents = bundle_total_cents | plus: rec_variant.price -%}
               <div class="bundle-item">
                 <label class="bundle-item__checkbox-label">
                   <input
@@ -126,7 +136,7 @@
     <div class="bundle-block__footer">
       <div class="bundle-block__total">
         <span>Total Price:</span>
-        <strong data-bundle-total class="bundle-block__total-price">{{ main_variant.price | money }}</strong>
+        <strong data-bundle-total class="bundle-block__total-price">{{ bundle_total_cents | money }}</strong>
       </div>
       <button
         type="button"

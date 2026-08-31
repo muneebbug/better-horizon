@@ -6,6 +6,7 @@
  * @module bundle-recommendations
  */
 
+import { formatMoney } from '@theme/money-formatting';
 import { updateCartState } from './wishlist.js';
 
 /**
@@ -30,6 +31,12 @@ export class BundleRecommendations extends HTMLElement {
   /** @type {number} */
   limit;
 
+  /** @type {string} */
+  moneyFormat;
+
+  /** @type {string} */
+  currency;
+
   /** @type {HTMLElement | null} */
   totalPriceEl;
 
@@ -47,6 +54,8 @@ export class BundleRecommendations extends HTMLElement {
     this.productId = this.dataset.productId;
     this.sectionId = this.dataset.sectionId;
     this.limit = parseInt(this.dataset.limit || '2', 10);
+    this.moneyFormat = this.dataset.moneyFormat || '{{amount}}';
+    this.currency = this.dataset.currency || 'USD';
     this.totalPriceEl = this.querySelector('[data-bundle-total]');
     this.addButton = this.querySelector('[data-bundle-add-button]');
     this.itemsContainer = this.querySelector('[data-bundle-items]');
@@ -72,7 +81,7 @@ export class BundleRecommendations extends HTMLElement {
   }
 
   /**
-   * Computes the sum of all currently checked bundle items and updates the formatted total UI.
+   * Computes the sum of all currently checked bundle items and updates the formatted total UI using theme money formatting.
    * @returns {void}
    */
   updateTotal() {
@@ -86,9 +95,7 @@ export class BundleRecommendations extends HTMLElement {
     });
 
     if (this.totalPriceEl) {
-      const formatted = (totalCents / 100).toFixed(2);
-      const currencySymbol = this.dataset.currencySymbol || '$';
-      this.totalPriceEl.textContent = `${currencySymbol}${formatted}`;
+      this.totalPriceEl.textContent = formatMoney(totalCents, this.moneyFormat, this.currency);
     }
 
     if (this.addButton) {
