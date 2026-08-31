@@ -28,37 +28,33 @@
       data-end-time="{{ end_date | default: '2028-12-31T23:59:59Z' }}"
     >
       {%- if block.settings.heading != blank -%}
-        <div class="countdown-timer__header">
+        <div class="countdown-timer__heading">
           <span class="svg-wrapper countdown-timer__icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
           </span>
-          <span class="countdown-timer__heading">{{ block.settings.heading }}</span>
+          <span>{{ block.settings.heading }}</span>
         </div>
       {%- endif -%}
 
-      <div class="countdown-timer__boxes" role="timer" aria-live="off">
-        <div class="countdown-box">
-          <span data-days class="countdown-box__num">00</span>
-          <span class="countdown-box__label">Days</span>
-        </div>
-        <span class="countdown-timer__separator">:</span>
-        <div class="countdown-box">
-          <span data-hours class="countdown-box__num">00</span>
-          <span class="countdown-box__label">Hours</span>
-        </div>
-        <span class="countdown-timer__separator">:</span>
-        <div class="countdown-box">
-          <span data-minutes class="countdown-box__num">00</span>
-          <span class="countdown-box__label">Mins</span>
-        </div>
-        <span class="countdown-timer__separator">:</span>
-        <div class="countdown-box">
-          <span data-seconds class="countdown-box__num">00</span>
-          <span class="countdown-box__label">Secs</span>
-        </div>
+      <div class="countdown-timer__digits" role="timer" aria-live="off">
+        <span class="countdown-unit">
+          <strong data-days class="countdown-num">00</strong><span class="countdown-label">d</span>
+        </span>
+        <span class="countdown-separator">:</span>
+        <span class="countdown-unit">
+          <strong data-hours class="countdown-num">00</strong><span class="countdown-label">h</span>
+        </span>
+        <span class="countdown-separator">:</span>
+        <span class="countdown-unit">
+          <strong data-minutes class="countdown-num">00</strong><span class="countdown-label">m</span>
+        </span>
+        <span class="countdown-separator">:</span>
+        <span class="countdown-unit">
+          <strong data-seconds class="countdown-num">00</strong><span class="countdown-label">s</span>
+        </span>
       </div>
     </countdown-timer>
   </div>
@@ -66,12 +62,12 @@
 
 {% stylesheet %}
   .countdown-block {
-    margin: var(--margin-md, 16px) 0;
-    padding: var(--padding-md, 16px);
+    margin: 0;
+    padding: 10px 16px;
     background-color: rgb(var(--color-foreground-rgb) / 0.03);
     border: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.15));
     border-radius: var(--style-border-radius-inputs, 8px);
-    display: inline-block;
+    display: block;
     width: 100%;
     box-sizing: border-box;
     color: var(--color-foreground);
@@ -79,60 +75,69 @@
 
   .countdown-timer {
     display: flex;
-    flex-direction: column;
-    gap: var(--gap-sm, 10px);
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap-sm, 12px);
+    flex-wrap: wrap;
   }
 
-  .countdown-timer__header {
-    display: flex;
+  .countdown-timer__heading {
+    display: inline-flex;
     align-items: center;
     gap: var(--gap-xs, 6px);
-    font-weight: 600;
     font-size: var(--font-body--size, 14px);
+    font-weight: 600;
     color: var(--color-foreground);
+    letter-spacing: -0.01em;
   }
 
   .countdown-timer__icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     color: var(--color-foreground);
+    flex-shrink: 0;
   }
 
-  .countdown-timer__boxes {
-    display: flex;
+  .countdown-timer__digits {
+    display: inline-flex;
     align-items: center;
-    gap: var(--gap-xs, 6px);
-  }
-
-  .countdown-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: var(--color-input-background, var(--color-background));
-    padding: 8px 12px;
-    border-radius: var(--style-border-radius-inputs, 6px);
-    border: var(--style-border-width, 1px) solid var(--color-input-border, rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.15)));
-    min-width: 48px;
-  }
-
-  .countdown-box__num {
-    font-size: 1.25rem;
-    font-weight: 700;
+    gap: 4px;
     font-variant-numeric: tabular-nums;
-    color: var(--color-foreground);
   }
 
-  .countdown-box__label {
-    font-size: var(--font-size--2xs, 11px);
-    text-transform: uppercase;
-    color: var(--color-foreground-subdued, rgb(var(--color-foreground-rgb) / 0.7));
-    letter-spacing: 0.05em;
+  .countdown-unit {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 1px;
   }
 
-  .countdown-timer__separator {
-    font-size: 1.25rem;
+  .countdown-num {
+    font-size: var(--font-body--size, 15px);
     font-weight: 700;
     color: var(--color-foreground);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .countdown-label {
+    font-size: var(--font-size--2xs, 11px);
+    font-weight: 500;
+    color: var(--color-foreground-subdued, rgb(var(--color-foreground-rgb) / 0.65));
+    margin-inline-end: 2px;
+  }
+
+  .countdown-separator {
+    font-size: var(--font-body--size, 13px);
+    font-weight: 600;
+    color: var(--color-foreground-subdued, rgb(var(--color-foreground-rgb) / 0.4));
+    margin: 0 1px;
+  }
+
+  @media screen and (max-width: 420px) {
+    .countdown-timer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
   }
 {% endstylesheet %}
 

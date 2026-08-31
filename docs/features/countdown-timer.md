@@ -12,6 +12,7 @@ The **Countdown Timer** theme block displays a real-time countdown timer bound t
 
 ## 🚀 Key Features
 
+- **✨ Minimal Single-Row Layout:** Clean inline bar displaying the offer heading and timer in a balanced row without cluttered nested cards.
 - **⏱️ Tabular Numerals:** Uses `font-variant-numeric: tabular-nums` to eliminate jitter while seconds tick down.
 - **📅 Dynamic Date Sourcing:**
   1. **Product Metafield:** `product.metafields.custom.sale_end_date` (ISO timestamp).
@@ -24,7 +25,7 @@ The **Countdown Timer** theme block displays a real-time countdown timer bound t
 
 | Setting | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `heading` | text | `"Limited Time Offer"` | Header title above the timer boxes. |
+| `heading` | text | `"Limited Time Offer"` | Header title next to the timer. |
 | `end_date` | text | `""` | ISO timestamp string (e.g. `2026-12-31T23:59:59Z`). |
 
 ---
