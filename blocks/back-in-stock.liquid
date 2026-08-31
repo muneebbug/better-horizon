@@ -137,7 +137,8 @@
     padding: 0 var(--padding-md, 14px);
     background-color: var(--color-input-background, var(--color-background));
     color: var(--color-input-text, var(--color-foreground));
-    border: var(--style-border-width, 1px) solid var(--color-input-border, rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.15)));
+    border: var(--style-border-width, 1px) solid
+      var(--color-input-border, rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.15)));
     border-radius: var(--style-border-radius-inputs, 8px);
     font-family: inherit;
     font-size: var(--font-body--size, 14px);
@@ -194,6 +195,9 @@
   }
 
   @media screen and (max-width: 480px) {
+    .back-in-stock__input {
+      flex: auto;
+    }
     .back-in-stock__input-group {
       flex-direction: column;
     }
