@@ -103,17 +103,19 @@
   @media screen and (min-width: 750px) {
     .cart-page {
       grid-template-columns: 1fr min(50vw, var(--sidebar-width));
-      grid-template-rows: auto auto auto;
+      grid-template-rows: min-content auto auto;
     }
 
     .cart-page__title {
       grid-column: 1;
       grid-row: 1;
+      align-self: start;
     }
 
     .cart-page__items {
       grid-column: 1;
       grid-row: 2;
+      align-self: start;
     }
 
     .cart-page__more-blocks {
@@ -126,6 +128,7 @@
 
     .cart-page__summary {
       display: grid;
+      grid-template-rows: subgrid;
       height: 100%;
       grid-column: 2;
       grid-row: 1 / span 3;
