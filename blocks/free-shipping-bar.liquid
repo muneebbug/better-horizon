@@ -1,0 +1,154 @@
+{% doc %}
+  Free Shipping Progress Bar Block
+  Can be placed as a theme block on the cart page or within sections.
+{% enddoc %}
+
+{%- liquid
+  assign is_primary_currency = false
+  if cart.currency.iso_code == shop.currency
+    assign is_primary_currency = true
+  endif
+-%}
+
+{%- if is_primary_currency or request.design_mode -%}
+  {%- liquid
+    assign block_threshold = block.settings.threshold
+    if block_threshold == blank or block_threshold <= 0
+      assign block_threshold = settings.free_shipping_threshold | default: 50
+    endif
+
+    assign block_message = block.settings.message
+    if block_message == blank
+      assign block_message = settings.free_shipping_message
+    endif
+
+    assign block_success_message = block.settings.success_message
+    if block_success_message == blank
+      assign block_success_message = settings.free_shipping_success_message
+    endif
+
+    assign block_alignment = block.settings.alignment | default: settings.free_shipping_alignment | default: 'left'
+  -%}
+
+  <div
+    class="free-shipping-block spacing-style free-shipping-block--{{ block.id }}"
+    style="{% render 'spacing-style', settings: block.settings %}"
+    {{ block.shopify_attributes }}
+  >
+    {% render 'free-shipping-bar',
+      alignment: block_alignment,
+      threshold: block_threshold,
+      message: block_message,
+      success_message: block_success_message,
+      is_block: true
+    %}
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .free-shipping-block {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Free shipping bar",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Threshold and messages default to Theme Settings > Cart unless customized below."
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "t:settings.alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "number",
+      "id": "threshold",
+      "label": "Custom threshold",
+      "info": "Leave blank or 0 to use global threshold from Theme Settings > Cart."
+    },
+    {
+      "type": "text",
+      "id": "message",
+      "label": "Custom progress message",
+      "placeholder": "Spend [amount] more for free shipping",
+      "info": "Leave blank to use global message. Use [amount] placeholder."
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Custom unlocked message",
+      "placeholder": "You've unlocked free shipping!"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Free shipping bar"
+    }
+  ]
+}
+{% endschema %}

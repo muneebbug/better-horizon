@@ -1527,6 +1527,57 @@
       },
       {
         "type": "header",
+        "content": "Free shipping progress bar"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_free_shipping_bar",
+        "label": "Enable free shipping bar",
+        "default": true
+      },
+      {
+        "type": "select",
+        "id": "free_shipping_alignment",
+        "label": "t:settings.alignment",
+        "options": [
+          {
+            "value": "left",
+            "label": "t:options.left"
+          },
+          {
+            "value": "center",
+            "label": "t:options.center"
+          },
+          {
+            "value": "right",
+            "label": "t:options.right"
+          }
+        ],
+        "default": "left",
+        "visible_if": "{{ settings.enable_free_shipping_bar == true }}"
+      },
+      {
+        "type": "number",
+        "id": "free_shipping_threshold",
+        "label": "Free shipping threshold",
+        "info": "Minimum cart subtotal to qualify for free shipping in your store currency (e.g. 50).",
+        "default": 50
+      },
+      {
+        "type": "text",
+        "id": "free_shipping_message",
+        "label": "Progress message",
+        "info": "Use [amount] for the remaining balance placeholder.",
+        "default": "Spend [amount] more for free shipping"
+      },
+      {
+        "type": "text",
+        "id": "free_shipping_success_message",
+        "label": "Unlocked message",
+        "default": "You've unlocked free shipping!"
+      },
+      {
+        "type": "header",
         "content": "t:content.cart_features"
       },
       {

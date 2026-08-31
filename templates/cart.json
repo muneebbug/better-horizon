@@ -53,8 +53,22 @@
             "border_radius": 0
           },
           "blocks": {}
+        },
+        "free_shipping_bar": {
+          "type": "free-shipping-bar",
+          "settings": {
+            "alignment": "left",
+            "threshold": 0,
+            "message": "",
+            "success_message": "",
+            "padding-block-start": 0,
+            "padding-block-end": 16
+          }
         }
       },
+      "block_order": [
+        "free_shipping_bar"
+      ],
       "settings": {
         "section_width": "page-width",
         "padding-block-start": 24,

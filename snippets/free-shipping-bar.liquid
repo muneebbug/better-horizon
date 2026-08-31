@@ -1,0 +1,194 @@
+{% doc %}
+  Free Shipping Progress Bar Snippet
+  Calculates and displays progress towards the free shipping threshold in the cart drawer and cart page.
+
+  @param {string} [alignment] - Text alignment ('left', 'center', 'right')
+  @param {number} [threshold] - Minimum amount threshold
+  @param {string} [message] - Progress message template with [amount]
+  @param {string} [success_message] - Goal reached message
+  @param {boolean} [is_block] - Whether rendered as a standalone theme block
+{% enddoc %}
+
+{%- liquid
+  assign is_block = is_block | default: false
+  assign is_enabled = settings.enable_free_shipping_bar
+  if is_block
+    assign is_enabled = true
+  endif
+
+  assign is_primary_currency = false
+  if cart.currency.iso_code == shop.currency
+    assign is_primary_currency = true
+  endif
+-%}
+
+{%- if is_enabled != false and is_primary_currency and cart.item_count > 0 or request.design_mode and is_primary_currency -%}
+  {%- liquid
+    assign raw_threshold = threshold
+    if raw_threshold == blank or raw_threshold <= 0
+      assign raw_threshold = settings.free_shipping_threshold | default: 50
+    endif
+
+    assign decimals = 2
+    case cart.currency.iso_code
+      when 'BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'
+        assign decimals = 0
+      when 'BHD', 'IQD', 'JOD', 'KWD', 'LYD', 'OMR', 'TND'
+        assign decimals = 3
+    endcase
+
+    if decimals == 0
+      assign threshold_cents = raw_threshold | times: 1
+    elsif decimals == 3
+      assign threshold_cents = raw_threshold | times: 1000
+    else
+      assign threshold_cents = raw_threshold | times: 100
+    endif
+
+    assign cart_total = cart.total_price
+    if cart.empty? and request.design_mode
+      assign cart_total = threshold_cents | divided_by: 2
+    endif
+
+    assign is_unlocked = false
+    if cart_total >= threshold_cents
+      assign is_unlocked = true
+      assign progress_percent = 100
+      assign remaining_cents = 0
+    else
+      assign remaining_cents = threshold_cents | minus: cart_total
+      assign progress_percent = cart_total | times: 100.0 | divided_by: threshold_cents | round: 1
+      if progress_percent > 100
+        assign progress_percent = 100
+      endif
+    endif
+
+    assign show_currency = settings.currency_code_enabled_cart_items
+    if show_currency
+      assign money_format = shop.money_with_currency_format
+    else
+      assign money_format = shop.money_format
+    endif
+
+    assign bar_alignment = alignment
+    if bar_alignment == blank
+      assign bar_alignment = settings.free_shipping_alignment | default: 'left'
+    endif
+
+    assign bar_msg = message
+    if bar_msg == blank
+      assign bar_msg = settings.free_shipping_message | default: 'Spend [amount] more for free shipping'
+    endif
+
+    assign bar_success_msg = success_message
+    if bar_success_msg == blank
+      assign bar_success_msg = settings.free_shipping_success_message | default: "You've unlocked free shipping!"
+    endif
+
+    assign formatted_remaining = remaining_cents | money
+    assign formatted_remaining_html = '<strong class="free-shipping-bar__amount">' | append: formatted_remaining | append: '</strong>'
+    assign progress_text = bar_msg | replace: '[amount]', formatted_remaining_html
+  -%}
+
+  <script
+    src="{{ 'free-shipping-bar.js' | asset_url }}"
+    defer
+    type="module"
+  ></script>
+
+  <free-shipping-bar
+    class="free-shipping-bar free-shipping-bar--align-{{ bar_alignment }}{% if is_block %} free-shipping-bar--block{% endif %}{% if is_unlocked %} is-unlocked{% endif %}"
+    data-threshold-cents="{{ threshold_cents }}"
+    data-money-format="{{ money_format | escape }}"
+    data-currency="{{ cart.currency.iso_code }}"
+    data-message="{{ bar_msg | escape }}"
+    data-success-message="{{ bar_success_msg | escape }}"
+    role="region"
+    aria-label="Free shipping progress"
+  >
+    <div class="free-shipping-bar__header">
+      <p class="free-shipping-bar__message" data-message-el aria-live="polite">
+        {%- if is_unlocked -%}
+          {{ bar_success_msg }}
+        {%- else -%}
+          {{ progress_text }}
+        {%- endif -%}
+      </p>
+    </div>
+
+    <div
+      class="free-shipping-bar__progress-track"
+      role="progressbar"
+      aria-valuenow="{{ progress_percent }}"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuetext="{% if is_unlocked %}{{ bar_success_msg }}{% else %}{{ progress_percent }}% towards free shipping{% endif %}"
+    >
+      <div
+        class="free-shipping-bar__progress-fill"
+        data-progress-fill
+        style="width: {{ progress_percent }}%;"
+      ></div>
+    </div>
+  </free-shipping-bar>
+{%- endif -%}
+
+{% stylesheet %}
+  .free-shipping-bar {
+    display: block;
+    padding: var(--padding-md, 16px) var(--cart-drawer-padding, 20px);
+    border-bottom: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.12));
+    font-size: var(--font-body--size, 13px);
+    line-height: 1.4;
+    background: transparent;
+    margin-bottom: var(--margin-md, 16px);
+  }
+
+  .free-shipping-bar--block {
+    padding: 0;
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  .free-shipping-bar__header {
+    margin-bottom: var(--margin-sm, 10px);
+  }
+
+  .free-shipping-bar--align-left .free-shipping-bar__header {
+    text-align: left;
+  }
+
+  .free-shipping-bar--align-center .free-shipping-bar__header {
+    text-align: center;
+  }
+
+  .free-shipping-bar--align-right .free-shipping-bar__header {
+    text-align: right;
+  }
+
+  .free-shipping-bar__message {
+    margin: 0;
+    font-size: var(--font-body--size, 13px);
+    color: var(--color-foreground);
+  }
+
+  .free-shipping-bar__amount {
+    font-weight: 700;
+  }
+
+  .free-shipping-bar__progress-track {
+    width: 100%;
+    height: 6px;
+    background-color: rgb(var(--color-foreground-rgb) / 0.1);
+    border-radius: 9999px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .free-shipping-bar__progress-fill {
+    height: 100%;
+    background-color: var(--color-foreground);
+    border-radius: 9999px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+{% endstylesheet %}

@@ -42,6 +42,7 @@ You can preview the theme here:
 - [Quick View & Quick Add](/features/quick-view) — Modal preview dialogs and loading spinner feedback.
 - [Back in Stock Capture](/features/back-in-stock) — Sold-out variant email notification forms.
 - [Frequently Bought Together](/features/frequently-bought-together) — Bundle cross-sells and multi-item cart submission.
+- [Free Shipping Bar](/features/free-shipping-bar) — Real-time progress bar in the cart drawer.
 - [Trust Badges Bar](/features/trust-badges) — Store reassurance, shipping guarantees, and security badges.
 - [Countdown Timer](/features/countdown-timer) — Real-date and metafield-driven urgency timers.
 - [Dynamic Size Guide](/features/size-chart) — Dynamic sizing dialogs via Shopify Pages or Metafields.

@@ -25,6 +25,7 @@ Better Horizon builds these features directly into the theme using clean Liquid 
 - **Quick View:** Lets shoppers preview product details and select variants without leaving the collection page.
 - **Back in Stock Alerts:** An email signup form that appears on sold-out variants so customers can be notified when items return.
 - **Frequently Bought Together:** Shows product bundles with automatic price calculations and one-click add to cart.
+- **Free Shipping Progress Bar:** Shows customers how much more they need to spend to unlock free shipping directly inside the cart drawer.
 - **Size Guide:** A popup modal that can pull size charts from Shopify pages or product metafields.
 - **Countdown Timer:** Displays a clean countdown for sales and limited-time offers.
 - **Payment Icons:** Shows your store's accepted payment methods with optional security headings and color settings.

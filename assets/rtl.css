@@ -78,7 +78,15 @@ html[lang^="ur"] {
   flex-direction: row-reverse;
 }
 
-/* 6. Tables */
+/* 6. Tables & Free Shipping Bar */
 [dir="rtl"] .size-chart-table {
   text-align: right;
+}
+
+[dir="rtl"] .free-shipping-bar--align-left .free-shipping-bar__header {
+  text-align: right;
+}
+
+[dir="rtl"] .free-shipping-bar--align-right .free-shipping-bar__header {
+  text-align: left;
 }
