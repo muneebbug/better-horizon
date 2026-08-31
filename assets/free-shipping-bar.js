@@ -1,6 +1,6 @@
 /**
  * Better Horizon — Free Shipping Progress Bar
- * Calculates progress against free shipping threshold in the cart drawer.
+ * Calculates progress against free shipping threshold in the cart drawer and cart page.
  *
  * @module free-shipping-bar
  */
@@ -9,7 +9,7 @@ import { formatMoney } from '@theme/money-formatting';
 import { StandardEvents } from '@shopify/events';
 
 /**
- * Custom element managing the live free shipping threshold progress in the cart drawer.
+ * Custom element managing the live free shipping threshold progress in the cart drawer and cart page.
  *
  * @extends {HTMLElement}
  */
@@ -53,6 +53,13 @@ export class FreeShippingBar extends HTMLElement {
     this.messageEl = this.querySelector('[data-message-el]');
     this.trackEl = this.querySelector('[role="progressbar"]');
 
+    const initialTotal = parseInt(this.dataset.cartTotal || '0', 10);
+    if (initialTotal <= 0 && !window.Shopify?.designMode) {
+      this.#hideBar();
+    } else {
+      this.updateProgress(initialTotal);
+    }
+
     document.addEventListener(StandardEvents.cartLinesUpdate, this.#handleCartLinesUpdate);
     document.addEventListener('cart:update', this.#handleCartUpdate);
   }
@@ -67,24 +74,60 @@ export class FreeShippingBar extends HTMLElement {
   }
 
   /**
+   * Hides the free shipping bar and its parent block wrapper when cart is empty.
+   * @returns {void}
+   */
+  #hideBar() {
+    this.hidden = true;
+    this.style.display = 'none';
+    const blockWrapper = this.closest('.free-shipping-block');
+    if (blockWrapper) {
+      blockWrapper.hidden = true;
+      blockWrapper.style.display = 'none';
+    }
+  }
+
+  /**
+   * Shows the free shipping bar and its parent block wrapper when cart has items.
+   * @returns {void}
+   */
+  #showBar() {
+    this.hidden = false;
+    this.style.display = '';
+    const blockWrapper = this.closest('.free-shipping-block');
+    if (blockWrapper) {
+      blockWrapper.hidden = false;
+      blockWrapper.style.display = '';
+    }
+  }
+
+  /**
    * Handles StandardEvents.cartLinesUpdate from Shopify.
    * @param {import('@shopify/events').CartLinesUpdateEvent} event
    */
   #handleCartLinesUpdate = (event) => {
     event.promise?.then(({ detail }) => {
-      if (detail?.cart?.total_price !== undefined) {
-        this.updateProgress(detail.cart.total_price);
+      let total = detail?.cart?.total_price;
+      if (total === undefined && detail?.cart?.item_count === 0) {
+        total = 0;
+      }
+      if (total !== undefined) {
+        this.updateProgress(total);
       }
     });
   };
 
   /**
    * Handles custom cart:update event if dispatched.
-   * @param {CustomEvent<{ cart?: { total_price: number } }>} event
+   * @param {CustomEvent<{ cart?: { total_price?: number, item_count?: number } }>} event
    */
   #handleCartUpdate = (event) => {
-    if (event.detail?.cart?.total_price !== undefined) {
-      this.updateProgress(event.detail.cart.total_price);
+    let total = event.detail?.cart?.total_price;
+    if (total === undefined && event.detail?.cart?.item_count === 0) {
+      total = 0;
+    }
+    if (total !== undefined) {
+      this.updateProgress(total);
     }
   };
 
@@ -95,6 +138,13 @@ export class FreeShippingBar extends HTMLElement {
    */
   updateProgress(totalCents) {
     if (!this.thresholdCents || this.thresholdCents <= 0) return;
+
+    if (totalCents <= 0 && !window.Shopify?.designMode) {
+      this.#hideBar();
+      return;
+    }
+
+    this.#showBar();
 
     const isUnlocked = totalCents >= this.thresholdCents;
     const progressPercent = Math.min(100, Math.max(0, (totalCents / this.thresholdCents) * 100));

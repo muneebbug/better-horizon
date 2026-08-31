@@ -8,9 +8,16 @@
   if cart.currency.iso_code == shop.currency
     assign is_primary_currency = true
   endif
+
+  assign show_block = false
+  if is_primary_currency
+    if cart.item_count > 0 or request.design_mode
+      assign show_block = true
+    endif
+  endif
 -%}
 
-{%- if is_primary_currency or request.design_mode -%}
+{%- if show_block -%}
   {%- liquid
     assign block_threshold = block.settings.threshold
     if block_threshold == blank or block_threshold <= 0
@@ -33,6 +40,10 @@
   <div
     class="free-shipping-block spacing-style free-shipping-block--{{ block.id }}"
     style="{% render 'spacing-style', settings: block.settings %}"
+    {% if cart.item_count == 0 and request.design_mode == false %}
+      hidden
+      style="display: none;"
+    {% endif %}
     {{ block.shopify_attributes }}
   >
     {% render 'free-shipping-bar',

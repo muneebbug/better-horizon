@@ -1,6 +1,7 @@
 {% doc %}
   Free Shipping Progress Bar Snippet
   Calculates and displays progress towards the free shipping threshold in the cart drawer and cart page.
+  Only rendered for the store's primary currency to avoid cross-currency conversion inaccuracies.
 
   @param {string} [alignment] - Text alignment ('left', 'center', 'right')
   @param {number} [threshold] - Minimum amount threshold
@@ -20,9 +21,16 @@
   if cart.currency.iso_code == shop.currency
     assign is_primary_currency = true
   endif
+
+  assign show_bar = false
+  if is_enabled != false and is_primary_currency
+    if cart.item_count > 0 or request.design_mode
+      assign show_bar = true
+    endif
+  endif
 -%}
 
-{%- if is_enabled != false and is_primary_currency and cart.item_count > 0 or request.design_mode and is_primary_currency -%}
+{%- if show_bar -%}
   {%- liquid
     assign raw_threshold = threshold
     if raw_threshold == blank or raw_threshold <= 0
@@ -46,20 +54,20 @@
     endif
 
     assign cart_total = cart.total_price
-    if cart.empty? and request.design_mode
-      assign cart_total = threshold_cents | divided_by: 2
-    endif
-
     assign is_unlocked = false
-    if cart_total >= threshold_cents
+    if cart_total >= threshold_cents and cart.item_count > 0
       assign is_unlocked = true
       assign progress_percent = 100
       assign remaining_cents = 0
     else
       assign remaining_cents = threshold_cents | minus: cart_total
-      assign progress_percent = cart_total | times: 100.0 | divided_by: threshold_cents | round: 1
-      if progress_percent > 100
-        assign progress_percent = 100
+      if cart_total > 0
+        assign progress_percent = cart_total | times: 100.0 | divided_by: threshold_cents | round: 1
+        if progress_percent > 100
+          assign progress_percent = 100
+        endif
+      else
+        assign progress_percent = 0
       endif
     endif
 
@@ -98,6 +106,7 @@
 
   <free-shipping-bar
     class="free-shipping-bar free-shipping-bar--align-{{ bar_alignment }}{% if is_block %} free-shipping-bar--block{% endif %}{% if is_unlocked %} is-unlocked{% endif %}"
+    data-cart-total="{{ cart.total_price }}"
     data-threshold-cents="{{ threshold_cents }}"
     data-money-format="{{ money_format | escape }}"
     data-currency="{{ cart.currency.iso_code }}"
@@ -105,6 +114,10 @@
     data-success-message="{{ bar_success_msg | escape }}"
     role="region"
     aria-label="Free shipping progress"
+    {% if cart.item_count == 0 and request.design_mode == false %}
+      hidden
+      style="display: none;"
+    {% endif %}
   >
     <div class="free-shipping-bar__header">
       <p class="free-shipping-bar__message" data-message-el aria-live="polite">
