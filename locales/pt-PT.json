@@ -256,6 +256,17 @@
     "gift_wrap_to_label": "To (Recipient name)",
     "gift_wrap_from_label": "From (Your name)",
     "gift_wrap_character_count": "{{ used_chars }}/{{ max_chars }} characters used",
+    "delivery_estimate_heading": "Estimated delivery",
+    "delivery_estimate_text": "Get it between {{ date_start }} and {{ date_end }}",
+    "delivery_estimate_single_date": "Get it by {{ date }}",
+    "delivery_estimate_cutoff_today": "Order within {{ time }} for dispatch today",
+    "delivery_estimate_cutoff_tomorrow": "Order within {{ time }} for dispatch tomorrow",
+    "delivery_estimate_zip_label": "Calculate for your area",
+    "delivery_estimate_zip_placeholder": "Enter ZIP / Postal code",
+    "delivery_estimate_zip_button": "Estimate",
+    "delivery_estimate_zip_change": "Change",
+    "delivery_estimate_loading": "Calculating delivery estimate...",
+    "delivery_estimate_error": "Unable to calculate for this postal code",
     "terms_and_policies": "Termos e políticas",
     "pagination": {
       "nav_label": "Paginação",
@@ -288,7 +299,8 @@
       "many": "{{ count }} itens adicionados ao carrinho"
     },
     "quick_order_list": "Lista de encomendas rápidas",
-    "product_disclosures": "Divulgações do produto"
+    "product_disclosures": "Divulgações do produto",
+    "delivery_estimate_delivering_to": "Delivering to"
   },
   "gift_cards": {
     "issued": {

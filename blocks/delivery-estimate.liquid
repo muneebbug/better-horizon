@@ -1,0 +1,264 @@
+{% doc %}
+  Estimated Delivery Date Block
+  Can be placed as a theme block on product pages, quick-view modals, or within sections.
+{% enddoc %}
+
+{%- liquid
+  assign block_settings = block.settings
+  assign product = closest.product
+  if request.visual_preview_mode and product == blank
+    assign product = collections.all.products.first
+  endif
+
+  assign min_handling = block_settings.min_handling_days | default: 1
+  assign max_handling = block_settings.max_handling_days | default: 2
+  assign min_transit = block_settings.min_transit_days | default: 2
+  assign max_transit = block_settings.max_transit_days | default: 4
+  assign cutoff = block_settings.cutoff_hour | default: 14
+  assign exclude_weekends = block_settings.exclude_weekends
+  assign show_countdown = block_settings.show_countdown
+  assign show_zip = block_settings.show_zip_estimator
+  assign show_icon = block_settings.show_icon
+
+  assign heading_text = block_settings.heading
+-%}
+
+<div
+  class="delivery-estimate-block spacing-style{% if block_settings.text_color != blank %} color-custom-{{ block.id }}{% endif %}"
+  style="
+    {% render 'spacing-style', settings: block_settings %}
+    {% if block_settings.text_color != blank %}
+      --color: {{ block_settings.text_color }};
+      --color-rgb: {{ block_settings.text_color.rgb }};
+    {% endif %}
+    {% if block_settings.card_style == 'custom' %}
+      {% if block_settings.background_color != blank %}
+        --color-card-background: {{ block_settings.background_color }};
+      {% endif %}
+      {% if block_settings.border_color != blank %}
+        --color-card-border: {{ block_settings.border_color }};
+      {% endif %}
+      --style-border-radius-inputs: {{ block_settings.border_radius }}px;
+    {% endif %}
+  "
+  {{ block.shopify_attributes }}
+>
+  {% render 'delivery-estimate',
+    min_handling_days: min_handling,
+    max_handling_days: max_handling,
+    min_transit_days: min_transit,
+    max_transit_days: max_transit,
+    cutoff_hour: cutoff,
+    exclude_weekends: exclude_weekends,
+    show_countdown: show_countdown,
+    show_zip_estimator: show_zip,
+    show_icon: show_icon,
+    heading: heading_text,
+    context: 'pdp',
+    is_block: true
+  %}
+</div>
+
+{% stylesheet %}
+  .delivery-estimate-block {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Estimated delivery",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Estimated delivery"
+    },
+    {
+      "type": "header",
+      "content": "Handling & processing time"
+    },
+    {
+      "type": "range",
+      "id": "min_handling_days",
+      "label": "Min handling days",
+      "min": 0,
+      "max": 7,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "max_handling_days",
+      "label": "Max handling days",
+      "min": 0,
+      "max": 14,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "header",
+      "content": "Shipping transit time"
+    },
+    {
+      "type": "range",
+      "id": "min_transit_days",
+      "label": "Min transit days",
+      "min": 1,
+      "max": 14,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "max_transit_days",
+      "label": "Max transit days",
+      "min": 1,
+      "max": 30,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Order cutoff & schedule"
+    },
+    {
+      "type": "range",
+      "id": "cutoff_hour",
+      "label": "Daily cutoff hour",
+      "info": "Hour of day (in 24-hour format) before which orders are dispatched same day.",
+      "min": 0,
+      "max": 23,
+      "step": 1,
+      "unit": ":00",
+      "default": 14
+    },
+    {
+      "type": "checkbox",
+      "id": "exclude_weekends",
+      "label": "Exclude weekends from delivery dates",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_countdown",
+      "label": "Show order cutoff countdown timer",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_zip_estimator",
+      "label": "Show postal code / ZIP estimator",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:content.appearance"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_icon",
+      "label": "Show delivery icon",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:settings.text_color",
+      "placeholder": "t:settings.default"
+    },
+    {
+      "type": "select",
+      "id": "card_style",
+      "label": "Card style",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:options.default"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:settings.background",
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "t:settings.borders",
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Estimated delivery"
+    }
+  ]
+}
+{% endschema %}

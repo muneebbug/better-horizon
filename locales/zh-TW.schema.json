@@ -978,7 +978,9 @@
     "gift_card_products": "禮品卡商品",
     "disclosures": "資訊揭露",
     "disclosures_metafield_content": "此商品必備的安全警告與法規資訊揭露。",
-    "page_text_color_contrast_info": "具有自訂背景顏色的區段，僅在色彩對比度充足時才會使用此文字顏色。"
+    "page_text_color_contrast_info": "具有自訂背景顏色的區段，僅在色彩對比度充足時才會使用此文字顏色。",
+    "delivery_estimate_delivering_to": "Delivering to",
+    "delivery_estimate_zip_change": "Change"
   },
   "html_defaults": {
     "share_information_about_your": "<p>向顧客分享您的品牌故事。可用來敘述產品、發布公告，或歡迎顧客造訪您的商店。</p>",

@@ -978,7 +978,9 @@
     "gift_card_products": "Productos de tarjeta de regalo",
     "disclosures": "Divulgaciones",
     "disclosures_metafield_content": "Advertencias de seguridad y divulgaciones normativas obligatorias para este producto.",
-    "page_text_color_contrast_info": "Las secciones con un color de fondo personalizado usarán este color del texto solo cuando haya suficiente contraste de color."
+    "page_text_color_contrast_info": "Las secciones con un color de fondo personalizado usarán este color del texto solo cuando haya suficiente contraste de color.",
+    "delivery_estimate_delivering_to": "Delivering to",
+    "delivery_estimate_zip_change": "Change"
   },
   "html_defaults": {
     "share_information_about_your": "<p>Comparte información sobre tu marca con tus clientes. Describe un producto, anuncia novedades o da la bienvenida a quienes visitan tu tienda.</p>",

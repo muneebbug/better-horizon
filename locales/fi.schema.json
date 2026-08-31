@@ -978,7 +978,9 @@
     "gift_card_products": "Lahjakorttituotteet",
     "disclosures": "Ilmoitukset",
     "disclosures_metafield_content": "Tämän tuotteen pakolliset turvallisuusvaroitukset ja säädösten edellyttämät ilmoitukset.",
-    "page_text_color_contrast_info": "Osiot, joissa on mukautettu taustaväri, käyttävät tätä tekstin väriä vain, kun värikontrasti on riittävä."
+    "page_text_color_contrast_info": "Osiot, joissa on mukautettu taustaväri, käyttävät tätä tekstin väriä vain, kun värikontrasti on riittävä.",
+    "delivery_estimate_delivering_to": "Delivering to",
+    "delivery_estimate_zip_change": "Change"
   },
   "html_defaults": {
     "share_information_about_your": "<p>Jaa tietoja brändistäsi asiakkaillesi. Kuvaile tuotetta, tee ilmoituksia tai toivota asiakkaat tervetulleiksi kauppaasi.</p>",

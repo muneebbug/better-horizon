@@ -12,20 +12,6 @@
     "cart-section": {
       "type": "main-cart",
       "blocks": {
-        "free_shipping_bar": {
-          "type": "free-shipping-bar",
-          "settings": {
-            "alignment": "left",
-            "threshold": 0,
-            "message": "",
-            "success_message": "",
-            "padding-block-start": 16,
-            "padding-block-end": 16,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {}
-        },
         "cart-page-title": {
           "type": "_cart-title",
           "static": true,
@@ -77,6 +63,41 @@
             "border_radius": 0
           },
           "blocks": {
+            "free_shipping_bar": {
+              "type": "free-shipping-bar",
+              "settings": {
+                "alignment": "left",
+                "threshold": 0,
+                "message": "",
+                "success_message": "",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            },
+            "delivery_estimate": {
+              "type": "delivery-estimate",
+              "settings": {
+                "heading": "Estimated delivery",
+                "min_handling_days": 1,
+                "max_handling_days": 2,
+                "min_transit_days": 2,
+                "max_transit_days": 4,
+                "cutoff_hour": 14,
+                "exclude_weekends": true,
+                "show_countdown": true,
+                "show_zip_estimator": true,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            },
+            "cart_totals": {
+              "type": "_cart-totals",
+              "settings": {}
+            },
             "cart_upsell": {
               "type": "cart-upsell",
               "settings": {
@@ -93,6 +114,9 @@
             }
           },
           "block_order": [
+            "free_shipping_bar",
+            "delivery_estimate",
+            "cart_totals",
             "cart_upsell"
           ]
         }

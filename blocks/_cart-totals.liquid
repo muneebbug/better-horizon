@@ -1,0 +1,28 @@
+{% doc %}
+  Cart Totals & Checkout Block
+  Renders the cart subtotal, discount codes, cart note, tax info, and checkout buttons.
+{% enddoc %}
+
+<div class="cart-totals-block" {{ block.shopify_attributes }}>
+  {% render 'cart-summary', accelerated_checkout_buttons_layout: 'vertical', section_id: section.id %}
+</div>
+
+{% stylesheet %}
+  .cart-totals-block {
+    display: block;
+    width: 100%;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Cart totals & checkout",
+  "tag": null,
+  "settings": [],
+  "presets": [
+    {
+      "name": "Cart totals & checkout"
+    }
+  ]
+}
+{% endschema %}

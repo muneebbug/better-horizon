@@ -35,7 +35,8 @@
       "@theme/sticky-add-to-cart": "{{ 'sticky-add-to-cart.js' | asset_url }}",
       "@theme/fly-to-cart": "{{ 'fly-to-cart.js' | asset_url }}",
       "@theme/scroll-container": "{{ 'scroll-container.js' | asset_url }}",
-      "@theme/theme-drawer": "{{ 'theme-drawer.js' | asset_url }}"
+      "@theme/theme-drawer": "{{ 'theme-drawer.js' | asset_url }}",
+      "@theme/delivery-estimate": "{{ 'delivery-estimate.js' | asset_url }}"
     }
   }
 </script>
@@ -277,6 +278,12 @@
     RecentlyViewed.addProduct('{{ product.id }}');
   </script>
 {% endif %}
+
+<script
+  src="{{ 'delivery-estimate.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
 
 <script
   src="{{ 'auto-close-details.js' | asset_url }}"

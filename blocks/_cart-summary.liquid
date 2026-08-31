@@ -31,8 +31,6 @@
   {{ block.shopify_attributes }}
 >
   <div class="{{ cart_summary_inner_class }}">
-    {% render 'free-shipping-bar', is_block: true %}
-    {% render 'cart-summary', accelerated_checkout_buttons_layout: 'vertical', section_id: section.id %}
     {%- content_for 'blocks' -%}
   </div>
 </div>

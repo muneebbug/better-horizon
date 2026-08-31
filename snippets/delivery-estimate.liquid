@@ -1,0 +1,417 @@
+{% doc %}
+  Estimated Delivery Date & Shipping Estimator Snippet
+  Calculates and displays dynamic delivery dates, cutoff countdown, and postal-code lookup.
+
+  @param {number} [min_handling_days] - Minimum handling days
+  @param {number} [max_handling_days] - Maximum handling days
+  @param {number} [min_transit_days] - Minimum transit days
+  @param {number} [max_transit_days] - Maximum transit days
+  @param {number} [cutoff_hour] - Cutoff hour in 24h format (e.g. 14 for 2pm)
+  @param {boolean} [exclude_weekends] - Whether to exclude Saturday/Sunday
+  @param {boolean} [show_countdown] - Show cutoff countdown timer
+  @param {boolean} [show_zip_estimator] - Show postal code estimator
+  @param {string} [context] - 'pdp', 'cart_drawer', or 'cart_page'
+  @param {string} [heading] - Custom block heading
+  @param {boolean} [is_block] - Rendered as a standalone block container
+{% enddoc %}
+
+{%- liquid
+  assign min_handling = min_handling_days | default: settings.delivery_estimate_min_handling | default: 1
+  assign max_handling = max_handling_days | default: settings.delivery_estimate_max_handling | default: 2
+  assign min_transit = min_transit_days | default: settings.delivery_estimate_min_transit | default: 2
+  assign max_transit = max_transit_days | default: settings.delivery_estimate_max_transit | default: 4
+  assign cutoff = cutoff_hour | default: settings.delivery_estimate_cutoff_hour | default: 14
+
+  assign exclude_weekends_val = true
+  if exclude_weekends == false
+    assign exclude_weekends_val = false
+  endif
+
+  assign show_countdown_val = true
+  if show_countdown == false
+    assign show_countdown_val = false
+  endif
+
+  assign show_zip_val = true
+  if show_zip_estimator == false
+    assign show_zip_val = false
+  endif
+
+  assign show_icon_val = true
+  if show_icon == false
+    assign show_icon_val = false
+  elsif show_icon == null and settings.delivery_estimate_show_icon == false
+    assign show_icon_val = false
+  endif
+
+  if heading == null
+    assign heading_text = 'content.delivery_estimate_heading' | t
+  else
+    assign heading_text = heading
+  endif
+  assign delivery_text_tpl = 'content.delivery_estimate_text' | t: date_start: '[date_start]', date_end: '[date_end]'
+  assign single_date_tpl = 'content.delivery_estimate_single_date' | t: date: '[date]'
+  assign cutoff_today_tpl = 'content.delivery_estimate_cutoff_today' | t: time: '{{ time }}'
+  assign cutoff_tomorrow_tpl = 'content.delivery_estimate_cutoff_tomorrow' | t: time: '{{ time }}'
+  assign zip_label = 'content.delivery_estimate_zip_label' | t
+  assign zip_placeholder = 'content.delivery_estimate_zip_placeholder' | t
+  assign zip_button = 'content.delivery_estimate_zip_button' | t
+  assign zip_change = 'content.delivery_estimate_zip_change' | t
+-%}
+
+<script
+  src="{{ 'delivery-estimate.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+<delivery-estimate
+  class="delivery-estimate delivery-estimate--{{ context | default: 'pdp' }}{% if is_block %} delivery-estimate--block{% endif %}"
+  data-min-handling="{{ min_handling }}"
+  data-max-handling="{{ max_handling }}"
+  data-min-transit="{{ min_transit }}"
+  data-max-transit="{{ max_transit }}"
+  data-cutoff-hour="{{ cutoff }}"
+  data-exclude-weekends="{{ exclude_weekends_val }}"
+  data-show-countdown="{{ show_countdown_val }}"
+  data-context="{{ context | default: 'pdp' }}"
+  data-default-country="{{ localization.country.name | default: 'United States' }}"
+>
+  <div
+    ref="liveRegion"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    class="visually-hidden"
+  ></div>
+
+  <div class="delivery-estimate__card">
+    <div class="delivery-estimate__main-row">
+      {%- if show_icon_val -%}
+        <span class="delivery-estimate__icon" aria-hidden="true">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="1" y="3" width="15" height="13"></rect>
+            <polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon>
+            <circle cx="5.5" cy="18.5" r="2.5"></circle>
+            <circle cx="18.5" cy="18.5" r="2.5"></circle>
+          </svg>
+        </span>
+      {%- endif -%}
+
+      <div class="delivery-estimate__info">
+        <div class="delivery-estimate__header-group">
+          {%- if heading_text != blank -%}
+            <span class="delivery-estimate__heading">{{ heading_text }}</span>
+          {%- endif -%}
+          <span
+            ref="dateRangeEl"
+            class="delivery-estimate__dates"
+            data-template="{{ delivery_text_tpl }}"
+            data-single-template="{{ single_date_tpl }}"
+          >
+            {{ 'content.delivery_estimate_loading' | t }}
+          </span>
+        </div>
+
+        {%- if show_countdown_val -%}
+          <div
+            ref="cutoffMessageEl"
+            class="delivery-estimate__cutoff"
+            data-template-today="{{ cutoff_today_tpl }}"
+            data-template-tomorrow="{{ cutoff_tomorrow_tpl }}"
+          ></div>
+        {%- endif -%}
+
+        {%- if show_zip_val -%}
+          <div class="delivery-estimate__zip-meta">
+            <span class="delivery-estimate__zip-badge" data-zip-badge hidden>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span>
+                {{- 'content.delivery_estimate_delivering_to' | t | default: 'Delivering to' }}
+                <strong ref="zipDisplay"></strong
+              ></span>
+              <span class="delivery-estimate__dot" aria-hidden="true">·</span>
+            </span>
+            <button
+              type="button"
+              class="delivery-estimate__toggle-btn"
+              data-toggle-zip
+              aria-expanded="false"
+            >
+              <span class="delivery-estimate__toggle-icon" data-toggle-icon>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </span>
+              <span data-toggle-text-check>{{ zip_label }}</span>
+              <span data-toggle-text-change hidden>{{ zip_change }}</span>
+            </button>
+          </div>
+        {%- endif -%}
+        
+        <div ref="carrierRatesList" class="delivery-estimate__carrier-rates"></div>
+      </div>
+    </div>
+
+    {%- if show_zip_val -%}
+      <div
+        ref="zipDisclosure"
+        class="delivery-estimate__zip-disclosure"
+        hidden
+      >
+        <form data-zip-form class="delivery-estimate__zip-form">
+          <label for="DeliveryEstimate-Zip-{{ context }}" class="visually-hidden">
+            {{ zip_label }}
+          </label>
+          <div class="delivery-estimate__zip-input-group">
+            <input
+              ref="zipInput"
+              type="text"
+              id="DeliveryEstimate-Zip-{{ context }}"
+              class="delivery-estimate__zip-input"
+              placeholder="{{ zip_placeholder }}"
+              autocomplete="postal-code"
+              maxlength="12"
+            >
+            <button type="submit" class="delivery-estimate__zip-submit">
+              {{ zip_button }}
+            </button>
+          </div>
+        </form>
+      </div>
+    {%- endif -%}
+  </div>
+</delivery-estimate>
+
+<style>
+  .delivery-estimate {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .delivery-estimate__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs, 8px);
+    padding: var(--padding-sm, 12px) var(--padding-md, 14px);
+    background-color: rgb(var(--color-foreground-rgb) / 0.03);
+    border: var(--style-border-width-inputs, 1px) solid rgb(var(--color-foreground-rgb) / 0.12);
+    border-radius: var(--style-border-radius-inputs, 8px);
+    box-sizing: border-box;
+    transition: border-color var(--animation-speed, 0.2s) ease;
+  }
+
+  .delivery-estimate__main-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-sm, 10px);
+    width: 100%;
+  }
+
+  .delivery-estimate__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--color-foreground);
+    opacity: 0.85;
+  }
+
+  .delivery-estimate__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-grow: 1;
+    font-size: var(--font-size--sm, 13px);
+    line-height: 1.4;
+  }
+
+  .delivery-estimate__header-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px;
+  }
+
+  .delivery-estimate__heading {
+    font-weight: 500;
+    color: var(--color-foreground);
+  }
+
+  .delivery-estimate__dates {
+    font-weight: 600;
+    color: var(--color-foreground);
+  }
+
+  .delivery-estimate__cutoff {
+    font-size: 12px;
+    color: rgb(var(--color-foreground-rgb) / 0.75);
+  }
+
+  .delivery-estimate__countdown-time {
+    color: rgb(var(--color-foreground-rgb) / 0.95);
+    font-weight: 600;
+  }
+
+  .delivery-estimate__zip-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    font-size: 11px;
+  }
+
+  .delivery-estimate__zip-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: rgb(var(--color-foreground-rgb) / 0.8);
+    font-weight: 500;
+  }
+
+  .delivery-estimate__zip-badge[hidden] {
+    display: none !important;
+  }
+
+  .delivery-estimate__toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    padding: 2px 0;
+    font-size: 11px;
+    font-family: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    color: var(--color-foreground);
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity var(--animation-speed, 0.2s) ease;
+  }
+
+  .delivery-estimate__toggle-btn:hover {
+    opacity: 1;
+  }
+
+  .delivery-estimate__zip-disclosure {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px dashed rgb(var(--color-foreground-rgb) / 0.15);
+  }
+
+  .delivery-estimate__zip-disclosure[hidden] {
+    display: none !important;
+  }
+
+  .delivery-estimate__zip-input-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .delivery-estimate__zip-input {
+    flex-grow: 1;
+    height: 32px;
+    padding: 0 10px;
+    font-size: 12px;
+    color: var(--color-input-text, var(--color-foreground));
+    background-color: var(--color-input-background, var(--color-background));
+    border: var(--style-border-width-inputs, 1px) solid
+      var(--color-input-border, rgb(var(--color-foreground-rgb) / 0.2));
+    border-radius: var(--style-border-radius-inputs, 6px);
+    box-sizing: border-box;
+  }
+
+  .delivery-estimate__zip-input:focus {
+    outline: none;
+    border-color: rgb(var(--color-foreground-rgb) / 0.6);
+  }
+
+  .delivery-estimate__zip-submit {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: var(--color-foreground);
+    color: var(--color-background);
+    border: none;
+    border-radius: var(--style-border-radius-inputs, 6px);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity var(--animation-speed, 0.2s) ease;
+  }
+
+  .delivery-estimate__zip-submit:hover {
+    opacity: 0.85;
+  }
+
+  .delivery-estimate__rates-list {
+    list-style: none;
+    margin: 4px 0 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+  }
+
+  .delivery-estimate__rate-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 6px;
+    background-color: rgb(var(--color-foreground-rgb) / 0.04);
+    border-radius: 4px;
+  }
+
+  .delivery-estimate__rate-name {
+    font-weight: 500;
+  }
+
+  .delivery-estimate__rates-loading {
+    font-size: 11px;
+    font-style: italic;
+    color: rgb(var(--color-foreground-rgb) / 0.6);
+  }
+</style>

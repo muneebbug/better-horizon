@@ -356,6 +356,26 @@
               },
               "block_order": []
             },
+            "delivery_estimate_pdp": {
+              "type": "delivery-estimate",
+              "name": "Estimated delivery",
+              "settings": {
+                "heading": "Estimated delivery",
+                "min_handling_days": 1,
+                "max_handling_days": 2,
+                "min_transit_days": 2,
+                "max_transit_days": 4,
+                "cutoff_hour": 14,
+                "exclude_weekends": true,
+                "show_countdown": true,
+                "show_zip_estimator": true,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
             "frequently_bought_together_VBWnqk": {
               "type": "frequently-bought-together",
               "name": "Frequently bought together",
@@ -430,6 +450,7 @@
             "back_in_stock_Ab76JE",
             "group_6br3kT",
             "buy_buttons_eYQEYi",
+            "delivery_estimate_pdp",
             "frequently_bought_together_VBWnqk",
             "payment_icons_L7CUcR",
             "trust_badge_bar_dRtmVT",

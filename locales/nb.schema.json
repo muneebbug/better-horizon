@@ -978,7 +978,9 @@
     "gift_card_products": "Gavekortprodukter",
     "disclosures": "Opplysninger",
     "disclosures_metafield_content": "Obligatoriske sikkerhetsadvarsler og lovpålagte opplysninger for dette produktet.",
-    "page_text_color_contrast_info": "Seksjoner med en egendefinert bakgrunnsfarge bruker bare denne tekstfargen når det er tilstrekkelig fargekontrast."
+    "page_text_color_contrast_info": "Seksjoner med en egendefinert bakgrunnsfarge bruker bare denne tekstfargen når det er tilstrekkelig fargekontrast.",
+    "delivery_estimate_delivering_to": "Delivering to",
+    "delivery_estimate_zip_change": "Change"
   },
   "html_defaults": {
     "share_information_about_your": "<p>Del informasjon om merkevaren din med kundene. Beskriv et produkt, kom med kunngjøringer eller ønsk kundene velkommen til butikken.</p>",

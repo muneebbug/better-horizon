@@ -146,7 +146,9 @@
     "disclosures": "גילוי נאות",
     "disclosures_metafield_content": "אזהרות בטיחות חובה וגילויים רגולטוריים עבור מוצר זה.",
     "app_required_for_ratings": "נדרש יישום עבור דירוגי מוצרים. [למידע נוסף](https://help.shopify.com/manual/apps)",
-    "navigation": "ניווט"
+    "navigation": "ניווט",
+    "delivery_estimate_delivering_to": "Delivering to",
+    "delivery_estimate_zip_change": "Change"
   },
   "html_defaults": {
     "join_our_email_list": "<h2>הצטרף לרשימת הדיוור שלנו</h2>",
@@ -235,10 +237,10 @@
     "media_type_info": "התכונות מאוכלסות מקישורי התפריט שלך"
   },
   "names": {
+    "404": "404",
     "column": "עמודה",
     "product_title": "כותרת מוצר",
     "custom_liquid": "Custom Liquid",
-    "404": "404",
     "accelerated_checkout": "תשלום מואץ",
     "accordion": "אקורדיון",
     "accordion_row": "שורת אקורדיון",

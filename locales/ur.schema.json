@@ -146,7 +146,9 @@
     "disclosures": "ڈسکلوزر",
     "disclosures_metafield_content": "اس پروڈکٹ کے لیے درکار حفاظتی انتباہات اور ریگولیٹری ڈسکلوزر۔",
     "app_required_for_ratings": "پروڈکٹ کی ریٹنگز کے لیے ایک ایپ درکار ہے۔ [مزید جانیں](https://help.shopify.com/manual/apps)",
-    "navigation": "نیویگیشن"
+    "navigation": "نیویگیشن",
+    "delivery_estimate_delivering_to": "Delivering to",
+    "delivery_estimate_zip_change": "Change"
   },
   "html_defaults": {
     "join_our_email_list": "<h2>ہماری ای میل لسٹ میں شامل ہوں</h2>",
@@ -235,10 +237,10 @@
     "media_type_info": "خصوصیات آپ کے مینو کے لنک سے پُر کی گئی ہیں"
   },
   "names": {
+    "404": "404",
     "column": "کالم",
     "product_title": "پروڈکٹ کا ٹائٹل",
     "custom_liquid": "کسٹم Liquid",
-    "404": "404",
     "accelerated_checkout": "تیز رفتار چیک آؤٹ",
     "accordion": "ایکارڈین",
     "accordion_row": "ایکارڈین کی قطار",

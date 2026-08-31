@@ -1578,6 +1578,75 @@
       },
       {
         "type": "header",
+        "content": "Estimated delivery date"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_cart_delivery_estimate",
+        "label": "Enable estimated delivery date in cart",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "delivery_estimate_min_handling",
+        "label": "Min handling days",
+        "min": 0,
+        "max": 7,
+        "step": 1,
+        "default": 1,
+        "visible_if": "{{ settings.enable_cart_delivery_estimate == true }}"
+      },
+      {
+        "type": "range",
+        "id": "delivery_estimate_max_handling",
+        "label": "Max handling days",
+        "min": 0,
+        "max": 14,
+        "step": 1,
+        "default": 2,
+        "visible_if": "{{ settings.enable_cart_delivery_estimate == true }}"
+      },
+      {
+        "type": "range",
+        "id": "delivery_estimate_min_transit",
+        "label": "Min transit days",
+        "min": 1,
+        "max": 14,
+        "step": 1,
+        "default": 2,
+        "visible_if": "{{ settings.enable_cart_delivery_estimate == true }}"
+      },
+      {
+        "type": "range",
+        "id": "delivery_estimate_max_transit",
+        "label": "Max transit days",
+        "min": 1,
+        "max": 30,
+        "step": 1,
+        "default": 4,
+        "visible_if": "{{ settings.enable_cart_delivery_estimate == true }}"
+      },
+      {
+        "type": "range",
+        "id": "delivery_estimate_cutoff_hour",
+        "label": "Daily cutoff hour",
+        "info": "Hour of day (24-hour) before which orders ship same day.",
+        "min": 0,
+        "max": 23,
+        "step": 1,
+        "unit": ":00",
+        "default": 14,
+        "visible_if": "{{ settings.enable_cart_delivery_estimate == true }}"
+      },
+      {
+        "type": "checkbox",
+        "id": "delivery_estimate_show_icon",
+        "label": "Show delivery truck icon",
+        "default": true,
+        "visible_if": "{{ settings.enable_cart_delivery_estimate == true }}"
+      },
+      {
+        "type": "header",
         "content": "Cart drawer upsell recommendations"
       },
       {
