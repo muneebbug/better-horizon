@@ -197,7 +197,7 @@
               "type": "variant-picker",
               "settings": {
                 "variant_style": "buttons",
-                "show_swatches": false,
+                "show_swatches": true,
                 "option_label_text_color": "",
                 "variant_style_class": "default",
                 "custom_variant_background": "{{ settings.color_palette.background }}",
@@ -361,7 +361,9 @@
               "name": "Frequently bought together",
               "settings": {
                 "heading": "Frequently Bought Together",
-                "button_label": "Add Bundle to Cart"
+                "button_label": "Add Bundle to Cart",
+                "products": [],
+                "products_to_show": 2
               },
               "blocks": {}
             },
