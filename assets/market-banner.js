@@ -2,12 +2,57 @@
  * Better Horizon — Geo-based Market Suggestion Banner
  * Detects visitor market via Shopify Markets API (/browsing_context_suggestions.json)
  * and prompts them to switch if their location differs from the active store country.
+ *
+ * @module market-banner
  */
 
+/**
+ * @typedef {object} DetectedCountry
+ * @property {string} name - The human-readable name of the country.
+ * @property {string} iso_code - The ISO 3166-1 alpha-2 code.
+ */
+
+/**
+ * @typedef {object} MarketSuggestion
+ * @property {string} [action_url] - Direct URL for market redirect.
+ */
+
+/**
+ * @typedef {object} BrowsingContextResponse
+ * @property {{ country?: DetectedCountry }} [detected_values] - Detected country details.
+ * @property {MarketSuggestion[]} [suggestions] - Array of suggestions from Shopify.
+ */
+
+/**
+ * Custom element managing the geo-located market banner prompt.
+ *
+ * @extends {HTMLElement}
+ */
 export class MarketBanner extends HTMLElement {
+  /** @type {string | undefined} */
+  currentCountry;
+
+  /** @type {string} */
+  dismissKey = 'better_horizon_market_dismissed';
+
+  /** @type {HTMLElement | null} */
+  banner;
+
+  /** @type {HTMLElement | null} */
+  countryNameEl;
+
+  /** @type {HTMLButtonElement | null} */
+  switchBtn;
+
+  /** @type {HTMLButtonElement | null} */
+  dismissBtn;
+
+  /**
+   * Initializes references and queries Shopify Browsing Context Suggestions API.
+   * @returns {void}
+   */
   connectedCallback() {
     this.currentCountry = this.dataset.currentCountry;
-    this.dismissKey = 'better_horizon_market_dismissed';
 
     if (sessionStorage.getItem(this.dismissKey)) return;
 
@@ -23,11 +68,16 @@ export class MarketBanner extends HTMLElement {
     this.checkMarketSuggestion();
   }
 
+  /**
+   * Asynchronously fetches contextual recommendations and displays the banner if a different country is detected.
+   * @returns {Promise<void>}
+   */
   async checkMarketSuggestion() {
     try {
       const res = await fetch('/browsing_context_suggestions.json');
       if (!res.ok) return;
 
+      /** @type {BrowsingContextResponse} */
       const data = await res.json();
       const detected = data.detected_values?.country;
       const suggestions = data.suggestions;
@@ -76,11 +126,19 @@ export class MarketBanner extends HTMLElement {
     }
   }
 
+  /**
+   * Shows the market suggestion banner.
+   * @returns {void}
+   */
   show() {
     this.removeAttribute('hidden');
     this.classList.add('is-visible');
   }
 
+  /**
+   * Dismisses the market suggestion banner for the rest of the user session.
+   * @returns {void}
+   */
   dismiss() {
     sessionStorage.setItem(this.dismissKey, 'true');
     this.classList.remove('is-visible');
@@ -93,3 +151,4 @@ export class MarketBanner extends HTMLElement {
 if (!customElements.get('market-banner')) {
   customElements.define('market-banner', MarketBanner);
 }
+

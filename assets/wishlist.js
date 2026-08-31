@@ -1,15 +1,35 @@
 /**
  * Better Horizon — Native Wishlist Web Components
  * Zero-app, localStorage-backed with cross-tab and cross-component synchronization.
+ *
+ * @module wishlist
  */
 
+/**
+ * The localStorage key used to store wishlist items.
+ * @constant {string}
+ */
 const STORAGE_KEY = 'better_horizon_wishlist';
 
 /**
+ * @typedef {object} WishlistItem
+ * @property {string} id - The product GraphQL or numeric ID.
+ * @property {string} [variantId] - The selected variant ID.
+ * @property {string} handle - The product handle.
+ * @property {string} title - The product title.
+ * @property {string} price - The formatted product price string.
+ * @property {string} image - The product image URL.
+ * @property {string} url - The product relative or absolute URL.
+ */
+
+/**
  * Refreshes the cart drawer section markup in the background and updates header bubbles without opening the cart drawer.
+ *
+ * @returns {Promise<void>}
  */
 export async function updateCartState() {
   try {
+    /** @type {HTMLElement | null} */
     const cartItemsComp = document.querySelector('#cart-drawer cart-items-component') || document.querySelector('cart-items-component');
     const sectionId = cartItemsComp?.dataset.sectionId || 'cart-drawer-section';
 
@@ -36,11 +56,11 @@ export async function updateCartState() {
 
     if (cartRes.ok) {
       const cartData = await cartRes.json();
-      document.querySelectorAll('cart-icon').forEach(icon => {
+      document.querySelectorAll('cart-icon').forEach((icon) => {
         const countEl = icon.querySelector('.cart-bubble__text-count');
         const bubble = icon.querySelector('.cart-bubble');
         if (countEl) {
-          countEl.textContent = cartData.item_count > 0 ? cartData.item_count : '';
+          countEl.textContent = cartData.item_count > 0 ? String(cartData.item_count) : '';
           countEl.classList.remove('hidden');
         }
         if (bubble) {
@@ -59,9 +79,14 @@ export async function updateCartState() {
   }
 }
 
+/**
+ * Storage manager for managing client-side wishlist items in localStorage.
+ */
 export class WishlistManager {
   /**
-   * @returns {Array<{id: string, handle: string, title: string, price: string, image: string, url: string, variantId?: string}>}
+   * Retrieves the current list of saved wishlist items from localStorage.
+   *
+   * @returns {WishlistItem[]} The array of wishlist items.
    */
   static getItems() {
     try {
@@ -73,7 +98,10 @@ export class WishlistManager {
   }
 
   /**
-   * @param {Array} items
+   * Saves the provided items array to localStorage and broadcasts the change event.
+   *
+   * @param {WishlistItem[]} items - The array of items to persist.
+   * @returns {void}
    */
   static saveItems(items) {
     try {
@@ -85,21 +113,26 @@ export class WishlistManager {
   }
 
   /**
-   * @param {string} handle
-   * @returns {boolean}
+   * Checks whether a product handle is currently saved in the wishlist.
+   *
+   * @param {string} handle - The product handle to check.
+   * @returns {boolean} True if the item is in the wishlist.
    */
   static has(handle) {
     if (!handle) return false;
-    return this.getItems().some(item => item.handle === handle);
+    return this.getItems().some((item) => item.handle === handle);
   }
 
   /**
-   * @param {object} item
+   * Toggles an item into or out of the wishlist.
+   *
+   * @param {WishlistItem} item - The product item object.
+   * @returns {void}
    */
   static toggle(item) {
     if (!item || !item.handle) return;
     const items = this.getItems();
-    const index = items.findIndex(i => i.handle === item.handle);
+    const index = items.findIndex((i) => i.handle === item.handle);
     if (index > -1) {
       items.splice(index, 1);
     } else {
@@ -109,18 +142,57 @@ export class WishlistManager {
   }
 
   /**
-   * @param {string} handle
+   * Removes an item by product handle from the wishlist.
+   *
+   * @param {string} handle - The product handle to remove.
+   * @returns {void}
    */
   static remove(handle) {
-    const items = this.getItems().filter(i => i.handle !== handle);
+    const items = this.getItems().filter((i) => i.handle !== handle);
     this.saveItems(items);
   }
 }
 
 /**
- * <wishlist-button> Web Component
+ * Custom element representing a wishlist toggle button on product cards and pages.
+ *
+ * @extends {HTMLElement}
  */
 export class WishlistButton extends HTMLElement {
+  /** @type {HTMLButtonElement | null} */
+  button;
+
+  /** @type {string | undefined} */
+  productHandle;
+
+  /** @type {string} */
+  productTitle = '';
+
+  /** @type {string} */
+  productPrice = '';
+
+  /** @type {string} */
+  productImage = '';
+
+  /** @type {string} */
+  productUrl = '';
+
+  /** @type {string} */
+  productId = '';
+
+  /** @type {string} */
+  variantId = '';
+
+  /** @type {(event: MouseEvent) => void} */
+  boundClickHandler;
+
+  /** @type {() => void} */
+  boundChangeHandler;
+
+  /**
+   * Attaches click handlers and subscribes to wishlist state updates.
+   * @returns {void}
+   */
   connectedCallback() {
     this.button = this.querySelector('button');
     if (!this.button) return;
@@ -142,6 +214,10 @@ export class WishlistButton extends HTMLElement {
     window.addEventListener('wishlist:change', this.boundChangeHandler);
   }
 
+  /**
+   * Removes all attached event listeners when disconnected from the DOM.
+   * @returns {void}
+   */
   disconnectedCallback() {
     if (this.button) {
       this.button.removeEventListener('click', this.boundClickHandler);
@@ -149,14 +225,20 @@ export class WishlistButton extends HTMLElement {
     window.removeEventListener('wishlist:change', this.boundChangeHandler);
   }
 
-  handleClick(e) {
-    e.preventDefault();
-    e.stopPropagation();
+  /**
+   * Handles user click on the wishlist button.
+   *
+   * @param {MouseEvent} event - The button click event.
+   * @returns {void}
+   */
+  handleClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
 
     WishlistManager.toggle({
       id: this.productId,
       variantId: this.variantId,
-      handle: this.productHandle,
+      handle: this.productHandle || '',
       title: this.productTitle,
       price: this.productPrice,
       image: this.productImage,
@@ -166,8 +248,12 @@ export class WishlistButton extends HTMLElement {
     this.updateState();
   }
 
+  /**
+   * Updates the button's active attribute, aria-pressed, and accessible label.
+   * @returns {void}
+   */
   updateState() {
-    const isSaved = WishlistManager.has(this.productHandle);
+    const isSaved = WishlistManager.has(this.productHandle || '');
     this.setAttribute('data-active', isSaved ? 'true' : 'false');
     if (this.button) {
       this.button.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
@@ -178,23 +264,40 @@ export class WishlistButton extends HTMLElement {
 }
 
 /**
- * <wishlist-count> Web Component
+ * Custom element displaying the total count of wishlist items in header badges.
+ *
+ * @extends {HTMLElement}
  */
 export class WishlistCount extends HTMLElement {
+  /** @type {() => void} */
+  boundHandler;
+
+  /**
+   * Initializes the count badge and listens for global wishlist changes.
+   * @returns {void}
+   */
   connectedCallback() {
     this.updateCount();
     this.boundHandler = this.updateCount.bind(this);
     window.addEventListener('wishlist:change', this.boundHandler);
   }
 
+  /**
+   * Removes the global change listener.
+   * @returns {void}
+   */
   disconnectedCallback() {
     window.removeEventListener('wishlist:change', this.boundHandler);
   }
 
+  /**
+   * Renders the updated item count and toggles visibility badges.
+   * @returns {void}
+   */
   updateCount() {
     const count = WishlistManager.getItems().length;
-    this.textContent = count > 0 ? count : '';
-    this.setAttribute('data-count', count);
+    this.textContent = count > 0 ? String(count) : '';
+    this.setAttribute('data-count', String(count));
 
     const bubble = this.closest('.wishlist-bubble');
     const icon = this.closest('.header-actions__wishlist-icon');
@@ -211,9 +314,27 @@ export class WishlistCount extends HTMLElement {
 }
 
 /**
- * <wishlist-drawer> Web Component
+ * Custom element controlling the slide-out wishlist drawer and rendering saved items.
+ *
+ * @extends {HTMLElement}
  */
 export class WishlistDrawer extends HTMLElement {
+  /** @type {HTMLElement | null} */
+  listContainer;
+
+  /** @type {HTMLElement | null} */
+  emptyState;
+
+  /** @type {HTMLElement | null} */
+  innerWrapper;
+
+  /** @type {() => void} */
+  boundHandler;
+
+  /**
+   * Initializes the drawer and attaches delegating action listeners.
+   * @returns {void}
+   */
   connectedCallback() {
     this.listContainer = this.querySelector('[data-wishlist-items]');
     this.emptyState = this.querySelector('[data-wishlist-empty]');
@@ -223,22 +344,24 @@ export class WishlistDrawer extends HTMLElement {
     this.boundHandler = this.render.bind(this);
     window.addEventListener('wishlist:change', this.boundHandler);
 
-    this.addEventListener('click', async (e) => {
+    this.addEventListener('click', async (event) => {
+      const target = /** @type {HTMLElement} */ (event.target);
+
       // 1. Remove Item
-      const removeBtn = e.target.closest('[data-remove-handle]');
+      const removeBtn = target.closest('[data-remove-handle]');
       if (removeBtn) {
-        e.preventDefault();
-        e.stopPropagation();
-        const handle = removeBtn.dataset.removeHandle;
-        WishlistManager.remove(handle);
+        event.preventDefault();
+        event.stopPropagation();
+        const handle = /** @type {HTMLElement} */ (removeBtn).dataset.removeHandle;
+        if (handle) WishlistManager.remove(handle);
         return;
       }
 
       // 2. Add to Cart from Wishlist
-      const addCartBtn = e.target.closest('[data-wishlist-add-to-cart]');
+      const addCartBtn = /** @type {HTMLButtonElement | null} */ (target.closest('[data-wishlist-add-to-cart]'));
       if (addCartBtn) {
-        e.preventDefault();
-        e.stopPropagation();
+        event.preventDefault();
+        event.stopPropagation();
         const variantId = addCartBtn.dataset.variantId;
         const handle = addCartBtn.dataset.handle;
         if (!variantId) {
@@ -261,13 +384,10 @@ export class WishlistDrawer extends HTMLElement {
           });
 
           if (res.ok) {
-            // Update cart drawer and bubble in the background
             await updateCartState();
-
-            // Give visual feedback and then remove from wishlist
             addCartBtn.innerHTML = '<span class="button-text">Added! ✓</span>';
             setTimeout(() => {
-              WishlistManager.remove(handle);
+              if (handle) WishlistManager.remove(handle);
             }, 600);
           } else {
             addCartBtn.disabled = false;
@@ -282,10 +402,18 @@ export class WishlistDrawer extends HTMLElement {
     });
   }
 
+  /**
+   * Removes change listener upon disconnection.
+   * @returns {void}
+   */
   disconnectedCallback() {
     window.removeEventListener('wishlist:change', this.boundHandler);
   }
 
+  /**
+   * Renders the current list of wishlist cards in the drawer container.
+   * @returns {void}
+   */
   render() {
     const items = WishlistManager.getItems();
     if (!this.listContainer) return;
@@ -302,7 +430,7 @@ export class WishlistDrawer extends HTMLElement {
       this.innerWrapper.classList.remove('wishlist-drawer--empty');
     }
 
-    this.listContainer.innerHTML = items.map(item => `
+    this.listContainer.innerHTML = items.map((item) => `
       <div class="wishlist-item" data-handle="${item.handle}">
         <div class="wishlist-item__media">
           <a href="${item.url}" class="wishlist-item__media-container">
@@ -352,3 +480,4 @@ if (!customElements.get('wishlist-count')) {
 if (!customElements.get('wishlist-drawer')) {
   customElements.define('wishlist-drawer', WishlistDrawer);
 }
+

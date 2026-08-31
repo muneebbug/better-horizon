@@ -2,11 +2,47 @@
  * Better Horizon — Frequently Bought Together / Bundle Recommendations
  * Fetches native Shopify recommendations or renders curated metafield items,
  * calculates bundle totals, and adds all selected items to cart.
+ *
+ * @module bundle-recommendations
  */
 
 import { updateCartState } from './wishlist.js';
 
+/**
+ * @typedef {object} CartItemPayload
+ * @property {number} id - The variant ID to add to cart.
+ * @property {number} quantity - The quantity of the variant.
+ */
+
+/**
+ * Custom element managing the Frequently Bought Together bundle recommendations,
+ * live price aggregation, and multi-item cart dispatch.
+ *
+ * @extends {HTMLElement}
+ */
 export class BundleRecommendations extends HTMLElement {
+  /** @type {string | undefined} */
+  productId;
+
+  /** @type {string | undefined} */
+  sectionId;
+
+  /** @type {number} */
+  limit;
+
+  /** @type {HTMLElement | null} */
+  totalPriceEl;
+
+  /** @type {HTMLButtonElement | null} */
+  addButton;
+
+  /** @type {HTMLElement | null} */
+  itemsContainer;
+
+  /**
+   * Initializes the bundle recommendations element when attached to the DOM.
+   * @returns {void}
+   */
   connectedCallback() {
     this.productId = this.dataset.productId;
     this.sectionId = this.dataset.sectionId;
@@ -23,19 +59,29 @@ export class BundleRecommendations extends HTMLElement {
     }
   }
 
+  /**
+   * Attaches change event listeners to all variant selection checkboxes.
+   * @returns {void}
+   */
   initCheckboxes() {
+    /** @type {NodeListOf<HTMLInputElement>} */
     const checkboxes = this.querySelectorAll('input[type="checkbox"][data-variant-id]');
-    checkboxes.forEach(cb => {
-      cb.addEventListener('change', () => this.updateTotal());
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener('change', () => this.updateTotal());
     });
   }
 
+  /**
+   * Computes the sum of all currently checked bundle items and updates the formatted total UI.
+   * @returns {void}
+   */
   updateTotal() {
+    /** @type {HTMLInputElement[]} */
     const checked = Array.from(this.querySelectorAll('input[type="checkbox"][data-variant-id]:checked'));
     let totalCents = 0;
 
-    checked.forEach(cb => {
-      const price = parseInt(cb.dataset.priceCents || '0', 10);
+    checked.forEach((checkbox) => {
+      const price = parseInt(checkbox.dataset.priceCents || '0', 10);
       totalCents += price;
     });
 
@@ -50,8 +96,16 @@ export class BundleRecommendations extends HTMLElement {
     }
   }
 
-  async handleAddBundle(e) {
-    e.preventDefault();
+  /**
+   * Handles clicking the bundle add-to-cart button.
+   * Dispatches all selected variants to `/cart/add.js` in a single request.
+   *
+   * @param {MouseEvent} event - The button click event.
+   * @returns {Promise<void>}
+   */
+  async handleAddBundle(event) {
+    event.preventDefault();
+    /** @type {HTMLInputElement[]} */
     const checked = Array.from(this.querySelectorAll('input[type="checkbox"][data-variant-id]:checked'));
     if (checked.length === 0) return;
 
@@ -61,8 +115,9 @@ export class BundleRecommendations extends HTMLElement {
       this.addButton.textContent = 'Adding bundle...';
     }
 
-    const items = checked.map(cb => ({
-      id: parseInt(cb.dataset.variantId, 10),
+    /** @type {CartItemPayload[]} */
+    const items = checked.map((checkbox) => ({
+      id: parseInt(checkbox.dataset.variantId || '0', 10),
       quantity: 1
     }));
 
@@ -78,6 +133,7 @@ export class BundleRecommendations extends HTMLElement {
 
       if (res.ok) {
         await updateCartState();
+        /** @type {HTMLElement & { open?: () => void } | null} */
         const cartDrawer = document.querySelector('#cart-drawer');
         if (cartDrawer && typeof cartDrawer.open === 'function') {
           cartDrawer.open();
@@ -101,3 +157,4 @@ export class BundleRecommendations extends HTMLElement {
 if (!customElements.get('bundle-recommendations')) {
   customElements.define('bundle-recommendations', BundleRecommendations);
 }
+

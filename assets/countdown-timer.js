@@ -2,9 +2,41 @@
  * Better Horizon — Countdown Timer Web Component
  * Bound to real metafield dates or verified promotion timestamps.
  * Gracefully hides when target timestamp has passed (Zero fake urgency).
+ *
+ * @module countdown-timer
  */
 
+/**
+ * Custom element managing real-time sale countdown timers.
+ *
+ * @extends {HTMLElement}
+ */
 export class CountdownTimer extends HTMLElement {
+  /** @type {string | undefined} */
+  endTimeStr;
+
+  /** @type {number} */
+  endTime = 0;
+
+  /** @type {HTMLElement | null} */
+  daysEl;
+
+  /** @type {HTMLElement | null} */
+  hoursEl;
+
+  /** @type {HTMLElement | null} */
+  minutesEl;
+
+  /** @type {HTMLElement | null} */
+  secondsEl;
+
+  /** @type {ReturnType<typeof setInterval> | null} */
+  timer = null;
+
+  /**
+   * Initializes target timestamps and begins the 1-second countdown interval.
+   * @returns {void}
+   */
   connectedCallback() {
     this.endTimeStr = this.dataset.endTime;
     if (!this.endTimeStr) {
@@ -27,10 +59,19 @@ export class CountdownTimer extends HTMLElement {
     this.timer = setInterval(() => this.tick(), 1000);
   }
 
+  /**
+   * Clears the interval timer when disconnected from the DOM.
+   * @returns {void}
+   */
   disconnectedCallback() {
     if (this.timer) clearInterval(this.timer);
   }
 
+  /**
+   * Calculates remaining days, hours, minutes, and seconds, updating the DOM text.
+   * Hides the component when the target time has passed.
+   * @returns {void}
+   */
   tick() {
     const now = Date.now();
     const diff = this.endTime - now;
@@ -52,6 +93,10 @@ export class CountdownTimer extends HTMLElement {
     if (this.secondsEl) this.secondsEl.textContent = String(seconds).padStart(2, '0');
   }
 
+  /**
+   * Hides the component from layout display.
+   * @returns {void}
+   */
   hide() {
     this.style.display = 'none';
   }
@@ -60,3 +105,4 @@ export class CountdownTimer extends HTMLElement {
 if (!customElements.get('countdown-timer')) {
   customElements.define('countdown-timer', CountdownTimer);
 }
+
