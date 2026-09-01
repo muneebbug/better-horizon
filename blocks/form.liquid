@@ -124,22 +124,29 @@
         tabindex="-1"
         role="alert"
       >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="2"/>
-          <path d="M10 6V11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <circle cx="10" cy="14.5" r="1" fill="currentColor"/>
-        </svg>
-        <span>
-          {{- error_msg -}}
-          {%- for field in form.errors -%}
-            {%- if field == 'form' -%}
-              {{ form.errors.messages[field] }}
-            {%- else -%}
-              — {{ form.errors.translated_fields[field] | capitalize }}
-              {{ form.errors.messages[field] }}
-            {%- endif -%}
-          {%- endfor -%}
-        </span>
+        <div class="custom-form__alert-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="2"/>
+            <path d="M10 6V11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="10" cy="14.5" r="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="custom-form__alert-body">
+          <div class="custom-form__alert-title">{{- error_msg -}}</div>
+          {%- if form.errors -%}
+            <ul class="custom-form__alert-list">
+              {%- for field in form.errors -%}
+                <li>
+                  {%- if field == 'form' -%}
+                    {{ form.errors.messages[field] }}
+                  {%- else -%}
+                    {{ form.errors.translated_fields[field] | capitalize }}: {{ form.errors.messages[field] }}
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </div>
       </div>
     {%- endif -%}
 
@@ -149,11 +156,15 @@
         tabindex="-1"
         role="status"
       >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="2"/>
-          <path d="M6 10.5L8.5 13L14 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>{{ success_msg }}</span>
+        <div class="custom-form__alert-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="2"/>
+            <path d="M6 10.5L8.5 13L14 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="custom-form__alert-body">
+          <div class="custom-form__alert-title">{{ success_msg }}</div>
+        </div>
       </div>
     {%- endif -%}
 

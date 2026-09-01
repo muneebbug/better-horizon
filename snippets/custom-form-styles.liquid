@@ -132,19 +132,21 @@
   }
 
   /* Status Alerts */
-  .custom-form__status-alert {
+  .custom-form__alert {
     display: flex;
     align-items: flex-start;
     gap: 12px;
     width: 100%;
+    flex: 0 0 100%;
     padding: 14px 18px;
     border-radius: var(--style-border-radius-inputs, 8px);
     box-sizing: border-box;
-    font-size: calc(var(--font-paragraph--size, 14px) * 0.95);
+    font-size: var(--form-input-font-size, 14px);
     line-height: 1.5;
+    margin-bottom: var(--gap-xs, 8px);
   }
 
-  .custom-form__status-alert-icon {
+  .custom-form__alert-icon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -154,15 +156,39 @@
     margin-top: 1px;
   }
 
-  .custom-form__status-alert--success {
-    background-color: var(--form-success-bg, rgb(34 197 94 / 0.1));
-    color: var(--form-success-text, #15803d);
-    border: 1px solid var(--form-success-border, rgb(34 197 94 / 0.25));
+  .custom-form__alert-icon svg {
+    width: 20px;
+    height: 20px;
   }
 
-  .custom-form__status-alert--error {
-    background-color: var(--form-error-bg, rgb(220 38 38 / 0.1));
-    color: var(--form-error-text, #b91c1c);
-    border: 1px solid var(--form-error-border, rgb(220 38 38 / 0.25));
+  .custom-form__alert-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .custom-form__alert-title {
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .custom-form__alert-list {
+    margin: 4px 0 0;
+    padding-left: 18px;
+    font-size: calc(var(--form-input-font-size, 14px) * 0.9);
+  }
+
+  .custom-form__alert--success {
+    background-color: var(--form-success-bg, rgb(16 185 129 / 0.08));
+    color: var(--form-success-text, #065f46);
+    border: 1px solid var(--form-success-border, rgb(16 185 129 / 0.25));
+  }
+
+  .custom-form__alert--error {
+    background-color: var(--form-error-bg, rgb(239 68 68 / 0.08));
+    color: var(--form-error-text, #991b1b);
+    border: 1px solid var(--form-error-border, rgb(239 68 68 / 0.25));
   }
 {% endstylesheet %}
