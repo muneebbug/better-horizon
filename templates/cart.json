@@ -74,12 +74,13 @@
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
-              }
+              },
+              "blocks": {}
             },
             "delivery_estimate": {
               "type": "delivery-estimate",
               "settings": {
-                "heading": "Estimated delivery",
+                "heading": "",
                 "min_handling_days": 1,
                 "max_handling_days": 2,
                 "min_transit_days": 2,
@@ -88,29 +89,60 @@
                 "exclude_weekends": true,
                 "show_countdown": true,
                 "show_zip_estimator": true,
+                "card_style": "outline",
+                "background_color": "",
+                "border_color": "",
+                "border_width": 1,
+                "border_radius": 8,
+                "show_icon": true,
+                "icon_type": "shipping",
+                "icon_size": 20,
+                "icon_color": "",
+                "heading_color": "",
+                "dates_color": "",
+                "countdown_color": "",
                 "padding-block-start": 0,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
-              }
+              },
+              "blocks": {}
             },
             "cart_totals": {
               "type": "cart-totals",
-              "settings": {}
+              "settings": {},
+              "blocks": {}
             },
             "cart_upsell": {
               "type": "cart-upsell",
               "settings": {
                 "heading": "Recommended for you",
-                "layout": "slider",
+                "layout": "list",
                 "products_to_show": 4,
-                "type_preset": "h4",
+                "image_size": 52,
+                "image_border_radius": 6,
+                "gap": 10,
+                "card_style": "outline",
+                "background_color": "",
+                "border_color": "",
+                "border_width": 1,
+                "border_radius": 8,
+                "heading_color": "",
+                "product_title_color": "",
+                "price_color": "",
+                "button_style": "secondary",
+                "button_background_color": "",
+                "button_text_color": "",
+                "button_border_color": "",
+                "button_border_radius": 8,
+                "type_preset": "h5",
                 "alignment": "left",
                 "padding-block-start": 16,
                 "padding-block-end": 16,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
-              }
+              },
+              "blocks": {}
             }
           },
           "block_order": [
