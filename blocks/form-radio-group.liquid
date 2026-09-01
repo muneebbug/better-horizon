@@ -1,0 +1,178 @@
+{% doc %}
+  Form Radio Group Block
+  Renders an accessible set of radio button options under a fieldset and legend.
+{% enddoc %}
+
+{%- liquid
+  assign block_settings = block.settings
+  assign field_name = block_settings.name | default: 'contact[inquiry_type]'
+  assign field_label = block_settings.label | default: 'Inquiry type'
+  assign field_width = block_settings.width | default: '100'
+  assign layout = block_settings.layout | default: 'column'
+  assign default_val = block_settings.default_option
+  assign help_id = 'FormField-Help-' | append: block.id
+
+  assign raw_options = block_settings.options | default: "General inquiry\nOrder support\nOther"
+  assign options_array = raw_options | newline_to_br | split: '<br />'
+-%}
+
+<div
+  class="custom-form__field custom-form__field--width-{{ field_width }} spacing-style"
+  style="{% render 'spacing-style', settings: block_settings %}"
+  {{ block.shopify_attributes }}
+>
+  <fieldset
+    class="custom-form__radio-group"
+    {% if block_settings.help_text != blank %}
+      aria-describedby="{{ help_id }}"
+    {% endif %}
+  >
+    <legend class="custom-form__radio-legend">
+      {{- field_label -}}
+      {%- if block_settings.required -%}
+        <span class="custom-form__required-mark" aria-hidden="true">*</span>
+      {%- endif -%}
+    </legend>
+
+    <div class="custom-form__radio-options custom-form__radio-options--{{ layout }}">
+      {%- for option in options_array -%}
+        {%- assign opt_clean = option | strip -%}
+        {%- if opt_clean != blank -%}
+          {%- assign opt_id = 'FormField-Radio-' | append: block.id | append: '-' | append: forloop.index -%}
+          <label for="{{ opt_id }}" class="custom-form__radio-label">
+            <input
+              type="radio"
+              id="{{ opt_id }}"
+              name="{{ field_name }}"
+              value="{{ opt_clean | escape }}"
+              {% if opt_clean == default_val or forloop.first and default_val == blank %}
+                checked
+              {% endif %}
+              {% if block_settings.required %}
+                required
+                aria-required="true"
+              {% endif %}
+            >
+            <span>{{ opt_clean }}</span>
+          </label>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </fieldset>
+
+  {%- if block_settings.help_text != blank -%}
+    <span id="{{ help_id }}" class="custom-form__help-text">
+      {{- block_settings.help_text -}}
+    </span>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Radio group",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "name",
+      "label": "Field name",
+      "default": "contact[inquiry_type]",
+      "info": "Form submission property key (e.g. contact[inquiry_type])"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Group label (Legend)",
+      "default": "Inquiry type"
+    },
+    {
+      "type": "textarea",
+      "id": "options",
+      "label": "Options (one per line)",
+      "default": "General inquiry\nOrder support\nOther"
+    },
+    {
+      "type": "text",
+      "id": "default_option",
+      "label": "Default selected option"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Options layout",
+      "options": [
+        {
+          "value": "column",
+          "label": "Vertical (stacked)"
+        },
+        {
+          "value": "row",
+          "label": "Horizontal (inline)"
+        }
+      ],
+      "default": "column"
+    },
+    {
+      "type": "checkbox",
+      "id": "required",
+      "label": "Required selection",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Field width",
+      "options": [
+        {
+          "value": "100",
+          "label": "Full width (100%)"
+        },
+        {
+          "value": "50",
+          "label": "Half width (50%)"
+        },
+        {
+          "value": "auto",
+          "label": "Auto"
+        }
+      ],
+      "default": "100"
+    },
+    {
+      "type": "text",
+      "id": "help_text",
+      "label": "Helper text"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Radio group",
+      "category": "t:categories.forms"
+    }
+  ]
+}
+{% endschema %}

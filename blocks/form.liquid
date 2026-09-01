@@ -1,0 +1,407 @@
+{% doc %}
+  Custom Form Container Block
+  Master form container block supporting modular nested fields (input, textarea, select, checkbox, radio, button).
+{% enddoc %}
+
+{{ 'custom-form.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign block_settings = block.settings
+  assign form_id = block.id | default: section.id | prepend: 'CustomForm-'
+  assign custom_input_style = false
+  if block_settings.input_style == 'custom'
+    assign custom_input_style = true
+  endif
+
+  assign success_msg = block_settings.success_message | default: 'blocks.contact_form.post_success' | t
+  assign error_msg = block_settings.error_message | default: 'templates.contact.form.error_heading' | t
+-%}
+
+<div
+  class="custom-form spacing-style size-style{% if block_settings.text_color != blank %} color-custom-{{ block.id }}{% endif %}"
+  style="
+    --form-gap: {{ block_settings.form_gap | default: 16 }}px;
+    {% render 'spacing-style', settings: block_settings %}
+    {% render 'size-style', settings: block_settings %}
+    {% if block_settings.background_color != blank %}background-color: {{ block_settings.background_color }};{% endif %}
+    {% if block_settings.text_color != blank %}
+      --color: {{ block_settings.text_color }};
+      --color-rgb: {{ block_settings.text_color.rgb }};
+    {% endif %}
+    {% if custom_input_style %}
+      {% render 'input-custom-styles', block_settings: block_settings %}
+      --style-border-width-inputs: {{ block_settings.border_width }}px;
+      --style-border-radius-inputs: {{ block_settings.border_radius }}px;
+    {% endif %}
+  "
+  {{ block.shopify_attributes }}
+>
+  {%- form 'contact', id: form_id, class: 'custom-form__form' -%}
+    <input
+      name="contact[id]"
+      type="hidden"
+      value="{{ form_id }}"
+    >
+
+    {% liquid
+      assign form_matches = false
+      if form.id == form_id or form.id == blank
+        assign form_matches = true
+      endif
+    %}
+
+    {%- if form.errors and form_matches -%}
+      <div
+        class="custom-form__alert custom-form__alert--error"
+        tabindex="-1"
+        autofocus
+        role="alert"
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="2"/>
+          <path d="M10 6V11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="10" cy="14.5" r="1" fill="currentColor"/>
+        </svg>
+        <span>
+          {{- error_msg -}}
+          {%- for field in form.errors -%}
+            {%- if field == 'form' -%}
+              {{ form.errors.messages[field] }}
+            {%- else -%}
+              — {{ form.errors.translated_fields[field] | capitalize }} {{ form.errors.messages[field] }}
+            {%- endif -%}
+          {%- endfor -%}
+        </span>
+      </div>
+    {%- endif -%}
+
+    {%- if form.posted_successfully? and form_matches -%}
+      <div
+        class="custom-form__alert custom-form__alert--success"
+        tabindex="-1"
+        autofocus
+        role="status"
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="2"/>
+          <path d="M6 10.5L8.5 13L14 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>{{ success_msg }}</span>
+      </div>
+    {%- endif -%}
+
+    {% content_for 'blocks' %}
+  {%- endform -%}
+</div>
+
+{% schema %}
+{
+  "name": "Custom form",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "form-input"
+    },
+    {
+      "type": "form-textarea"
+    },
+    {
+      "type": "form-select"
+    },
+    {
+      "type": "form-checkbox"
+    },
+    {
+      "type": "form-radio-group"
+    },
+    {
+      "type": "form-submit-button"
+    },
+    {
+      "type": "text"
+    },
+    {
+      "type": "group"
+    },
+    {
+      "type": "_divider"
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Messages"
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Success message",
+      "default": "Thank you for contacting us. We will get back to you as soon as possible."
+    },
+    {
+      "type": "text",
+      "id": "error_message",
+      "label": "Error message",
+      "default": "Please adjust the errors below and try again."
+    },
+    {
+      "type": "header",
+      "content": "Layout & Gap"
+    },
+    {
+      "type": "range",
+      "id": "form_gap",
+      "label": "Field gap",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color"
+    },
+    {
+      "type": "select",
+      "id": "input_style",
+      "label": "Input styling",
+      "options": [
+        {
+          "value": "default",
+          "label": "Theme default"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Input border width",
+      "min": 0,
+      "max": 6,
+      "step": 1,
+      "unit": "px",
+      "default": 1,
+      "visible_if": "{{ block.settings.input_style == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Input border radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 4,
+      "visible_if": "{{ block.settings.input_style == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.size"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "fit-content",
+          "label": "t:options.fit_content"
+        },
+        {
+          "value": "fill",
+          "label": "t:options.fill"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "fill"
+    },
+    {
+      "type": "range",
+      "id": "custom_width",
+      "label": "t:settings.custom_width",
+      "min": 10,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 100,
+      "visible_if": "{{ block.settings.width == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom form",
+      "category": "t:categories.forms",
+      "blocks": {
+        "input_name": {
+          "type": "form-input",
+          "settings": {
+            "name": "contact[name]",
+            "label": "Name",
+            "placeholder": "Your name",
+            "width": "50",
+            "autocomplete": "name"
+          }
+        },
+        "input_email": {
+          "type": "form-input",
+          "settings": {
+            "name": "contact[email]",
+            "type": "email",
+            "label": "Email",
+            "placeholder": "your.email@example.com",
+            "required": true,
+            "width": "50",
+            "autocomplete": "email"
+          }
+        },
+        "input_phone": {
+          "type": "form-input",
+          "settings": {
+            "name": "contact[phone]",
+            "type": "tel",
+            "label": "Phone number",
+            "placeholder": "+1 (555) 000-0000",
+            "width": "50",
+            "autocomplete": "tel"
+          }
+        },
+        "select_subject": {
+          "type": "form-select",
+          "settings": {
+            "name": "contact[Subject]",
+            "label": "Subject",
+            "placeholder": "Select a subject...",
+            "width": "50"
+          },
+          "blocks": {
+            "opt_general": {
+              "type": "_form-select-option",
+              "settings": {
+                "label": "General inquiry",
+                "value": "General inquiry"
+              }
+            },
+            "opt_order": {
+              "type": "_form-select-option",
+              "settings": {
+                "label": "Order support",
+                "value": "Order support"
+              }
+            },
+            "opt_wholesale": {
+              "type": "_form-select-option",
+              "settings": {
+                "label": "Wholesale & B2B",
+                "value": "Wholesale & B2B"
+              }
+            }
+          },
+          "block_order": ["opt_general", "opt_order", "opt_wholesale"]
+        },
+        "textarea_msg": {
+          "type": "form-textarea",
+          "settings": {
+            "name": "contact[body]",
+            "label": "Message",
+            "placeholder": "How can we help you?",
+            "required": true,
+            "rows": 4,
+            "width": "100"
+          }
+        },
+        "checkbox_newsletter": {
+          "type": "form-checkbox",
+          "settings": {
+            "name": "contact[newsletter_opt_in]",
+            "label": "Subscribe to our newsletter for exclusive offers",
+            "width": "100"
+          }
+        },
+        "submit_btn": {
+          "type": "form-submit-button",
+          "settings": {
+            "label": "Send message",
+            "style_class": "button-primary",
+            "width": "full_width"
+          }
+        }
+      },
+      "block_order": [
+        "input_name",
+        "input_email",
+        "input_phone",
+        "select_subject",
+        "textarea_msg",
+        "checkbox_newsletter",
+        "submit_btn"
+      ]
+    }
+  ]
+}
+{% endschema %}

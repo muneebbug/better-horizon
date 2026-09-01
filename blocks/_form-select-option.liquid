@@ -1,0 +1,61 @@
+{% doc %}
+  Select Option Block
+  Renders an individual <option> inside a Form Select Block.
+{% enddoc %}
+
+{%- liquid
+  assign block_settings = block.settings
+  assign option_label = block_settings.label | default: block_settings.value
+  assign option_value = block_settings.value | default: block_settings.label
+-%}
+
+<option
+  value="{{ option_value | escape }}"
+  {% if block_settings.selected_by_default %}
+    selected
+  {% endif %}
+  {% if block_settings.disabled %}
+    disabled
+  {% endif %}
+  {{ block.shopify_attributes }}
+>
+  {{- option_label | escape -}}
+</option>
+
+{% schema %}
+{
+  "name": "Option",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Option label",
+      "default": "Option label"
+    },
+    {
+      "type": "text",
+      "id": "value",
+      "label": "Option value",
+      "default": "Option value"
+    },
+    {
+      "type": "checkbox",
+      "id": "selected_by_default",
+      "label": "Selected by default",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "disabled",
+      "label": "Disabled",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Option"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,126 @@
+{% doc %}
+  Form Submit Button Block
+  Renders the primary form submission trigger for custom forms.
+{% enddoc %}
+
+{%- liquid
+  assign block_settings = block.settings
+  assign label = block_settings.label | default: 'Send message'
+  assign style_class = block_settings.style_class | default: 'button-primary'
+  assign alignment = block_settings.alignment | default: 'left'
+  assign width = block_settings.width | default: 'auto'
+-%}
+
+<div
+  class="custom-form__submit-wrapper custom-form__submit-wrapper--{{ alignment }}{% if width == 'full_width' %} custom-form__submit-wrapper--full-width{% endif %} spacing-style"
+  style="{% render 'spacing-style', settings: block_settings %}"
+  {{ block.shopify_attributes }}
+>
+  <button
+    type="submit"
+    class="button {{ style_class }} custom-form__submit-button{% if width == 'full_width' %} custom-form__submit-button--full-width{% endif %}"
+  >
+    {{- label -}}
+  </button>
+</div>
+
+{% schema %}
+{
+  "name": "Submit button",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Button label",
+      "default": "Send message"
+    },
+    {
+      "type": "select",
+      "id": "style_class",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "button-primary",
+          "label": "Primary"
+        },
+        {
+          "value": "button-secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "button-outline",
+          "label": "Outline"
+        }
+      ],
+      "default": "button-primary"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Button width",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "full_width",
+          "label": "Full width"
+        }
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Submit button",
+      "category": "t:categories.forms"
+    }
+  ]
+}
+{% endschema %}

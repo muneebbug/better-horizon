@@ -1,0 +1,147 @@
+{% doc %}
+  Form Checkbox Block
+  Renders a single checkbox input for agreements, subscriptions, or optional confirmations.
+{% enddoc %}
+
+{%- liquid
+  assign block_settings = block.settings
+  assign field_id = 'FormField-Checkbox-' | append: block.id
+  assign field_name = block_settings.name | default: 'contact[newsletter]'
+  assign field_label = block_settings.label | default: 'Subscribe to newsletter'
+  assign field_value = block_settings.value | default: 'Yes'
+  assign field_width = block_settings.width | default: '100'
+  assign help_id = 'FormField-Help-' | append: block.id
+-%}
+
+<div
+  class="custom-form__field custom-form__field--width-{{ field_width }} spacing-style"
+  style="{% render 'spacing-style', settings: block_settings %}"
+  {{ block.shopify_attributes }}
+>
+  <label for="{{ field_id }}" class="custom-form__checkbox-field">
+    <input
+      type="checkbox"
+      id="{{ field_id }}"
+      name="{{ field_name }}"
+      value="{{ field_value | escape }}"
+      class="custom-form__checkbox-input"
+      {% if block_settings.checked_by_default %}
+        checked
+      {% endif %}
+      {% if block_settings.required %}
+        required
+        aria-required="true"
+      {% endif %}
+      {% if block_settings.help_text != blank %}
+        aria-describedby="{{ help_id }}"
+      {% endif %}
+    >
+    <span class="custom-form__label">
+      {{- field_label -}}
+      {%- if block_settings.required -%}
+        <span class="custom-form__required-mark" aria-hidden="true">*</span>
+      {%- endif -%}
+    </span>
+  </label>
+
+  {%- if block_settings.help_text != blank -%}
+    <span id="{{ help_id }}" class="custom-form__help-text" style="margin-left: 28px;">
+      {{- block_settings.help_text -}}
+    </span>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Checkbox",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "name",
+      "label": "Field name",
+      "default": "contact[newsletter]",
+      "info": "Form submission property key (e.g. contact[newsletter] or contact[terms_accepted])"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "label",
+      "label": "Label",
+      "default": "Subscribe to our newsletter"
+    },
+    {
+      "type": "text",
+      "id": "value",
+      "label": "Checked value",
+      "default": "Yes"
+    },
+    {
+      "type": "checkbox",
+      "id": "checked_by_default",
+      "label": "Checked by default",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "required",
+      "label": "Required field",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Field width",
+      "options": [
+        {
+          "value": "100",
+          "label": "Full width (100%)"
+        },
+        {
+          "value": "50",
+          "label": "Half width (50%)"
+        },
+        {
+          "value": "auto",
+          "label": "Auto"
+        }
+      ],
+      "default": "100"
+    },
+    {
+      "type": "text",
+      "id": "help_text",
+      "label": "Helper text"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Checkbox",
+      "category": "t:categories.forms"
+    }
+  ]
+}
+{% endschema %}

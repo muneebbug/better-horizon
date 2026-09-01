@@ -1,0 +1,184 @@
+{% doc %}
+  Form Select Dropdown Block
+  Renders a dropdown selector with nested Option blocks for custom forms.
+{% enddoc %}
+
+{%- liquid
+  assign block_settings = block.settings
+  assign field_id = 'FormField-Select-' | append: block.id
+  assign field_name = block_settings.name | default: 'contact[Subject]'
+  assign field_label = block_settings.label | default: 'Subject'
+  assign field_width = block_settings.width | default: '100'
+  assign help_id = 'FormField-Help-' | append: block.id
+-%}
+
+<div
+  class="custom-form__field custom-form__field--width-{{ field_width }} spacing-style"
+  style="{% render 'spacing-style', settings: block_settings %}"
+  {{ block.shopify_attributes }}
+>
+  <label
+    for="{{ field_id }}"
+    class="custom-form__label{% if block_settings.hide_label %} visually-hidden{% endif %}"
+  >
+    {{- field_label -}}
+    {%- if block_settings.required -%}
+      <span class="custom-form__required-mark" aria-hidden="true">*</span>
+    {%- endif -%}
+  </label>
+
+  <div class="custom-form__select-wrapper">
+    <select
+      id="{{ field_id }}"
+      name="{{ field_name }}"
+      class="custom-form__select"
+      {% if block_settings.required %}
+        required
+        aria-required="true"
+      {% endif %}
+      {% if block_settings.help_text != blank %}
+        aria-describedby="{{ help_id }}"
+      {% endif %}
+    >
+      {%- if block_settings.placeholder != blank -%}
+        <option value="" disabled selected hidden>
+          {{- block_settings.placeholder | escape -}}
+        </option>
+      {%- endif -%}
+      {% content_for 'blocks' %}
+    </select>
+
+    <span class="custom-form__select-icon" aria-hidden="true">
+      <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+  </div>
+
+  {%- if block_settings.help_text != blank -%}
+    <span id="{{ help_id }}" class="custom-form__help-text">
+      {{- block_settings.help_text -}}
+    </span>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Select menu",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "_form-select-option"
+    }
+  ],
+  "settings": [
+    {
+      "type": "text",
+      "id": "name",
+      "label": "Field name",
+      "default": "contact[Subject]",
+      "info": "Submission property key (e.g. contact[Subject] or contact[Department])"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "Subject"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_label",
+      "label": "Visually hide label",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "Placeholder option",
+      "default": "Select an option..."
+    },
+    {
+      "type": "checkbox",
+      "id": "required",
+      "label": "Required field",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Field width",
+      "options": [
+        {
+          "value": "100",
+          "label": "Full width (100%)"
+        },
+        {
+          "value": "50",
+          "label": "Half width (50%)"
+        },
+        {
+          "value": "33",
+          "label": "One third (33%)"
+        },
+        {
+          "value": "auto",
+          "label": "Auto"
+        }
+      ],
+      "default": "100"
+    },
+    {
+      "type": "text",
+      "id": "help_text",
+      "label": "Helper text"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Select menu",
+      "category": "t:categories.forms",
+      "blocks": {
+        "option_1": {
+          "type": "_form-select-option",
+          "settings": {
+            "label": "General inquiry",
+            "value": "General inquiry"
+          }
+        },
+        "option_2": {
+          "type": "_form-select-option",
+          "settings": {
+            "label": "Order support",
+            "value": "Order support"
+          }
+        }
+      },
+      "block_order": ["option_1", "option_2"]
+    }
+  ]
+}
+{% endschema %}

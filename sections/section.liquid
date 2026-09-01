@@ -1746,6 +1746,134 @@
         "padding-block-start": 40,
         "padding-block-end": 40
       }
+    },
+    {
+      "name": "Contact form",
+      "category": "t:categories.forms",
+      "blocks": {
+        "heading": {
+          "type": "text",
+          "settings": {
+            "text": "<h2>Get in touch</h2>",
+            "type_preset": "h2"
+          }
+        },
+        "form": {
+          "type": "form",
+          "blocks": {
+            "name": {
+              "type": "form-input",
+              "settings": {
+                "name": "contact[name]",
+                "label": "Name",
+                "placeholder": "Your name",
+                "width": "50",
+                "autocomplete": "name"
+              }
+            },
+            "email": {
+              "type": "form-input",
+              "settings": {
+                "name": "contact[email]",
+                "type": "email",
+                "label": "Email",
+                "placeholder": "your.email@example.com",
+                "required": true,
+                "width": "50",
+                "autocomplete": "email"
+              }
+            },
+            "phone": {
+              "type": "form-input",
+              "settings": {
+                "name": "contact[phone]",
+                "type": "tel",
+                "label": "Phone number",
+                "placeholder": "+1 (555) 000-0000",
+                "width": "50",
+                "autocomplete": "tel"
+              }
+            },
+            "subject": {
+              "type": "form-select",
+              "settings": {
+                "name": "contact[Subject]",
+                "label": "Subject",
+                "placeholder": "Select a subject...",
+                "width": "50"
+              },
+              "blocks": {
+                "opt_1": {
+                  "type": "_form-select-option",
+                  "settings": {
+                    "label": "General inquiry",
+                    "value": "General inquiry"
+                  }
+                },
+                "opt_2": {
+                  "type": "_form-select-option",
+                  "settings": {
+                    "label": "Order support",
+                    "value": "Order support"
+                  }
+                },
+                "opt_3": {
+                  "type": "_form-select-option",
+                  "settings": {
+                    "label": "Wholesale & Partnerships",
+                    "value": "Wholesale & Partnerships"
+                  }
+                }
+              },
+              "block_order": ["opt_1", "opt_2", "opt_3"]
+            },
+            "message": {
+              "type": "form-textarea",
+              "settings": {
+                "name": "contact[body]",
+                "label": "Message",
+                "placeholder": "How can we help you?",
+                "required": true,
+                "rows": 4,
+                "width": "100"
+              }
+            },
+            "newsletter": {
+              "type": "form-checkbox",
+              "settings": {
+                "name": "contact[newsletter_opt_in]",
+                "label": "Subscribe to our newsletter for updates and offers",
+                "width": "100"
+              }
+            },
+            "submit": {
+              "type": "form-submit-button",
+              "settings": {
+                "label": "Send message",
+                "style_class": "button-primary",
+                "width": "full_width"
+              }
+            }
+          },
+          "block_order": [
+            "name",
+            "email",
+            "phone",
+            "subject",
+            "message",
+            "newsletter",
+            "submit"
+          ]
+        }
+      },
+      "block_order": ["heading", "form"],
+      "settings": {
+        "content_direction": "column",
+        "horizontal_alignment": "center",
+        "gap": 24,
+        "padding-block-start": 48,
+        "padding-block-end": 48
+      }
     }
   ]
 }

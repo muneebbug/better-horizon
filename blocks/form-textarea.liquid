@@ -1,0 +1,175 @@
+{% doc %}
+  Form Text Area Block
+  Renders a multiline text area for messages, comments, and long-form responses.
+{% enddoc %}
+
+{%- liquid
+  assign block_settings = block.settings
+  assign field_id = 'FormField-Textarea-' | append: block.id
+  assign field_name = block_settings.name | default: 'contact[body]'
+  assign field_label = block_settings.label | default: 'Message'
+  assign field_width = block_settings.width | default: '100'
+  assign rows = block_settings.rows | default: 4
+  assign help_id = 'FormField-Help-' | append: block.id
+  assign max_chars = block_settings.max_characters | default: 0
+
+  assign field_value = block_settings.default_value
+-%}
+
+<div
+  class="custom-form__field custom-form__field--width-{{ field_width }} spacing-style"
+  style="{% render 'spacing-style', settings: block_settings %}"
+  {{ block.shopify_attributes }}
+>
+  <label
+    for="{{ field_id }}"
+    class="custom-form__label{% if block_settings.hide_label %} visually-hidden{% endif %}"
+  >
+    {{- field_label -}}
+    {%- if block_settings.required -%}
+      <span class="custom-form__required-mark" aria-hidden="true">*</span>
+    {%- endif -%}
+  </label>
+
+  <textarea
+    id="{{ field_id }}"
+    name="{{ field_name }}"
+    rows="{{ rows }}"
+    class="custom-form__textarea"
+    placeholder="{{ block_settings.placeholder | escape }}"
+    {% if block_settings.required %}
+      required
+      aria-required="true"
+    {% endif %}
+    {% if max_chars > 0 %}
+      maxlength="{{ max_chars }}"
+    {% endif %}
+    {% if block_settings.help_text != blank %}
+      aria-describedby="{{ help_id }}"
+    {% endif %}
+  >{{ field_value | escape }}</textarea>
+
+  {%- if block_settings.help_text != blank -%}
+    <span id="{{ help_id }}" class="custom-form__help-text">
+      {{- block_settings.help_text -}}
+    </span>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Text area",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "name",
+      "label": "Field name",
+      "default": "contact[body]",
+      "info": "Form submission property key (e.g. contact[body] or contact[Special_Instructions])"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "Message"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_label",
+      "label": "Visually hide label",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "Placeholder",
+      "default": "Write your message here..."
+    },
+    {
+      "type": "textarea",
+      "id": "default_value",
+      "label": "Default text"
+    },
+    {
+      "type": "checkbox",
+      "id": "required",
+      "label": "Required field",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "rows",
+      "label": "Number of rows",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "max_characters",
+      "label": "Maximum character limit (0 for unlimited)",
+      "min": 0,
+      "max": 1000,
+      "step": 50,
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Field width",
+      "options": [
+        {
+          "value": "100",
+          "label": "Full width (100%)"
+        },
+        {
+          "value": "50",
+          "label": "Half width (50%)"
+        },
+        {
+          "value": "auto",
+          "label": "Auto"
+        }
+      ],
+      "default": "100"
+    },
+    {
+      "type": "text",
+      "id": "help_text",
+      "label": "Helper text"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text area",
+      "category": "t:categories.forms"
+    }
+  ]
+}
+{% endschema %}

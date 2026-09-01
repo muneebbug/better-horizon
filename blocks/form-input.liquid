@@ -1,0 +1,257 @@
+{% doc %}
+  Form Input Block
+  Renders a customizable single-line input field (text, email, tel, number, url, etc.) for custom forms.
+{% enddoc %}
+
+{%- liquid
+  assign block_settings = block.settings
+  assign field_id = 'FormField-Input-' | append: block.id
+  assign field_type = block_settings.type | default: 'text'
+  assign field_name = block_settings.name | default: 'contact[name]'
+  assign field_label = block_settings.label | default: 'Name'
+  assign field_width = block_settings.width | default: '100'
+  assign help_id = 'FormField-Help-' | append: block.id
+
+  assign field_value = block_settings.default_value
+  if field_name == 'contact[name]' and customer
+    assign field_value = customer.name
+  elsif field_name == 'contact[email]' and customer
+    assign field_value = customer.email
+  elsif field_name == 'contact[phone]' and customer
+    assign field_value = customer.phone
+  endif
+-%}
+
+{%- if field_type == 'hidden' -%}
+  <input
+    type="hidden"
+    name="{{ field_name }}"
+    value="{{ field_value | escape }}"
+    {{ block.shopify_attributes }}
+  >
+{%- else -%}
+  <div
+    class="custom-form__field custom-form__field--width-{{ field_width }} spacing-style"
+    style="{% render 'spacing-style', settings: block_settings %}"
+    {{ block.shopify_attributes }}
+  >
+    <label
+      for="{{ field_id }}"
+      class="custom-form__label{% if block_settings.hide_label %} visually-hidden{% endif %}"
+    >
+      {{- field_label -}}
+      {%- if block_settings.required -%}
+        <span class="custom-form__required-mark" aria-hidden="true">*</span>
+      {%- endif -%}
+    </label>
+
+    <input
+      type="{{ field_type }}"
+      id="{{ field_id }}"
+      name="{{ field_name }}"
+      class="custom-form__input"
+      value="{{ field_value | escape }}"
+      placeholder="{{ block_settings.placeholder | escape }}"
+      {% if block_settings.required %}
+        required
+        aria-required="true"
+      {% endif %}
+      {% if block_settings.autocomplete != 'off' and block_settings.autocomplete != blank %}
+        autocomplete="{{ block_settings.autocomplete }}"
+      {% endif %}
+      {% if block_settings.help_text != blank %}
+        aria-describedby="{{ help_id }}"
+      {% endif %}
+    >
+
+    {%- if block_settings.help_text != blank -%}
+      <span id="{{ help_id }}" class="custom-form__help-text">
+        {{- block_settings.help_text -}}
+      </span>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Input field",
+  "tag": null,
+  "settings": [
+    {
+      "type": "select",
+      "id": "type",
+      "label": "Input type",
+      "options": [
+        {
+          "value": "text",
+          "label": "Text"
+        },
+        {
+          "value": "email",
+          "label": "Email"
+        },
+        {
+          "value": "tel",
+          "label": "Phone"
+        },
+        {
+          "value": "number",
+          "label": "Number"
+        },
+        {
+          "value": "url",
+          "label": "URL"
+        },
+        {
+          "value": "date",
+          "label": "Date"
+        },
+        {
+          "value": "password",
+          "label": "Password"
+        },
+        {
+          "value": "hidden",
+          "label": "Hidden"
+        }
+      ],
+      "default": "text"
+    },
+    {
+      "type": "text",
+      "id": "name",
+      "label": "Field name",
+      "default": "contact[name]",
+      "info": "Form submission property key (e.g. contact[name], contact[email], contact[Company])"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "Name"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_label",
+      "label": "Visually hide label",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "Placeholder",
+      "default": "Enter your name..."
+    },
+    {
+      "type": "text",
+      "id": "default_value",
+      "label": "Default value"
+    },
+    {
+      "type": "checkbox",
+      "id": "required",
+      "label": "Required field",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Field width",
+      "options": [
+        {
+          "value": "100",
+          "label": "Full width (100%)"
+        },
+        {
+          "value": "50",
+          "label": "Half width (50%)"
+        },
+        {
+          "value": "33",
+          "label": "One third (33%)"
+        },
+        {
+          "value": "auto",
+          "label": "Auto"
+        }
+      ],
+      "default": "100"
+    },
+    {
+      "type": "select",
+      "id": "autocomplete",
+      "label": "Browser autocomplete",
+      "options": [
+        {
+          "value": "off",
+          "label": "Off"
+        },
+        {
+          "value": "name",
+          "label": "Name"
+        },
+        {
+          "value": "email",
+          "label": "Email"
+        },
+        {
+          "value": "tel",
+          "label": "Phone"
+        },
+        {
+          "value": "organization",
+          "label": "Company / Organization"
+        },
+        {
+          "value": "street-address",
+          "label": "Street address"
+        },
+        {
+          "value": "postal-code",
+          "label": "Postal / ZIP code"
+        },
+        {
+          "value": "country-name",
+          "label": "Country"
+        }
+      ],
+      "default": "name"
+    },
+    {
+      "type": "text",
+      "id": "help_text",
+      "label": "Helper text"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Input field",
+      "category": "t:categories.forms"
+    }
+  ]
+}
+{% endschema %}
