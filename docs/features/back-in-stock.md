@@ -25,12 +25,12 @@ The **Back in Stock** theme block displays an email capture form when a product 
 ## 🎨 Design System & Customization
 
 - **Layout Options:** Choose between `Inline (input & button side-by-side)` and `Stacked (full-width button below)`.
-- **Container Styling:** `Default card`, `Minimal (borderless / transparent)`, and `Outline only`.
+- **Container Styling:** `Default card`, `Minimal (borderless / transparent)`, `Outline only`, and `Custom colors`.
 - **Full Color Customization:**
-  - Container background and border colors with custom border radius.
+  - Container background and border colors with custom border radius (visible when `Custom colors` is selected).
   - Heading, subheading, and success confirmation colors.
   - Input field background, text, and border colors.
-  - Button styling presets (`Primary`, `Secondary`, `Outline`) with custom background, text, and border color overrides.
+  - Button styling presets (`Primary`, `Secondary`, `Outline`, `Custom`) with conditional custom background, text, and border color overrides.
 - **Theme Padding Controls:** Standard `t:content.padding` sliders.
 
 ---
@@ -45,11 +45,11 @@ The **Back in Stock** theme block displays an email capture form when a product 
 | `button_label` | text | `"Notify Me"` | Primary action button label. |
 | `success_message` | text | `"Thank you! We will notify you when restocked."` | Confirmation message. |
 | `layout` | select | `inline` | Form layout (`inline`, `stacked`). |
-| `card_style` | select | `default` | Container style (`default`, `minimal`, `outline`). |
-| `background_color` | color | `""` | Container background fill. |
-| `border_color` | color | `""` | Container border stroke. |
-| `border_width` | range | `1` | Container border thickness (0–4px). |
-| `border_radius` | range | `8` | Container corner radius (0–24px). |
+| `card_style` | select | `default` | Container style (`default`, `minimal`, `outline`, `custom`). |
+| `background_color` | color | `""` | Container background fill (visible when `custom`). |
+| `border_color` | color | `""` | Container border stroke (visible when `custom`). |
+| `border_width` | range | `1` | Container border thickness (0–4px, visible when `custom`). |
+| `border_radius` | range | `8` | Container corner radius (0–24px, visible when `custom`). |
 | `heading_color` | color | `""` | Heading text color. |
 | `subheading_color` | color | `""` | Subheading text color. |
 | `success_color` | color | `""` | Success icon and text color. |
@@ -57,11 +57,11 @@ The **Back in Stock** theme block displays an email capture form when a product 
 | `input_text_color` | color | `""` | Input field text color. |
 | `input_border_color` | color | `""` | Input field border color. |
 | `input_border_radius` | range | `8` | Input field corner radius (0–24px). |
-| `button_style` | select | `primary` | Button style preset (`primary`, `secondary`, `outline`). |
-| `button_background_color` | color | `""` | Custom button background color. |
-| `button_text_color` | color | `""` | Custom button text color. |
-| `button_border_color` | color | `""` | Custom button border color. |
-| `button_border_radius` | range | `8` | Button corner radius (0–24px). |
+| `button_style` | select | `primary` | Button style preset (`primary`, `secondary`, `outline`, `custom`). |
+| `button_background_color` | color | `""` | Custom button background color (visible when `custom`). |
+| `button_text_color` | color | `""` | Custom button text color (visible when `custom`). |
+| `button_border_color` | color | `""` | Custom button border color (visible when `custom`). |
+| `button_border_radius` | range | `8` | Button corner radius (0–24px, visible when `custom`). |
 
 ---
 

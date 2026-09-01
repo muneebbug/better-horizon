@@ -46,11 +46,11 @@ The **Estimated Delivery Date & Shipping Estimator** provides customers with rea
 | `exclude_weekends` | checkbox | `true` | Exclude Saturdays and Sundays from delivery estimates. |
 | `show_countdown` | checkbox | `true` | Show real-time order cutoff countdown timer. |
 | `show_zip_estimator` | checkbox | `true` | Enable ZIP / postal code lookup field. |
-| `card_style` | select | `default` | Style preset (`default`, `minimal`, `outline`). |
-| `background_color` | color | `""` | Custom card background color. |
-| `border_color` | color | `""` | Custom card border color. |
-| `border_width` | range | `1` | Card border width (0–4px). |
-| `border_radius` | range | `8` | Card corner radius (0–24px). |
+| `card_style` | select | `default` | Style preset (`default`, `minimal`, `outline`, `custom`). |
+| `background_color` | color | `""` | Custom card background color (visible when `custom`). |
+| `border_color` | color | `""` | Custom card border color (visible when `custom`). |
+| `border_width` | range | `1` | Card border width (0–4px, visible when `custom`). |
+| `border_radius` | range | `8` | Card corner radius (0–24px, visible when `custom`). |
 | `show_icon` | checkbox | `true` | Toggle delivery icon visibility. |
 | `icon_type` | select | `shipping` | Choose from `shipping`, `airplane`, `box`, `calendar`, `clock`. |
 | `icon_size` | range | `20` | Icon size (16–32px). |

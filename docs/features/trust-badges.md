@@ -22,7 +22,8 @@ The **Trust Badges & Guarantee Bar** theme block displays store value propositio
   - **Badge Orientation:** Choose `Icon beside text (Horizontal)` or `Icon above text (Vertical)`.
   - **Alignment:** Align items `Left`, `Center`, or `Right`.
 - **🎨 Complete Styling & Color Control:**
-  - Custom background color, border color, border width, and border radius.
+  - Container styles: `Default card`, `Minimal (borderless / transparent)`, `Outline only`, and `Custom colors`.
+  - Custom background color, border color, border width, and border radius (active when `Custom colors` is chosen).
   - Custom icon color, heading text color, and subtext color.
   - Icon size slider (16px to 48px) and badge spacing controls.
 
@@ -40,10 +41,11 @@ The **Trust Badges & Guarantee Bar** theme block displays store value propositio
 - `gap`: Gap spacing between badges (Range: 8–40px, Default: 16px).
 
 ### Appearance & Colors
-- `background_color`: Custom container background fill.
-- `border_color`: Custom container border stroke.
-- `border_width`: Border thickness in pixels (Range: 0–4px, Default: 1px).
-- `border_radius`: Container corner roundness (Range: 0–24px, Default: 8px).
+- `card_style`: Container style preset (`Default card`, `Minimal`, `Outline only`, `Custom colors`).
+- `background_color`: Custom container background fill (visible when `Custom colors` is selected).
+- `border_color`: Custom container border stroke (visible when `Custom colors` is selected).
+- `border_width`: Border thickness in pixels (Range: 0–4px, Default: 1px, visible when `Custom colors` is selected).
+- `border_radius`: Container corner roundness (Range: 0–24px, Default: 8px, visible when `Custom colors` is selected).
 - `icon_color`: Color for vector preset icons.
 - `heading_color`: Text color for badge titles.
 - `subtext_color`: Text color for badge subtitles.
@@ -57,3 +59,8 @@ Each badge includes:
 - `badge_X_heading`: Badge title text.
 - `badge_X_subtext`: Optional supporting description.
 - `badge_X_link`: Optional URL to make the badge clickable.
+
+---
+
+## 📁 Files
+- `blocks/trust-badge-bar.liquid` — Block template, Theme Editor schema, and scoped styles.
