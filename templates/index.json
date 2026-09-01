@@ -307,10 +307,154 @@
         "padding-block-start": 48,
         "padding-block-end": 48
       }
+    },
+    "contact_form_home": {
+      "type": "section",
+      "blocks": {
+        "heading_contact": {
+          "type": "text",
+          "name": "t:names.heading",
+          "settings": {
+            "text": "<h2>Get in touch</h2>",
+            "type_preset": "h2",
+            "alignment": "center",
+            "width": "100%"
+          }
+        },
+        "form_contact": {
+          "type": "form",
+          "blocks": {
+            "name_input": {
+              "type": "form-input",
+              "settings": {
+                "name": "contact[name]",
+                "label": "Name",
+                "placeholder": "Your name",
+                "width": "50",
+                "autocomplete": "name"
+              }
+            },
+            "email_input": {
+              "type": "form-input",
+              "settings": {
+                "name": "contact[email]",
+                "type": "email",
+                "label": "Email",
+                "placeholder": "your.email@example.com",
+                "required": true,
+                "width": "50",
+                "autocomplete": "email"
+              }
+            },
+            "phone_input": {
+              "type": "form-input",
+              "settings": {
+                "name": "contact[phone]",
+                "type": "tel",
+                "label": "Phone number",
+                "placeholder": "+1 (555) 000-0000",
+                "width": "50",
+                "autocomplete": "tel"
+              }
+            },
+            "subject_select": {
+              "type": "form-select",
+              "settings": {
+                "name": "contact[Subject]",
+                "label": "Subject",
+                "placeholder": "Select a subject...",
+                "width": "50"
+              },
+              "blocks": {
+                "opt_general": {
+                  "type": "_form-select-option",
+                  "settings": {
+                    "label": "General inquiry",
+                    "value": "General inquiry"
+                  }
+                },
+                "opt_order": {
+                  "type": "_form-select-option",
+                  "settings": {
+                    "label": "Order support",
+                    "value": "Order support"
+                  }
+                },
+                "opt_wholesale": {
+                  "type": "_form-select-option",
+                  "settings": {
+                    "label": "Wholesale & Partnerships",
+                    "value": "Wholesale & Partnerships"
+                  }
+                }
+              },
+              "block_order": [
+                "opt_general",
+                "opt_order",
+                "opt_wholesale"
+              ]
+            },
+            "message_textarea": {
+              "type": "form-textarea",
+              "settings": {
+                "name": "contact[body]",
+                "label": "Message",
+                "placeholder": "How can we help you?",
+                "required": true,
+                "rows": 4,
+                "width": "100"
+              }
+            },
+            "newsletter_checkbox": {
+              "type": "form-checkbox",
+              "settings": {
+                "name": "contact[newsletter_opt_in]",
+                "label": "Subscribe to our newsletter for exclusive updates and offers",
+                "width": "100"
+              }
+            },
+            "submit_button": {
+              "type": "form-submit-button",
+              "settings": {
+                "label": "Send message",
+                "style_class": "button-primary",
+                "width": "full_width"
+              }
+            }
+          },
+          "block_order": [
+            "name_input",
+            "email_input",
+            "phone_input",
+            "subject_select",
+            "message_textarea",
+            "newsletter_checkbox",
+            "submit_button"
+          ],
+          "settings": {
+            "width": "fill",
+            "form_gap": 16
+          }
+        }
+      },
+      "block_order": [
+        "heading_contact",
+        "form_contact"
+      ],
+      "name": "Contact form",
+      "settings": {
+        "section_width": "page-width",
+        "content_direction": "column",
+        "horizontal_alignment": "center",
+        "gap": 24,
+        "padding-block-start": 64,
+        "padding-block-end": 64
+      }
     }
   },
   "order": [
     "hero_jVaWmY",
-    "product_list_fa6P9H"
+    "product_list_fa6P9H",
+    "contact_form_home"
   ]
 }
