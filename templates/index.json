@@ -316,76 +316,191 @@
           "name": "t:names.heading",
           "settings": {
             "text": "<h2>Get in touch</h2>",
-            "type_preset": "h2",
+            "width": "100%",
+            "max_width": "normal",
             "alignment": "center",
-            "width": "100%"
-          }
+            "type_preset": "h2",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "text_color": "",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
         },
         "form_contact": {
           "type": "form",
+          "settings": {
+            "card_style": "minimal",
+            "background_color": "",
+            "border_color": "",
+            "card_border_width": 1,
+            "card_border_radius": 8,
+            "card_padding": 24,
+            "text_color": "",
+            "form_gap": 16,
+            "input_size": "default",
+            "label_color": "",
+            "label_size": "medium",
+            "label_weight": "500",
+            "help_text_color": "",
+            "input_style": "default",
+            "input_background_color": "",
+            "input_text_color": "",
+            "input_border_color": "",
+            "input_focus_border_color": "",
+            "input_placeholder_color": "",
+            "border_width": 1,
+            "border_radius": 6,
+            "success_message": "Thank you for contacting us. We will get back to you as soon as possible.",
+            "success_background_color": "",
+            "success_text_color": "",
+            "success_border_color": "",
+            "error_message": "Please adjust the errors below and try again.",
+            "error_background_color": "",
+            "error_text_color": "",
+            "error_border_color": "",
+            "width": "fill",
+            "custom_width": 100,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
           "blocks": {
             "name_input": {
               "type": "form-input",
               "settings": {
-                "name": "contact[name]",
+                "type": "text",
+                "name_type": "contact",
+                "name": "name",
                 "label": "Name",
+                "hide_label": false,
                 "placeholder": "Your name",
+                "icon": "none",
+                "default_value": "",
+                "required": false,
                 "width": "50",
-                "autocomplete": "name"
-              }
+                "help_text": "",
+                "autocomplete": "name",
+                "override_colors": false,
+                "input_background_color": "",
+                "input_text_color": "",
+                "input_border_color": "",
+                "input_border_radius": 6,
+                "padding-block-start": 0,
+                "padding-block-end": 0
+              },
+              "blocks": {}
             },
             "email_input": {
               "type": "form-input",
               "settings": {
-                "name": "contact[email]",
                 "type": "email",
+                "name_type": "contact",
+                "name": "email",
                 "label": "Email",
+                "hide_label": false,
                 "placeholder": "your.email@example.com",
+                "icon": "none",
+                "default_value": "",
                 "required": true,
                 "width": "50",
-                "autocomplete": "email"
-              }
+                "help_text": "",
+                "autocomplete": "email",
+                "override_colors": false,
+                "input_background_color": "",
+                "input_text_color": "",
+                "input_border_color": "",
+                "input_border_radius": 6,
+                "padding-block-start": 0,
+                "padding-block-end": 0
+              },
+              "blocks": {}
             },
             "phone_input": {
               "type": "form-input",
               "settings": {
-                "name": "contact[phone]",
                 "type": "tel",
+                "name_type": "contact",
+                "name": "phone",
                 "label": "Phone number",
+                "hide_label": false,
                 "placeholder": "+1 (555) 000-0000",
+                "icon": "none",
+                "default_value": "",
+                "required": false,
                 "width": "50",
-                "autocomplete": "tel"
-              }
+                "help_text": "",
+                "autocomplete": "tel",
+                "override_colors": false,
+                "input_background_color": "",
+                "input_text_color": "",
+                "input_border_color": "",
+                "input_border_radius": 6,
+                "padding-block-start": 0,
+                "padding-block-end": 0
+              },
+              "blocks": {}
             },
             "subject_select": {
               "type": "form-select",
               "settings": {
-                "name": "contact[Subject]",
+                "name_type": "contact",
+                "name": "Subject",
                 "label": "Subject",
+                "hide_label": false,
                 "placeholder": "Select a subject...",
-                "width": "50"
+                "required": false,
+                "width": "50",
+                "help_text": "",
+                "override_colors": false,
+                "input_background_color": "",
+                "input_text_color": "",
+                "input_border_color": "",
+                "input_border_radius": 6,
+                "padding-block-start": 0,
+                "padding-block-end": 0
               },
               "blocks": {
                 "opt_general": {
                   "type": "_form-select-option",
                   "settings": {
                     "label": "General inquiry",
-                    "value": "General inquiry"
-                  }
+                    "value": "General inquiry",
+                    "selected_by_default": false,
+                    "disabled": false
+                  },
+                  "blocks": {}
                 },
                 "opt_order": {
                   "type": "_form-select-option",
                   "settings": {
                     "label": "Order support",
-                    "value": "Order support"
-                  }
+                    "value": "Order support",
+                    "selected_by_default": false,
+                    "disabled": false
+                  },
+                  "blocks": {}
                 },
                 "opt_wholesale": {
                   "type": "_form-select-option",
                   "settings": {
                     "label": "Wholesale & Partnerships",
-                    "value": "Wholesale & Partnerships"
-                  }
+                    "value": "Wholesale & Partnerships",
+                    "selected_by_default": false,
+                    "disabled": false
+                  },
+                  "blocks": {}
                 }
               },
               "block_order": [
@@ -397,29 +512,67 @@
             "message_textarea": {
               "type": "form-textarea",
               "settings": {
-                "name": "contact[body]",
+                "name_type": "contact",
+                "name": "body",
                 "label": "Message",
+                "hide_label": false,
                 "placeholder": "How can we help you?",
+                "default_value": "",
                 "required": true,
                 "rows": 4,
-                "width": "100"
-              }
+                "min_height": 100,
+                "max_characters": 0,
+                "show_counter": true,
+                "width": "100",
+                "help_text": "",
+                "override_colors": false,
+                "input_background_color": "",
+                "input_text_color": "",
+                "input_border_color": "",
+                "input_border_radius": 6,
+                "padding-block-start": 0,
+                "padding-block-end": 0
+              },
+              "blocks": {}
             },
             "newsletter_checkbox": {
               "type": "form-checkbox",
               "settings": {
-                "name": "contact[newsletter_opt_in]",
+                "name_type": "contact",
+                "name": "newsletter_opt_in",
                 "label": "Subscribe to our newsletter for exclusive updates and offers",
-                "width": "100"
-              }
+                "value": "Yes",
+                "checked_by_default": false,
+                "required": false,
+                "checkbox_size": "medium",
+                "width": "100",
+                "help_text": "",
+                "override_colors": false,
+                "checkbox_active_color": "",
+                "checkbox_border_color": "",
+                "checkbox_text_color": "",
+                "padding-block-start": 0,
+                "padding-block-end": 0
+              },
+              "blocks": {}
             },
             "submit_button": {
               "type": "form-submit-button",
               "settings": {
                 "label": "Send message",
                 "style_class": "button-primary",
-                "width": "full_width"
-              }
+                "button_background_color": "",
+                "button_text_color": "",
+                "button_border_color": "",
+                "button_border_width": 1,
+                "button_border_radius": 6,
+                "button_size": "medium",
+                "width": "full_width",
+                "alignment": "left",
+                "padding-block-start": 8,
+                "padding-block-end": 0
+              },
+              "blocks": {}
             }
           },
           "block_order": [
@@ -430,11 +583,7 @@
             "message_textarea",
             "newsletter_checkbox",
             "submit_button"
-          ],
-          "settings": {
-            "width": "fill",
-            "form_gap": 16
-          }
+          ]
         }
       },
       "block_order": [
@@ -443,10 +592,30 @@
       ],
       "name": "Contact form",
       "settings": {
-        "section_width": "page-width",
         "content_direction": "column",
+        "vertical_on_mobile": true,
         "horizontal_alignment": "center",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "flex-start",
+        "vertical_alignment_flex_direction_column": "center",
         "gap": 24,
+        "section_width": "page-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "background_media": "none",
+        "background_color": "",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_color": "",
+        "border_radius": 0,
         "padding-block-start": 64,
         "padding-block-end": 64
       }
