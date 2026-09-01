@@ -77,12 +77,13 @@
   font-family: inherit;
   font-size: var(--font-size-md, 16px);
   line-height: 1.5;
-  color: inherit;
-  background-color: var(--input-bg, var(--color-input-background, transparent));
-  border: var(--style-border-width-inputs, 1px) solid var(--color-border, rgba(0, 0, 0, 0.15));
+  color: var(--color-input-text, inherit);
+  background-color: var(--color-input-background, transparent);
+  border: var(--style-border-width-inputs, 1px) solid var(--color-input-border, rgb(var(--color-foreground-rgb, 0 0 0) / 0.15));
   border-radius: var(--style-border-radius-inputs, 4px);
-  padding: 12px 16px;
+  padding: var(--padding-lg, 12px) var(--padding-xl, 16px);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  -webkit-font-smoothing: antialiased;
 }
 
 .custom-form__input:focus-visible,
@@ -95,7 +96,7 @@
 
 .custom-form__textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 100px;
 }
 
 /* Custom Select Dropdown Arrow */
