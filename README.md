@@ -21,7 +21,10 @@ Better Horizon builds these features directly into the theme using clean Liquid 
 
 ## Built-in Features
 
-- **Wishlist:** Customers can save items to a wishlist and view them in a slide-out drawer or add them straight to their cart.
+- **Custom Form Builder:** Fully modular block-based forms (inputs, textareas, dropdowns with nested options, checkboxes, radio groups) that submit natively through Shopify without third-party form apps.
+- **Estimated Delivery Date:** Real-time shipping calculation showing earliest and latest delivery dates, order cut-off countdowns, and optional postal code lookup.
+- **Gift Wrap & Message:** Gift packaging option with nested line item pricing and custom gift note handling.
+- **Wishlist:** Customers can save items to a wishlist, view them in a slide-out drawer, and add them straight to cart.
 - **Quick View:** Lets shoppers preview product details and select variants without leaving the collection page.
 - **Back in Stock Alerts:** An email signup form that appears on sold-out variants so customers can be notified when items return.
 - **Frequently Bought Together:** Shows product bundles with automatic price calculations and one-click add to cart.

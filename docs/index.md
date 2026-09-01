@@ -38,6 +38,9 @@ You can preview the theme here:
 - [Architecture Overview](/getting-started/architecture) — Liquid Storefronts, Theme Blocks, and Custom Elements lifecycle.
 
 ### Core Features
+- [Custom Forms & Form Blocks](/features/custom-forms) — Block-based form builder supporting inputs, textareas, selects, checkboxes, and radio groups.
+- [Estimated Delivery Date](/features/delivery-estimate) — Dynamic delivery timeframe calculator with postal code estimation and shipping cutoffs.
+- [Gift Wrap & Custom Note](/features/gift-wrap) — Gift packaging addon with nested line items support and message cards.
 - [Wishlist System](/features/wishlist) — Header counter badge, slide-out drawer, and direct Add-to-Cart.
 - [Quick View & Quick Add](/features/quick-view) — Modal preview dialogs and loading spinner feedback.
 - [Back in Stock Capture](/features/back-in-stock) — Sold-out variant email notification forms.
