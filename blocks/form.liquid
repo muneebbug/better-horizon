@@ -13,8 +13,8 @@
     assign custom_input_style = true
   endif
 
-  assign success_msg = block_settings.success_message | default: 'blocks.contact_form.post_success' | t
-  assign error_msg = block_settings.error_message | default: 'templates.contact.form.error_heading' | t
+  assign success_msg = block_settings.success_message | default: 'Thank you for contacting us. We will get back to you as soon as possible.'
+  assign error_msg = block_settings.error_message | default: 'Please adjust the errors below and try again.'
 -%}
 
 <div
