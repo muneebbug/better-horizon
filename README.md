@@ -76,9 +76,9 @@ shopify theme check
 ## Installing on Your Store
 
 ### Option 1: Upload a ZIP file
-1. Download the repository ZIP file from GitHub.
-2. In your Shopify Admin, go to **Online Store > Themes**.
-3. Under **Theme library**, click **Add theme > Upload zip file**.
+1. Download the repository ZIP file from [here](https://github.com/muneebbug/better-horizon/archive/refs/heads/main.zip) or download the [latest release](https://github.com/muneebbug/better-horizon/releases/latest).
+2. In your Shopify Admin, go to **Sales Channels > Online Store**.
+3. Click **Import > Upload zip file**.
 4. Test the theme in preview, then click **Publish**.
 
 ### Option 2: Push with Shopify CLI
