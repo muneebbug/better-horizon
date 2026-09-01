@@ -3,10 +3,37 @@
   Renders a dropdown selector with nested Option blocks for custom forms.
 {% enddoc %}
 
+{% render 'custom-form-styles' %}
+
 {%- liquid
   assign block_settings = block.settings
   assign field_id = 'FormField-Select-' | append: block.id
-  assign field_name = block_settings.name | default: 'contact[Subject]'
+  assign raw_name = block_settings.name | default: 'Subject'
+  assign name_type = block_settings.name_type | default: 'contact'
+
+  case name_type
+    when 'contact'
+      if raw_name contains 'contact['
+        assign field_name = raw_name
+      else
+        assign field_name = 'contact[' | append: raw_name | append: ']'
+      endif
+    when 'property'
+      if raw_name contains 'properties['
+        assign field_name = raw_name
+      else
+        assign field_name = 'properties[' | append: raw_name | append: ']'
+      endif
+    when 'attribute'
+      if raw_name contains 'attributes['
+        assign field_name = raw_name
+      else
+        assign field_name = 'attributes[' | append: raw_name | append: ']'
+      endif
+    when 'custom'
+      assign field_name = raw_name
+  endcase
+
   assign field_label = block_settings.label | default: 'Subject'
   assign field_width = block_settings.width | default: '100'
   assign help_id = 'FormField-Help-' | append: block.id
@@ -61,6 +88,8 @@
       focusable="false"
       class="icon icon-caret"
       viewBox="0 0 10 6"
+      width="10"
+      height="6"
     >
       {%- render 'icon', icon: 'caret' -%}
     </svg>
@@ -84,11 +113,36 @@
   ],
   "settings": [
     {
+      "type": "select",
+      "id": "name_type",
+      "label": "Field purpose",
+      "options": [
+        {
+          "value": "contact",
+          "label": "Contact form (contact[...])"
+        },
+        {
+          "value": "property",
+          "label": "Line item property (properties[...])"
+        },
+        {
+          "value": "attribute",
+          "label": "Cart attribute (attributes[...])"
+        },
+        {
+          "value": "custom",
+          "label": "Custom (no wrapper)"
+        }
+      ],
+      "default": "contact",
+      "info": "Contact: for contact/inquiry forms. Line item property: for custom product options (color, material). Cart attribute: for cart-level order dropdowns. Custom: exact HTML name."
+    },
+    {
       "type": "text",
       "id": "name",
       "label": "Field name",
-      "default": "contact[Subject]",
-      "info": "Submission property key (e.g. contact[Subject] or contact[Department])"
+      "default": "Subject",
+      "info": "Field key (e.g. Subject, Department, or Delivery Option). Brackets are added automatically based on purpose."
     },
     {
       "type": "text",

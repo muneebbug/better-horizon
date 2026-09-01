@@ -2,9 +2,7 @@
   Custom Form Container Block
   Master form container block supporting modular nested fields (input, textarea, select, checkbox, radio, button).
 {% enddoc %}
-
-{{ 'custom-form.css' | asset_url | stylesheet_tag }}
-
+{% render 'custom-form-styles' %}
 {%- liquid
   assign block_settings = block.settings
   assign form_id = block.id | default: section.id | prepend: 'CustomForm-'

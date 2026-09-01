@@ -3,6 +3,8 @@
   Renders the primary form submission trigger for custom forms.
 {% enddoc %}
 
+{% render 'custom-form-styles' %}
+
 {%- liquid
   assign block_settings = block.settings
   assign label = block_settings.label | default: 'Send message'
