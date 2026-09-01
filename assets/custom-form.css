@@ -9,13 +9,13 @@
   display: flex;
   flex-wrap: wrap;
   width: 100%;
-  gap: var(--form-gap, var(--gap-md, 16px));
+  gap: var(--form-gap, var(--gap-md));
 }
 
 .custom-form__field {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-xs, 6px);
+  gap: var(--gap-xs);
   position: relative;
   box-sizing: border-box;
 }
@@ -43,13 +43,13 @@
 
 @media screen and (min-width: 750px) {
   .custom-form__field--width-50 {
-    width: calc(50% - (var(--form-gap, var(--gap-md, 16px)) / 2));
-    flex: 0 0 calc(50% - (var(--form-gap, var(--gap-md, 16px)) / 2));
+    width: calc(50% - (var(--form-gap, var(--gap-md)) / 2));
+    flex: 0 0 calc(50% - (var(--form-gap, var(--gap-md)) / 2));
   }
 
   .custom-form__field--width-33 {
-    width: calc(33.333% - (var(--form-gap, var(--gap-md, 16px)) * 2 / 3));
-    flex: 0 0 calc(33.333% - (var(--form-gap, var(--gap-md, 16px)) * 2 / 3));
+    width: calc(33.333% - (var(--form-gap, var(--gap-md)) * 2 / 3));
+    flex: 0 0 calc(33.333% - (var(--form-gap, var(--gap-md)) * 2 / 3));
   }
 }
 
@@ -58,7 +58,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: var(--font-size-sm, 14px);
+  font-size: var(--font-paragraph--size);
   font-weight: 500;
   color: inherit;
 }
@@ -68,77 +68,83 @@
   font-weight: bold;
 }
 
-/* Input, Textarea, Select base styling */
+/* Native Horizon Input & Textarea styling */
 .custom-form__input,
-.custom-form__textarea,
-.custom-form__select {
+.custom-form__textarea {
   width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-input-text);
+  background-color: var(--color-input-background);
+  padding: var(--padding-lg) var(--padding-xl);
+  border-radius: var(--style-border-radius-inputs);
+  border: var(--style-border-width-inputs) solid var(--color-input-border);
+  -webkit-font-smoothing: antialiased;
   box-sizing: border-box;
   font-family: inherit;
-  font-size: var(--font-size-md, 16px);
-  line-height: 1.5;
-  color: var(--color-input-text, inherit);
-  background-color: var(--color-input-background, transparent);
-  border: var(--style-border-width-inputs, 1px) solid var(--color-input-border, rgb(var(--color-foreground-rgb, 0 0 0) / 0.15));
-  border-radius: var(--style-border-radius-inputs, 4px);
-  padding: var(--padding-lg, 12px) var(--padding-xl, 16px);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  -webkit-font-smoothing: antialiased;
+  font-size: var(--font-paragraph--size);
+  line-height: normal;
 }
 
 .custom-form__input:focus-visible,
-.custom-form__textarea:focus-visible,
-.custom-form__select:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
-  border-color: currentColor;
+.custom-form__textarea:focus-visible {
+  outline: var(--focus-outline-width) solid currentcolor;
+  outline-offset: var(--focus-outline-offset);
 }
 
 .custom-form__textarea {
   resize: vertical;
-  min-height: 100px;
+  min-height: var(--input-textarea-min-height);
 }
 
-/* Custom Select Dropdown Arrow */
+/* Native Horizon Select dropdown styling */
 .custom-form__select-wrapper {
+  display: flex;
   position: relative;
+  border: var(--style-border-width-inputs) solid var(--color-input-border);
+  border-radius: var(--style-border-radius-inputs);
+  align-items: center;
+  overflow: clip;
+  color: var(--color-input-text);
+  background-color: var(--color-input-background);
   width: 100%;
+  box-sizing: border-box;
+}
+
+.custom-form__select-wrapper:has(.custom-form__select:focus-visible) {
+  outline: var(--focus-outline-width) solid currentcolor;
+  outline-offset: var(--focus-outline-offset);
 }
 
 .custom-form__select {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: var(--padding-lg) var(--padding-xl);
+  padding-inline-end: calc(var(--padding-xl) + var(--icon-size-2xs) + var(--padding-sm));
   appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  padding-right: 40px;
+  background-color: transparent;
+  color: inherit;
+  border: 0;
+  margin: 0;
   cursor: pointer;
+  -webkit-font-smoothing: antialiased;
+  font-family: inherit;
+  font-size: var(--font-paragraph--size);
+  line-height: normal;
+  outline: none;
+  box-sizing: border-box;
 }
 
-.custom-form__select-icon {
+.custom-form__select-wrapper .icon {
   position: absolute;
-  right: 14px;
+  right: var(--padding-xl);
   top: 50%;
   transform: translateY(-50%);
+  width: var(--icon-size-2xs);
+  height: var(--icon-size-2xs);
   pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  opacity: 0.7;
-}
-
-/* Checkbox field styling */
-.custom-form__checkbox-field {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.custom-form__checkbox-field input[type="checkbox"] {
-  margin-top: 3px;
-  cursor: pointer;
+  color: var(--color-input-text);
 }
 
 /* Radio Group styling */
@@ -150,15 +156,15 @@
 }
 
 .custom-form__radio-legend {
-  font-size: var(--font-size-sm, 14px);
+  font-size: var(--font-paragraph--size);
   font-weight: 500;
-  margin-bottom: 8px;
+  margin-bottom: var(--margin-xs);
   padding: 0;
 }
 
 .custom-form__radio-options {
   display: flex;
-  gap: 12px;
+  gap: var(--gap-sm);
   flex-wrap: wrap;
 }
 
@@ -171,36 +177,56 @@
 }
 
 .custom-form__radio-label {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  position: relative;
+  padding-block: var(--padding-sm);
+  padding-inline: var(--padding-lg);
+  border: var(--style-border-width-inputs) solid var(--color-input-border);
+  border-radius: var(--style-border-radius-inputs);
+  overflow: clip;
+  justify-content: center;
+  min-width: auto;
+  background-color: var(--color-input-background);
+  color: var(--color-input-text);
   cursor: pointer;
-  font-size: var(--font-size-sm, 14px);
+  transition: background-color var(--animation-speed) var(--animation-easing),
+    border-color var(--animation-speed) var(--animation-easing);
+}
+
+.custom-form__radio-label:has(input:checked) {
+  background-color: var(--color-foreground);
+  color: var(--color-background);
+  border-color: var(--color-foreground);
+}
+
+.custom-form__radio-label:has(input:focus-visible) {
+  outline: var(--focus-outline-width) solid currentcolor;
+  outline-offset: var(--focus-outline-offset);
 }
 
 .custom-form__radio-label input[type="radio"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
   cursor: pointer;
+  width: 100%;
+  height: 100%;
 }
 
 /* Helper text & Character counter */
 .custom-form__help-text {
-  font-size: 12px;
-  opacity: 0.75;
-  margin-top: 2px;
-}
-
-.custom-form__char-count {
-  font-size: 11px;
-  opacity: 0.65;
-  text-align: right;
-  margin-top: 2px;
+  font-size: var(--font-size--xs, 0.85rem);
+  color: rgb(var(--color-foreground-rgb) / var(--opacity-60));
+  margin-top: var(--margin-2xs);
 }
 
 /* Submit button wrapper */
 .custom-form__submit-wrapper {
   display: flex;
   width: 100%;
-  margin-top: var(--gap-xs, 4px);
+  margin-top: var(--gap-xs);
 }
 
 .custom-form__submit-wrapper--left {
@@ -224,29 +250,27 @@
 .custom-form__alert {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--gap-xs);
   width: 100%;
-  padding: 14px 18px;
-  border-radius: var(--style-border-radius-inputs, 4px);
-  font-size: 14px;
-  font-weight: 500;
   box-sizing: border-box;
+  font-size: var(--font-paragraph--size);
+  padding-block: var(--padding-md);
+  padding-inline: var(--padding-lg);
+  border-radius: var(--style-border-radius-inputs);
 }
 
 .custom-form__alert svg {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
   flex-shrink: 0;
 }
 
 .custom-form__alert--success {
-  background-color: rgba(30, 150, 70, 0.12);
-  color: #0e6c30;
-  border: 1px solid rgba(30, 150, 70, 0.3);
+  background-color: rgb(var(--color-foreground-rgb) / var(--opacity-8));
+  color: var(--color-foreground);
 }
 
 .custom-form__alert--error {
-  background-color: rgba(220, 30, 30, 0.1);
-  color: #b31010;
-  border: 1px solid rgba(220, 30, 30, 0.3);
+  background-color: rgb(var(--color-foreground-rgb) / var(--opacity-8));
+  color: var(--color-error, #d20000);
 }

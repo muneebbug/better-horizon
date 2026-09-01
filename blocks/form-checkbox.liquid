@@ -13,18 +13,20 @@
   assign help_id = 'FormField-Help-' | append: block.id
 -%}
 
+{% render 'checkbox-styles' %}
+
 <div
   class="custom-form__field custom-form__field--width-{{ field_width }} spacing-style"
   style="{% render 'spacing-style', settings: block_settings %}"
   {{ block.shopify_attributes }}
 >
-  <label for="{{ field_id }}" class="custom-form__checkbox-field">
+  <div class="checkbox">
     <input
       type="checkbox"
       id="{{ field_id }}"
       name="{{ field_name }}"
       value="{{ field_value | escape }}"
-      class="custom-form__checkbox-input"
+      class="checkbox__input"
       {% if block_settings.checked_by_default %}
         checked
       {% endif %}
@@ -36,16 +38,23 @@
         aria-describedby="{{ help_id }}"
       {% endif %}
     >
-    <span class="custom-form__label">
-      {{- field_label -}}
-      {%- if block_settings.required -%}
-        <span class="custom-form__required-mark" aria-hidden="true">*</span>
-      {%- endif -%}
-    </span>
-  </label>
+    <label class="checkbox__label" for="{{ field_id }}">
+      {{ 'icon-checkmark.svg' | inline_asset_content }}
+      <span class="checkbox__label-text">
+        {{- field_label -}}
+        {%- if block_settings.required -%}
+          <span class="custom-form__required-mark" aria-hidden="true">*</span>
+        {%- endif -%}
+      </span>
+    </label>
+  </div>
 
   {%- if block_settings.help_text != blank -%}
-    <span id="{{ help_id }}" class="custom-form__help-text" style="margin-left: 28px;">
+    <span
+      id="{{ help_id }}"
+      class="custom-form__help-text"
+      style="margin-inline-start: calc(var(--checkbox-size) + var(--checkbox-label-padding));"
+    >
       {{- block_settings.help_text -}}
     </span>
   {%- endif -%}
