@@ -1,42 +1,59 @@
 ---
 title: Trust Badges & Guarantee Bar
-description: Store value proposition bar highlighting shipping policies, return guarantees, security, and customer care.
+description: Highly customizable store reassurance bar featuring layout options, vector icons, custom image uploads, color styling, and flexible alignments.
 sidebar_position: 5
 ---
 
 # Trust Badges & Guarantee Bar
 
-The **Trust Badges & Guarantee Bar** theme block displays reassurance credentials to build buyer confidence.
+The **Trust Badges & Guarantee Bar** theme block displays store value propositions, credentials, and customer reassurance to build buyer confidence.
 
 ---
 
 ## 🚀 Key Features
 
-- **🛡️ 4 Value Proposition Badges:**
-  - **Delivery:** Free Shipping / Delivery terms
-  - **Guarantee:** 30-Day Money-Back Guarantee
-  - **Security:** 256-Bit SSL Encrypted Checkout
-  - **Support:** 24/7 Dedicated Customer Care
-- **📐 Flexible Layouts:** Toggle between **Grid** and **Horizontal bar** modes.
-- **🎨 Theme Token Integration:** Uses soft adaptive borders and theme foreground colors.
+- **🛡️ Up to 6 Configurable Badges:** Configure from 1 to 6 reassurance badges with individual enable toggles and optional links.
+- **🎨 Icons or Custom Uploads:**
+  - **Icons:** Pick from 12 built-in vector presets (`shipping`, `shield`, `lock`, `support`, `return`, `star`, `award`, `heart`, `clock`, `globe`, `check`, `zap`).
+  - **Custom Image:** Upload custom brand icons or badges via Shopify's media manager.
+- **📐 Flexible Layouts & Orientations:**
+  - **Layout Styles:** `Grid` (multi-column), `Horizontal` (inline wrap), or `Vertical` (stacked list).
+  - **Grid Columns:** Select 1 to 4 desktop columns (or `Auto-fit`), and 1 or 2 mobile columns.
+  - **Badge Orientation:** Choose `Icon beside text (Horizontal)` or `Icon above text (Vertical)`.
+  - **Alignment:** Align items `Left`, `Center`, or `Right`.
+- **🎨 Complete Styling & Color Control:**
+  - Custom background color, border color, border width, and border radius.
+  - Custom icon color, heading text color, and subtext color.
+  - Icon size slider (16px to 48px) and badge spacing controls.
 
 ---
 
 ## ⚙️ Block Settings
 
-| Setting | Type | Options / Default | Description |
-| :--- | :--- | :--- | :--- |
-| `layout` | select | `grid` / `horizontal` | Display layout arrangement. |
-| `badge_1_heading` | text | `"Free Shipping"` | Title for badge 1. |
-| `badge_1_subtext` | text | `"On orders over $50"` | Caption for badge 1. |
-| `badge_2_heading` | text | `"30-Day Guarantee"` | Title for badge 2. |
-| `badge_2_subtext` | text | `"Hassle-free returns"` | Caption for badge 2. |
-| `badge_3_heading` | text | `"Secure Checkout"` | Title for badge 3. |
-| `badge_3_subtext` | text | `"256-bit SSL encryption"` | Caption for badge 3. |
-| `badge_4_heading` | text | `"24/7 Support"` | Title for badge 4. |
-| `badge_4_subtext` | text | `"Dedicated customer care"` | Caption for badge 4. |
+### Layout & Arrangement
+- `layout`: Choose between `Grid`, `Horizontal (inline wrap)`, and `Vertical (stacked)`.
+- `columns_desktop`: Number of desktop columns in grid mode (`Auto-fit`, `1`, `2`, `3`, `4`).
+- `columns_mobile`: Number of mobile columns (`1` or `2`).
+- `badge_orientation`: `Horizontal` (icon beside text) or `Vertical` (icon above text).
+- `alignment`: Content alignment (`Left`, `Center`, `Right`).
+- `icon_size`: Sizing of icons in pixels (Range: 16–48px, Default: 22px).
+- `gap`: Gap spacing between badges (Range: 8–40px, Default: 16px).
 
----
+### Appearance & Colors
+- `background_color`: Custom container background fill.
+- `border_color`: Custom container border stroke.
+- `border_width`: Border thickness in pixels (Range: 0–4px, Default: 1px).
+- `border_radius`: Container corner roundness (Range: 0–24px, Default: 8px).
+- `icon_color`: Color for vector preset icons.
+- `heading_color`: Text color for badge titles.
+- `subtext_color`: Text color for badge subtitles.
 
-## 📁 Files
-- `blocks/trust-badge-bar.liquid` — Block template and styling.
+### Badge Items (1 through 6)
+Each badge includes:
+- `badge_X_enable`: Toggle visibility for this badge.
+- `badge_X_icon_type`: Select `Icons` (preset) or `Custom image`.
+- `badge_X_icon`: Vector icon preset dropdown.
+- `badge_X_image`: Image picker for custom uploaded icons.
+- `badge_X_heading`: Badge title text.
+- `badge_X_subtext`: Optional supporting description.
+- `badge_X_link`: Optional URL to make the badge clickable.
