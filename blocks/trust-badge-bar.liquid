@@ -12,21 +12,30 @@
   assign desktop_cols = block_settings.columns_desktop | default: 'auto'
   assign mobile_cols = block_settings.columns_mobile | default: '1'
   assign layout = block_settings.layout | default: 'grid'
+  assign card_style = block_settings.card_style | default: 'default'
 -%}
 
 {%- style -%}
   .trust-bar-block--{{ block.id }} {
-    {% if block_settings.background_color != blank %}
-      background-color: {{ block_settings.background_color }};
-    {% endif %}
-    {% if block_settings.border_color != blank %}
-      border-color: {{ block_settings.border_color }};
-    {% endif %}
-    {% if block_settings.border_width != blank %}
-      border-width: {{ block_settings.border_width }}px;
-    {% endif %}
-    {% if block_settings.border_radius != blank %}
-      border-radius: {{ block_settings.border_radius }}px;
+    {% if card_style == 'custom' %}
+      {% if block_settings.background_color != blank %}
+        background-color: {{ block_settings.background_color }};
+      {% endif %}
+      {% if block_settings.border_color != blank %}
+        border-color: {{ block_settings.border_color }};
+      {% endif %}
+      {% if block_settings.border_width != blank %}
+        border-width: {{ block_settings.border_width }}px;
+      {% endif %}
+      {% if block_settings.border_radius != blank %}
+        border-radius: {{ block_settings.border_radius }}px;
+      {% endif %}
+    {% elsif card_style == 'minimal' %}
+      background-color: transparent;
+      border-color: transparent;
+      border-width: 0px;
+    {% elsif card_style == 'outline' %}
+      background-color: transparent;
     {% endif %}
     --trust-icon-size: {{ icon_size }}px;
     --trust-gap: {{ gap_size }}px;
@@ -441,14 +450,40 @@
       "content": "Appearance & Colors"
     },
     {
+      "type": "select",
+      "id": "card_style",
+      "label": "Container style",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default card"
+        },
+        {
+          "value": "minimal",
+          "label": "Minimal (borderless / transparent)"
+        },
+        {
+          "value": "outline",
+          "label": "Outline only"
+        },
+        {
+          "value": "custom",
+          "label": "Custom colors"
+        }
+      ],
+      "default": "default"
+    },
+    {
       "type": "color",
       "id": "background_color",
-      "label": "Background color"
+      "label": "Background color",
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
     },
     {
       "type": "color",
       "id": "border_color",
-      "label": "Border color"
+      "label": "Border color",
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
     },
     {
       "type": "range",
@@ -458,7 +493,8 @@
       "max": 4,
       "step": 1,
       "unit": "px",
-      "default": 1
+      "default": 1,
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
     },
     {
       "type": "range",
@@ -468,7 +504,8 @@
       "max": 24,
       "step": 2,
       "unit": "px",
-      "default": 8
+      "default": 8,
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
     },
     {
       "type": "color",

@@ -4,6 +4,7 @@
 {% enddoc %}
 
 {%- liquid
+  assign block_settings = block.settings
   assign product = closest.product
   if request.visual_preview_mode and product == blank
     assign product = collections.all.products.first
@@ -16,7 +17,76 @@
   elsif product and product.available == false
     assign is_sold_out = true
   endif
+
+  assign card_style = block_settings.card_style | default: 'default'
+  assign layout = block_settings.layout | default: 'inline'
+  assign button_style = block_settings.button_style | default: 'primary'
 -%}
+
+{%- style -%}
+  .back-in-stock-block--{{ block.id }} {
+    {% if card_style == 'custom' %}
+      {% if block_settings.background_color != blank %}
+        --bis-bg: {{ block_settings.background_color }};
+      {% endif %}
+      {% if block_settings.border_color != blank %}
+        --bis-border: {{ block_settings.border_color }};
+      {% endif %}
+      {% if block_settings.border_width != blank %}
+        --bis-border-width: {{ block_settings.border_width }}px;
+      {% endif %}
+      {% if block_settings.border_radius != blank %}
+        --bis-border-radius: {{ block_settings.border_radius }}px;
+      {% endif %}
+    {% elsif card_style == 'minimal' %}
+      --bis-bg: transparent;
+      --bis-border: transparent;
+      --bis-border-width: 0px;
+    {% elsif card_style == 'outline' %}
+      --bis-bg: transparent;
+    {% endif %}
+
+    {% if block_settings.heading_color != blank %}
+      --bis-heading-color: {{ block_settings.heading_color }};
+    {% endif %}
+    {% if block_settings.subheading_color != blank %}
+      --bis-subheading-color: {{ block_settings.subheading_color }};
+    {% endif %}
+    {% if block_settings.success_color != blank %}
+      --bis-success-color: {{ block_settings.success_color }};
+    {% endif %}
+
+    {% if block_settings.input_background_color != blank %}
+      --bis-input-bg: {{ block_settings.input_background_color }};
+    {% endif %}
+    {% if block_settings.input_text_color != blank %}
+      --bis-input-text: {{ block_settings.input_text_color }};
+    {% endif %}
+    {% if block_settings.input_border_color != blank %}
+      --bis-input-border: {{ block_settings.input_border_color }};
+    {% endif %}
+    {% if block_settings.input_border_radius != blank %}
+      --bis-input-radius: {{ block_settings.input_border_radius }}px;
+    {% endif %}
+  }
+
+  {% if button_style == 'custom' %}
+    .back-in-stock-block--{{ block.id }} .back-in-stock__button {
+      {% if block_settings.button_background_color != blank %}
+        background-color: {{ block_settings.button_background_color }};
+      {% endif %}
+      {% if block_settings.button_text_color != blank %}
+        color: {{ block_settings.button_text_color }};
+      {% endif %}
+      {% if block_settings.button_border_color != blank %}
+        border-color: {{ block_settings.button_border_color }};
+      {% endif %}
+      {% if block_settings.button_border_radius != blank %}
+        border-radius: {{ block_settings.button_border_radius }}px;
+      {% endif %}
+    }
+  {% endif %}
+{%- endstyle -%}
 
 <script
   src="{{ 'back-in-stock.js' | asset_url }}"
@@ -25,14 +95,17 @@
 ></script>
 
 <div
-  class="back-in-stock-block back-in-stock-block--{{ block.id }}{% unless is_sold_out or request.design_mode %} is-hidden{% endunless %}"
+  class="back-in-stock-block back-in-stock-block--{{ block.id }} spacing-style{% unless is_sold_out or request.design_mode %} is-hidden{% endunless %}"
+  style="{% render 'spacing-style', settings: block_settings %}"
   {{ block.shopify_attributes }}
 >
   <back-in-stock-form class="back-in-stock-form-wrapper">
     <div class="back-in-stock__header">
-      <h3 class="back-in-stock__title">{{ block.settings.heading }}</h3>
-      {%- if block.settings.subheading != blank -%}
-        <p class="back-in-stock__subheading">{{ block.settings.subheading }}</p>
+      {%- if block_settings.heading != blank -%}
+        <h3 class="back-in-stock__title">{{ block_settings.heading }}</h3>
+      {%- endif -%}
+      {%- if block_settings.subheading != blank -%}
+        <p class="back-in-stock__subheading">{{ block_settings.subheading }}</p>
       {%- endif -%}
     </div>
 
@@ -48,24 +121,24 @@
         value="Customer requested notification when '{{ product.title | escape }}' (SKU: {{ selected_variant.sku | default: 'N/A' }}) is back in stock."
       >
 
-      <div class="back-in-stock__input-group">
+      <div class="back-in-stock__input-group back-in-stock__input-group--{{ layout }}">
         <label for="BackInStockEmail--{{ block.id }}" class="visually-hidden">
-          {{ block.settings.email_placeholder }}
+          {{ block_settings.email_placeholder }}
         </label>
         <input
           id="BackInStockEmail--{{ block.id }}"
           type="email"
           name="contact[email]"
           class="back-in-stock__input"
-          placeholder="{{ block.settings.email_placeholder }}"
+          placeholder="{{ block_settings.email_placeholder }}"
           required
           aria-required="true"
         >
         <button
           type="submit"
-          class="button back-in-stock__button"
+          class="button back-in-stock__button button--{{ button_style }}"
         >
-          {{ block.settings.button_label }}
+          {{ block_settings.button_label }}
         </button>
       </div>
     {%- endform -%}
@@ -80,7 +153,7 @@
       <span class="svg-wrapper back-in-stock__success-icon">
         {{ 'icon-checkmark.svg' | inline_asset_content }}
       </span>
-      <p>{{ block.settings.success_message }}</p>
+      <p>{{ block_settings.success_message }}</p>
     </div>
   </back-in-stock-form>
 </div>
@@ -89,9 +162,9 @@
   .back-in-stock-block {
     margin: 0;
     padding: var(--padding-lg, 20px);
-    background-color: rgb(var(--color-foreground-rgb) / 0.03);
-    border: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.15));
-    border-radius: var(--style-border-radius-inputs, 8px);
+    background-color: var(--bis-bg, rgb(var(--color-foreground-rgb) / 0.03));
+    border: var(--bis-border-width, 1px) solid var(--bis-border, rgb(var(--color-foreground-rgb) / 0.15));
+    border-radius: var(--bis-border-radius, var(--style-border-radius-inputs, 8px));
     box-sizing: border-box;
     width: 100%;
   }
@@ -109,13 +182,13 @@
     font-size: var(--font-body--size, 15px);
     font-weight: 600;
     line-height: 1.3;
-    color: var(--color-foreground);
+    color: var(--bis-heading-color, var(--color-foreground));
   }
 
   .back-in-stock__subheading {
     margin: 0;
     font-size: var(--font-size--xs, 13px);
-    color: var(--color-foreground-subdued, rgb(var(--color-foreground-rgb) / 0.7));
+    color: var(--bis-subheading-color, var(--color-foreground-subdued, rgb(var(--color-foreground-rgb) / 0.7)));
     line-height: 1.4;
   }
 
@@ -130,16 +203,20 @@
     width: 100%;
   }
 
+  .back-in-stock__input-group--stacked {
+    flex-direction: column;
+  }
+
   .back-in-stock__input {
     flex: 1;
     min-width: 0;
     height: 44px;
     padding: 0 var(--padding-md, 14px);
-    background-color: var(--color-input-background, var(--color-background));
-    color: var(--color-input-text, var(--color-foreground));
+    background-color: var(--bis-input-bg, var(--color-input-background, var(--color-background)));
+    color: var(--bis-input-text, var(--color-input-text, var(--color-foreground)));
     border: var(--style-border-width, 1px) solid
-      var(--color-input-border, rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.15)));
-    border-radius: var(--style-border-radius-inputs, 8px);
+      var(--bis-input-border, var(--color-input-border, rgb(var(--color-foreground-rgb) / 0.15)));
+    border-radius: var(--bis-input-radius, var(--style-border-radius-inputs, 8px));
     font-family: inherit;
     font-size: var(--font-body--size, 14px);
     box-sizing: border-box;
@@ -162,18 +239,27 @@
     border-radius: var(--style-border-radius-buttons-primary, 8px);
     font-family: var(--button-font-family-primary, inherit);
     font-size: var(--font-body--size, 14px);
-    font-weight: 500;
+    font-weight: 600;
     white-space: nowrap;
     flex-shrink: 0;
     box-sizing: border-box;
     cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .back-in-stock__button:hover {
+    opacity: 0.9;
+  }
+
+  .back-in-stock__input-group--stacked .back-in-stock__button {
+    width: 100%;
   }
 
   .back-in-stock__success {
     display: flex;
     align-items: center;
     gap: var(--gap-xs, 8px);
-    color: #16a34a;
+    color: var(--bis-success-color, #16a34a);
     font-size: var(--font-body--size, 14px);
     font-weight: 500;
     margin-top: var(--margin-md, 14px);
@@ -187,7 +273,7 @@
   .back-in-stock__success-icon {
     width: 18px;
     height: 18px;
-    color: #16a34a;
+    color: var(--bis-success-color, #16a34a);
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
@@ -213,6 +299,14 @@
   "name": "Back in stock capture",
   "tag": null,
   "settings": [
+    {
+      "type": "paragraph",
+      "content": "Displays an email notification capture form when the current product or variant is sold out."
+    },
+    {
+      "type": "header",
+      "content": "Content & Text"
+    },
     {
       "type": "text",
       "id": "heading",
@@ -242,11 +336,239 @@
       "id": "success_message",
       "label": "Success message",
       "default": "Thank you! We will notify you when restocked."
+    },
+    {
+      "type": "header",
+      "content": "Form Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Form layout",
+      "options": [
+        {
+          "value": "inline",
+          "label": "Inline (input & button side-by-side)"
+        },
+        {
+          "value": "stacked",
+          "label": "Stacked (full-width button below)"
+        }
+      ],
+      "default": "inline"
+    },
+    {
+      "type": "header",
+      "content": "Card Style & Colors"
+    },
+    {
+      "type": "select",
+      "id": "card_style",
+      "label": "Container style",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default card"
+        },
+        {
+          "value": "minimal",
+          "label": "Minimal (borderless / transparent)"
+        },
+        {
+          "value": "outline",
+          "label": "Outline only"
+        },
+        {
+          "value": "custom",
+          "label": "Custom colors"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Container background color",
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Container border color",
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Container border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1,
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Container corner radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Subheading color"
+    },
+    {
+      "type": "color",
+      "id": "success_color",
+      "label": "Success message & icon color"
+    },
+    {
+      "type": "header",
+      "content": "Input Field Styling"
+    },
+    {
+      "type": "color",
+      "id": "input_background_color",
+      "label": "Input background color"
+    },
+    {
+      "type": "color",
+      "id": "input_text_color",
+      "label": "Input text color"
+    },
+    {
+      "type": "color",
+      "id": "input_border_color",
+      "label": "Input border color"
+    },
+    {
+      "type": "range",
+      "id": "input_border_radius",
+      "label": "Input corner radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Button Styling"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style preset",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "outline",
+          "label": "Outline"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Custom button background",
+      "visible_if": "{{ block.settings.button_style == \"custom\" }}"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Custom button text color",
+      "visible_if": "{{ block.settings.button_style == \"custom\" }}"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Custom button border color",
+      "visible_if": "{{ block.settings.button_style == \"custom\" }}"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Button corner radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ block.settings.button_style == \"custom\" }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
     }
   ],
   "presets": [
     {
-      "name": "Back in stock capture"
+      "name": "Back in stock capture",
+      "category": "t:categories.product"
     }
   ]
 }

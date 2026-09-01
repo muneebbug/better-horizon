@@ -22,9 +22,10 @@ The **Estimated Delivery Date & Shipping Estimator** provides customers with rea
   - Synchronizes across multiple components on the page in real-time.
 - **Shopify Ajax Shipping Rates Integration:**
   - When items are in the cart, it queries Shopify's Ajax Cart Shipping Rates API (`/cart/shipping_rates.json`) to display real carrier quotes.
-- **Cart & PDP Support:**
-  - Placeable anywhere as a Theme Block on product pages.
-  - Built into the Cart Drawer and Cart Page summary sidebar (toggleable globally in Theme Settings).
+- **Visual Styles & Custom Icons:**
+  - Card style options: `Default card`, `Minimal (borderless)`, `Outline only`.
+  - Icon selection: `Delivery truck`, `Airplane / Express`, `Package box`, `Calendar date`, `Clock`.
+  - Custom color controls for card background, border, icon, heading, delivery dates highlight, and cutoff countdown text.
 - **WCAG 2.2 AA Accessible:**
   - Built with polite ARIA live regions, semantic inputs, full keyboard accessibility, and high-contrast focus rings.
 
@@ -45,6 +46,18 @@ The **Estimated Delivery Date & Shipping Estimator** provides customers with rea
 | `exclude_weekends` | checkbox | `true` | Exclude Saturdays and Sundays from delivery estimates. |
 | `show_countdown` | checkbox | `true` | Show real-time order cutoff countdown timer. |
 | `show_zip_estimator` | checkbox | `true` | Enable ZIP / postal code lookup field. |
+| `card_style` | select | `default` | Style preset (`default`, `minimal`, `outline`). |
+| `background_color` | color | `""` | Custom card background color. |
+| `border_color` | color | `""` | Custom card border color. |
+| `border_width` | range | `1` | Card border width (0–4px). |
+| `border_radius` | range | `8` | Card corner radius (0–24px). |
+| `show_icon` | checkbox | `true` | Toggle delivery icon visibility. |
+| `icon_type` | select | `shipping` | Choose from `shipping`, `airplane`, `box`, `calendar`, `clock`. |
+| `icon_size` | range | `20` | Icon size (16–32px). |
+| `icon_color` | color | `""` | Custom icon color. |
+| `heading_color` | color | `""` | Custom heading text color. |
+| `dates_color` | color | `""` | Custom delivery date highlight color. |
+| `countdown_color` | color | `""` | Custom countdown timer text color. |
 
 ### Global Cart Settings (`config/settings_schema.json`)
 
