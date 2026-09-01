@@ -1,6 +1,6 @@
 ---
 title: Custom Forms & Form Blocks
-description: Modular form builder blocks for contact forms, product line item properties, cart attributes, and custom form fields.
+description: Modular form builder blocks for contact forms, product line item properties, cart attributes, file uploads, and custom form fields.
 sidebar_position: 15
 ---
 
@@ -17,8 +17,8 @@ Every form field block includes a **Field purpose** setting to control how submi
 | Option | Output Format | Where to Use | Example |
 | :--- | :--- | :--- | :--- |
 | **Contact form** *(Default)* | `contact[name]` | Standard contact and inquiry forms. | Entering `email` outputs `name="contact[email]"`. |
-| **Line item property** | `properties[name]` | Product pages for item-specific options (engravings, custom sizes, personal messages). | Entering `Engraving` outputs `name="properties[Engraving]"`. |
-| **Cart attribute** | `attributes[name]` | Cart drawer, cart page, or checkout for order-wide notes (gift message, delivery instructions, PO number). | Entering `delivery_notes` outputs `name="attributes[delivery_notes]"`. |
+| **Line item property** | `properties[name]` | Product pages for item-specific options (engravings, custom sizes, artwork uploads). | Entering `artwork` outputs `name="properties[artwork]"`. |
+| **Cart attribute** | `attributes[name]` | Cart drawer, cart page, or checkout for order-wide notes and files. | Entering `delivery_notes` outputs `name="attributes[delivery_notes]"`. |
 | **Custom** | `name` | Raw unwrapped HTML attribute for custom app forms or newsletter integrations. | Entering `customer[note]` outputs `name="customer[note]"`. |
 
 ---
@@ -30,7 +30,7 @@ All form blocks are found under the **Forms** category in the Shopify Theme Edit
 ### 1. `Form` (Container)
 - **File:** `blocks/form.liquid`
 - **Purpose:** Form root container. Renders `<form>` tags, handles hidden metadata, and displays success/error alerts.
-- **Allowed Child Blocks:** `form-input`, `form-textarea`, `form-select`, `form-checkbox`, `form-radio-group`, `form-submit-button`, `text`, `group`, `_divider`, `@app`.
+- **Allowed Child Blocks:** `form-input`, `form-textarea`, `form-select`, `form-checkbox`, `form-radio-group`, `form-file-input`, `form-submit-button`, `text`, `group`, `_divider`, `@app`.
 - **Key Settings:** Container card style (`minimal`, `default`, `outline`, `custom`), field gap (4–48px), field sizing (`compact`, `default`, `spacious`), label typography and colors, input color overrides, and alert messages.
 
 ### 2. `Input field`
@@ -64,7 +64,29 @@ All form blocks are found under the **Forms** category in the Shopify Theme Edit
 - **Purpose:** Radio button group under an accessible `<fieldset>` and `<legend>`.
 - **Key Settings:** Field purpose (`contact`, `property`, `attribute`, `custom`), field name (`inquiry_type`, `Font Choice`, `packing_slip_preference`), legend label, options list (one per line), default selected option, layout (`row`, `column`, `grid-2`, `grid-3`), required flag, and width.
 
-### 8. `Submit button`
+### 8. `File upload`
+- **File:** `blocks/form-file-input.liquid`
+- **Web Component:** `assets/form-file-input.js` (`<form-file-input>`)
+- **Purpose:** Drag-and-drop file upload zone with live image/video previews, single/multi-file selection, format/size validation, and multiple layout display modes.
+- **Key Settings:**
+  - **Field purpose:** `contact`, `property`, `attribute`, `custom`.
+  - **Selection Mode:** Single file or Multiple files (with maximum file count limit).
+  - **Allowed Extensions:** Images & Videos (`image/*,video/*`), Images only (`image/*`), Documents only (`.pdf,.doc,.docx,.txt,.csv`), All files, or Custom extensions list.
+  - **Max File Size:** Configurable 1–50 MB limit with client-side validation.
+  - **Live In-Place Preview:** The preview appears in place of the upload dropzone. Clicking the remove button (`x`) removes the file and restores the dropzone.
+  - **File List Layouts & "Add More":**
+    - `Vertical list`: Thumbnail on the left, file info (name, size, type) in the middle, remove button on the right, plus an inline dashed "Add more files" button.
+    - `Thumbnail grid`: Horizontal wrapping grid cards with thumbnail and remove button, plus an "Add more" dashed tile.
+    - `Compact chips`: Inline pills with file name, size, and remove button, plus an "Add more" dashed pill chip.
+  - **Thumbnail Size:** Custom pixel slider (5–180px).
+  - **Container Style Presets (Cards & Preview):**
+    - `Default (subtle card)`: Theme-consistent soft border (`1px`) and gentle background.
+    - `Minimal (borderless / transparent)`: Clean, modern borderless display with soft translucent background.
+    - `Outline only`: Transparent background with subtle 1px border.
+    - `Custom colors`: Full granular controls for background, border color, border width (0–4px), corner radius (0–32px), text color, and meta color.
+  - **Dropzone Styling:** Optional background, border color, label, hint text, and radius override.
+
+### 9. `Submit button`
 - **File:** `blocks/form-submit-button.liquid`
 - **Purpose:** Button that submits the parent form.
 - **Key Settings:** Button label ("Send message"), style class (`button-primary`, `button-secondary`, `button-outline`, `button-custom`), size (`small`, `medium`, `large`), width (`auto`, `full_width`), and alignment (`left`, `center`, `right`).
@@ -73,12 +95,12 @@ All form blocks are found under the **Forms** category in the Shopify Theme Edit
 
 ## Common Use Cases
 
-### 1. Line Item Properties (Product Customization)
-To add custom options (like custom text, monogram, or color choice) to an individual product:
-1. Add the form block inside the product section or buy-buttons area.
+### 1. Line Item Properties & Product Customization
+To add custom options (monograms, engravings, or custom artwork uploads) to an individual product:
+1. Add the form block (e.g., **Input field** or **File upload**) inside the product section or buy-buttons area.
 2. Set **Field purpose** to **Line item property (`properties[...]`)**.
-3. Set the **Field name** (e.g., `Engraving text` or `Color selection`).
-4. When added to cart, the property is stored with that specific item.
+3. Set the **Field name** (e.g., `Custom Artwork` or `Engraving text`).
+4. When added to cart, the data/file is attached directly to that product line item.
 
 ### 2. Cart Attributes (Order Notes & Instructions)
 To capture order-level information for the whole order:
@@ -90,6 +112,6 @@ To capture order-level information for the whole order:
 ### 3. Contact & Inquiry Forms
 To build a custom contact form:
 1. Add the **Form** container block to any page or section.
-2. Add nested fields (**Input field**, **Text area**, **Select menu**, **Checkbox**, **Radio group**, **Submit button**).
+2. Add nested fields (**Input field**, **Text area**, **Select menu**, **Checkbox**, **Radio group**, **File upload**, **Submit button**).
 3. Keep **Field purpose** set to **Contact form (`contact[...]`)**.
 4. Submissions are sent directly through Shopify's native contact email system.

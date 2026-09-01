@@ -1,0 +1,718 @@
+{% doc %}
+  Form File Input Block
+  Renders an accessible, highly customizable single or multi-file upload dropzone with live image/video previews, layout choices, and format/size validation.
+{% enddoc %}
+
+{% render 'custom-form-styles' %}
+
+<script
+  src="{{ 'form-file-input.js' | asset_url }}"
+  defer
+  type="module"
+></script>
+
+{%- liquid
+  assign block_settings = block.settings
+  assign field_id = 'FormField-File-' | append: block.id
+  assign raw_name = block_settings.name | default: 'file'
+  assign name_type = block_settings.name_type | default: 'contact'
+
+  case name_type
+    when 'contact'
+      if raw_name contains 'contact['
+        assign field_name = raw_name
+      else
+        assign field_name = 'contact[' | append: raw_name | append: ']'
+      endif
+    when 'property'
+      if raw_name contains 'properties['
+        assign field_name = raw_name
+      else
+        assign field_name = 'properties[' | append: raw_name | append: ']'
+      endif
+    when 'attribute'
+      if raw_name contains 'attributes['
+        assign field_name = raw_name
+      else
+        assign field_name = 'attributes[' | append: raw_name | append: ']'
+      endif
+    when 'custom'
+      assign field_name = raw_name
+  endcase
+
+  assign field_label = block_settings.label | default: 'Upload file'
+  assign field_width = block_settings.width | default: '100'
+  assign help_id = 'FormField-Help-' | append: block.id
+
+  assign is_multiple = block_settings.allow_multiple | default: false
+  assign max_files = block_settings.max_files | default: 5
+  assign max_size_mb = block_settings.max_size_mb | default: 10
+  assign layout = block_settings.layout | default: 'list'
+  assign thumbnail_size = block_settings.thumbnail_size | default: 64
+  assign show_preview = block_settings.show_preview
+  if show_preview == null
+    assign show_preview = true
+  endif
+  assign accept_type = block_settings.accepted_types | default: 'media_only'
+  assign custom_accept = block_settings.custom_accepted_types | default: '.jpg,.png,.webp,.pdf,.mp4'
+
+  assign accept_attr = ''
+  case accept_type
+    when 'images_only'
+      assign accept_attr = 'image/*'
+    when 'media_only'
+      assign accept_attr = 'image/*,video/*'
+    when 'documents_only'
+      assign accept_attr = '.pdf,.doc,.docx,.txt,.csv'
+    when 'all'
+      assign accept_attr = '*'
+    when 'custom'
+      assign accept_attr = custom_accept
+  endcase
+  assign card_style = block_settings.card_style | default: 'default'
+  assign preview_style = block_settings.preview_style | default: 'default'
+-%}
+
+<div
+  class="custom-form__field custom-form__field--width-{{ field_width }} spacing-style"
+  style="
+    --thumb-size: {{ thumbnail_size }}px;
+    {% render 'spacing-style', settings: block_settings %}
+
+    {% case card_style %}
+      {% when 'minimal' %}
+        --form-file-card-bg: rgb(var(--color-foreground-rgb) / 0.04);
+        --form-file-card-border: transparent;
+        --form-file-card-border-width: 0px;
+      {% when 'outline' %}
+        --form-file-card-bg: transparent;
+        --form-file-card-border: rgb(var(--color-foreground-rgb) / 0.12);
+        --form-file-card-border-width: 1px;
+      {% when 'default' %}
+        --form-file-card-bg: var(--color-input-background, var(--color-background));
+        --form-file-card-border: rgb(var(--color-foreground-rgb) / 0.12);
+        --form-file-card-border-width: 1px;
+      {% when 'custom' %}
+        {% if block_settings.card_background_color != blank %}--form-file-card-bg: {{ block_settings.card_background_color }};{% endif %}
+        {% if block_settings.card_border_color != blank %}--form-file-card-border: {{ block_settings.card_border_color }};{% endif %}
+        {% if block_settings.card_border_width != blank %}--form-file-card-border-width: {{ block_settings.card_border_width }}px;{% endif %}
+        {% if block_settings.card_border_radius != blank %}--form-file-card-radius: {{ block_settings.card_border_radius }}px;{% endif %}
+        {% if block_settings.card_text_color != blank %}--form-file-card-text: {{ block_settings.card_text_color }};{% endif %}
+        {% if block_settings.card_meta_color != blank %}--form-file-card-meta: {{ block_settings.card_meta_color }};{% endif %}
+        {% if block_settings.card_active_border_color != blank %}--form-file-card-active-border: {{ block_settings.card_active_border_color }};{% endif %}
+    {% endcase %}
+
+    {% case preview_style %}
+      {% when 'minimal' %}
+        --form-file-stage-bg: rgb(var(--color-foreground-rgb) / 0.03);
+        --form-file-stage-border: transparent;
+        --form-file-stage-border-width: 0px;
+        --form-file-stage-bar-bg: transparent;
+      {% when 'outline' %}
+        --form-file-stage-bg: transparent;
+        --form-file-stage-border: rgb(var(--color-foreground-rgb) / 0.12);
+        --form-file-stage-border-width: 1px;
+        --form-file-stage-bar-bg: transparent;
+      {% when 'default' %}
+        --form-file-stage-bg: rgb(var(--color-foreground-rgb) / 0.02);
+        --form-file-stage-border: rgb(var(--color-foreground-rgb) / 0.12);
+        --form-file-stage-border-width: 1px;
+        --form-file-stage-bar-bg: rgb(var(--color-foreground-rgb) / 0.04);
+      {% when 'custom' %}
+        {% if block_settings.preview_background_color != blank %}--form-file-stage-bg: {{ block_settings.preview_background_color }};{% endif %}
+        {% if block_settings.preview_border_color != blank %}--form-file-stage-border: {{ block_settings.preview_border_color }};{% endif %}
+        {% if block_settings.preview_border_width != blank %}--form-file-stage-border-width: {{ block_settings.preview_border_width }}px;{% endif %}
+        {% if block_settings.preview_border_radius != blank %}--form-file-stage-radius: {{ block_settings.preview_border_radius }}px;{% endif %}
+        {% if block_settings.preview_bar_background_color != blank %}--form-file-stage-bar-bg: {{ block_settings.preview_bar_background_color }};{% endif %}
+        {% if block_settings.preview_bar_text_color != blank %}--form-file-stage-bar-text: {{ block_settings.preview_bar_text_color }};{% endif %}
+    {% endcase %}
+    {% if block_settings.preview_max_height != blank %}--form-file-stage-max-height: {{ block_settings.preview_max_height }}px;{% endif %}
+
+    {% if block_settings.override_dropzone_colors %}
+      {% if block_settings.dropzone_background_color != blank %}--form-file-bg: {{ block_settings.dropzone_background_color }};{% endif %}
+      {% if block_settings.dropzone_border_color != blank %}--form-file-border: {{ block_settings.dropzone_border_color }};{% endif %}
+      {% if block_settings.dropzone_text_color != blank %}--form-file-text: {{ block_settings.dropzone_text_color }};{% endif %}
+      {% if block_settings.dropzone_hint_color != blank %}--form-file-hint: {{ block_settings.dropzone_hint_color }};{% endif %}
+      {% if block_settings.dropzone_border_radius != blank %}--form-file-radius: {{ block_settings.dropzone_border_radius }}px;{% endif %}
+    {% endif %}
+  "
+  {{ block.shopify_attributes }}
+>
+  <label
+    for="{{ field_id }}"
+    class="custom-form__label{% if block_settings.hide_label %} visually-hidden{% endif %}"
+  >
+    {{- field_label -}}
+    {%- if block_settings.required -%}
+      <span class="custom-form__required-mark" aria-hidden="true">*</span>
+    {%- endif -%}
+  </label>
+
+  <form-file-input
+    class="custom-form__file-component"
+    data-max-size-mb="{{ max_size_mb }}"
+    data-max-files="{{ max_files }}"
+    data-accept="{{ accept_attr }}"
+    data-layout="{{ layout }}"
+    data-show-preview="{{ show_preview }}"
+    {% if is_multiple %}
+      data-multiple
+    {% endif %}
+  >
+    <div class="custom-form__file-stage" data-preview-stage hidden></div>
+
+    <div
+      class="custom-form__file-dropzone"
+      data-dropzone
+      tabindex="0"
+      role="button"
+      aria-label="{{ block_settings.dropzone_text | default: 'Choose file or drag and drop here' }}"
+    >
+      <input
+        type="file"
+        id="{{ field_id }}"
+        name="{{ field_name }}"
+        class="custom-form__file-native-input"
+        accept="{{ accept_attr }}"
+        {% if is_multiple %}
+          multiple
+        {% endif %}
+        {% if block_settings.required %}
+          required
+          aria-required="true"
+        {% endif %}
+        {% if block_settings.help_text != blank %}
+          aria-describedby="{{ help_id }}"
+        {% endif %}
+      >
+
+      <div class="custom-form__file-dropzone-content" aria-hidden="true">
+        <div class="custom-form__file-dropzone-icon">
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <span class="custom-form__file-dropzone-title">
+          {{ block_settings.dropzone_text | default: 'Choose file or drag & drop here' }}
+        </span>
+        <span class="custom-form__file-dropzone-hint">
+          {% if accept_type == 'images_only' %}
+            Images (PNG, JPG, WEBP, GIF) up to {{ max_size_mb }}MB
+          {% elsif accept_type == 'media_only' %}
+            Images & Videos (MP4, MOV, PNG, JPG) up to {{ max_size_mb }}MB
+          {% elsif accept_type == 'documents_only' %}
+            Documents (PDF, DOC, TXT) up to {{ max_size_mb }}MB
+          {% elsif accept_type == 'custom' %}
+            {{ custom_accept }} up to {{ max_size_mb }}MB
+          {% else %}
+            Files up to {{ max_size_mb }}MB
+          {% endif %}
+        </span>
+      </div>
+    </div>
+
+    <div
+      class="custom-form__file-error"
+      data-error-message
+      role="alert"
+      hidden
+    ></div>
+
+    <div
+      class="custom-form__file-list custom-form__file-list--{{ layout }}"
+      data-file-list
+      hidden
+    ></div>
+
+    <div
+      class="visually-hidden"
+      data-live-region
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+  </form-file-input>
+
+  {%- if block_settings.help_text != blank -%}
+    <span id="{{ help_id }}" class="custom-form__help-text">
+      {{- block_settings.help_text -}}
+    </span>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "File upload",
+  "tag": null,
+  "settings": [
+    {
+      "type": "select",
+      "id": "name_type",
+      "label": "Field purpose",
+      "options": [
+        {
+          "value": "contact",
+          "label": "Contact form (contact[...])"
+        },
+        {
+          "value": "property",
+          "label": "Line item property (properties[...])"
+        },
+        {
+          "value": "attribute",
+          "label": "Cart attribute (attributes[...])"
+        },
+        {
+          "value": "custom",
+          "label": "Custom (no wrapper)"
+        }
+      ],
+      "default": "contact",
+      "info": "Contact: for contact/inquiry forms. Line item property: for product customization uploads (artwork, photo). Cart attribute: for cart-level uploads. Custom: exact HTML name."
+    },
+    {
+      "type": "text",
+      "id": "name",
+      "label": "Field name",
+      "default": "file",
+      "info": "Field key (e.g. file, custom_artwork, or attachment). Brackets are added automatically based on purpose."
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "Upload file"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_label",
+      "label": "Visually hide label",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "dropzone_text",
+      "label": "Dropzone text",
+      "default": "Choose file or drag & drop here"
+    },
+    {
+      "type": "checkbox",
+      "id": "allow_multiple",
+      "label": "Allow multiple files",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "max_files",
+      "label": "Maximum files",
+      "min": 2,
+      "max": 20,
+      "step": 1,
+      "default": 5,
+      "visible_if": "{{ block.settings.allow_multiple }}"
+    },
+    {
+      "type": "range",
+      "id": "max_size_mb",
+      "label": "Maximum file size (MB)",
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "unit": "MB",
+      "default": 10
+    },
+    {
+      "type": "select",
+      "id": "accepted_types",
+      "label": "Allowed file types",
+      "options": [
+        {
+          "value": "media_only",
+          "label": "Images & Videos"
+        },
+        {
+          "value": "images_only",
+          "label": "Images only (PNG, JPG, WEBP, GIF, SVG)"
+        },
+        {
+          "value": "documents_only",
+          "label": "Documents only (PDF, DOC, TXT, CSV)"
+        },
+        {
+          "value": "all",
+          "label": "All file types"
+        },
+        {
+          "value": "custom",
+          "label": "Custom extensions"
+        }
+      ],
+      "default": "media_only"
+    },
+    {
+      "type": "text",
+      "id": "custom_accepted_types",
+      "label": "Custom allowed extensions",
+      "default": ".jpg,.png,.webp,.pdf,.mp4",
+      "info": "Comma-separated extensions (e.g. .jpg,.png,.pdf,.mp4)",
+      "visible_if": "{{ block.settings.accepted_types == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "Preview & Layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_preview",
+      "label": "Show media preview",
+      "default": true,
+      "info": "Displays live image and video previews in place of the dropzone."
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Uploaded files layout",
+      "options": [
+        {
+          "value": "list",
+          "label": "Vertical list (thumbnail + info)"
+        },
+        {
+          "value": "grid",
+          "label": "Thumbnail grid"
+        },
+        {
+          "value": "compact",
+          "label": "Compact chips"
+        }
+      ],
+      "default": "list"
+    },
+    {
+      "type": "range",
+      "id": "thumbnail_size",
+      "label": "Thumbnail size",
+      "min": 5,
+      "max": 180,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Field Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "required",
+      "label": "Required field",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Field width",
+      "options": [
+        {
+          "value": "100",
+          "label": "100%"
+        },
+        {
+          "value": "75",
+          "label": "75%"
+        },
+        {
+          "value": "50",
+          "label": "50%"
+        },
+        {
+          "value": "33",
+          "label": "33%"
+        },
+        {
+          "value": "25",
+          "label": "25%"
+        },
+        {
+          "value": "auto",
+          "label": "Auto"
+        }
+      ],
+      "default": "100"
+    },
+    {
+      "type": "text",
+      "id": "help_text",
+      "label": "Helper text"
+    },
+    {
+      "type": "header",
+      "content": "Uploaded File Cards"
+    },
+    {
+      "type": "select",
+      "id": "card_style",
+      "label": "Card container style",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default (subtle card)"
+        },
+        {
+          "value": "minimal",
+          "label": "Minimal (borderless / transparent)"
+        },
+        {
+          "value": "outline",
+          "label": "Outline only"
+        },
+        {
+          "value": "custom",
+          "label": "Custom colors"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "color",
+      "id": "card_background_color",
+      "label": "Card background",
+      "visible_if": "{{ block.settings.card_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Card border",
+      "visible_if": "{{ block.settings.card_style == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "label": "Card border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1,
+      "visible_if": "{{ block.settings.card_style == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 6,
+      "visible_if": "{{ block.settings.card_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "card_text_color",
+      "label": "Card file name color",
+      "visible_if": "{{ block.settings.card_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "card_meta_color",
+      "label": "Card file size & meta color",
+      "visible_if": "{{ block.settings.card_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "card_active_border_color",
+      "label": "Active selected card border",
+      "visible_if": "{{ block.settings.card_style == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "Media Preview Stage"
+    },
+    {
+      "type": "select",
+      "id": "preview_style",
+      "label": "Preview container style",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default (subtle card)"
+        },
+        {
+          "value": "minimal",
+          "label": "Minimal (borderless / transparent)"
+        },
+        {
+          "value": "outline",
+          "label": "Outline only"
+        },
+        {
+          "value": "custom",
+          "label": "Custom colors"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "color",
+      "id": "preview_background_color",
+      "label": "Preview background",
+      "visible_if": "{{ block.settings.preview_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "preview_border_color",
+      "label": "Preview border",
+      "visible_if": "{{ block.settings.preview_style == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "preview_border_width",
+      "label": "Preview border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1,
+      "visible_if": "{{ block.settings.preview_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "preview_bar_background_color",
+      "label": "Preview bottom bar background",
+      "visible_if": "{{ block.settings.preview_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "preview_bar_text_color",
+      "label": "Preview bottom bar text",
+      "visible_if": "{{ block.settings.preview_style == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "preview_border_radius",
+      "label": "Preview border radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ block.settings.preview_style == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "preview_max_height",
+      "label": "Preview maximum height",
+      "min": 150,
+      "max": 600,
+      "step": 25,
+      "unit": "px",
+      "default": 350
+    },
+    {
+      "type": "header",
+      "content": "Dropzone Styling"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_dropzone_colors",
+      "label": "Override dropzone colors",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "dropzone_background_color",
+      "label": "Dropzone background",
+      "visible_if": "{{ block.settings.override_dropzone_colors }}"
+    },
+    {
+      "type": "color",
+      "id": "dropzone_border_color",
+      "label": "Dropzone border",
+      "visible_if": "{{ block.settings.override_dropzone_colors }}"
+    },
+    {
+      "type": "color",
+      "id": "dropzone_text_color",
+      "label": "Dropzone title text",
+      "visible_if": "{{ block.settings.override_dropzone_colors }}"
+    },
+    {
+      "type": "color",
+      "id": "dropzone_hint_color",
+      "label": "Dropzone hint text",
+      "visible_if": "{{ block.settings.override_dropzone_colors }}"
+    },
+    {
+      "type": "range",
+      "id": "dropzone_border_radius",
+      "label": "Dropzone border radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ block.settings.override_dropzone_colors }}"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "File upload"
+    }
+  ]
+}
+{% endschema %}

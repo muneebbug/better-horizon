@@ -419,6 +419,94 @@ class ProductFormComponent extends Component {
 
     const formData = new FormData(form);
 
+    // Collect external form fields (e.g. line item properties, attributes, file uploads) in section or referencing form
+    const sectionElement =
+      this.closest('.shopify-section') ||
+      this.closest('[data-section-id]') ||
+      this.closest('section') ||
+      document;
+
+    // First, scan for any form-file-input web components in the section
+    const fileComponents = sectionElement.querySelectorAll('form-file-input');
+    const handledFileInputs = new Set();
+    fileComponents.forEach((comp) => {
+      const fileInput = comp.querySelector('input[type="file"]');
+      if (fileInput) {
+        handledFileInputs.add(fileInput);
+        const rawName = fileInput.name || 'properties[File]';
+        const files = comp.selectedFiles || comp.files || fileInput.files;
+        if (files && files.length > 0) {
+          formData.delete(rawName);
+          if (files.length === 1) {
+            formData.append(rawName, files[0]);
+          } else {
+            const propMatch = rawName.match(/^(properties|attributes)\[(.*)\]$/);
+            for (let i = 0; i < files.length; i++) {
+              if (propMatch) {
+                const prefix = propMatch[1];
+                const key = propMatch[2];
+                formData.append(`${prefix}[${key} ${i + 1}]`, files[i]);
+              } else {
+                formData.append(`${rawName} ${i + 1}`, files[i]);
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const externalInputs = sectionElement.querySelectorAll(
+      `input[name^="properties"], textarea[name^="properties"], select[name^="properties"], input[name^="attributes"], textarea[name^="attributes"], select[name^="attributes"], input[form="${form.id}"], textarea[form="${form.id}"], select[form="${form.id}"]`
+    );
+
+    // Validate external inputs before proceeding
+    for (const el of externalInputs) {
+      if (typeof el.checkValidity === 'function' && !el.checkValidity()) {
+        el.reportValidity?.();
+        return;
+      }
+    }
+
+    externalInputs.forEach((el) => {
+      if (form.contains(el)) return; // Already present via new FormData(form)
+      if (!el.name || el.disabled) return;
+      if (handledFileInputs.has(el)) return;
+
+      if (el instanceof HTMLInputElement) {
+        if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) {
+          return;
+        }
+        if (el.type === 'file') {
+          if (el.files && el.files.length > 0) {
+            formData.delete(el.name);
+            if (el.files.length === 1) {
+              formData.append(el.name, el.files[0]);
+            } else {
+              const propMatch = el.name.match(/^(properties|attributes)\[(.*)\]$/);
+              for (let i = 0; i < el.files.length; i++) {
+                if (propMatch) {
+                  const prefix = propMatch[1];
+                  const key = propMatch[2];
+                  formData.append(`${prefix}[${key} ${i + 1}]`, el.files[i]);
+                } else {
+                  formData.append(`${el.name} ${i + 1}`, el.files[i]);
+                }
+              }
+            }
+          }
+          return;
+        }
+      }
+
+      if (el.value !== '') {
+        if (formData.has(el.name) && (el.type === 'checkbox' || el.tagName === 'SELECT')) {
+          formData.append(el.name, el.value);
+        } else {
+          formData.set(el.name, el.value);
+        }
+      }
+    });
+
     if (overrideVariantId) {
       formData.set('id', overrideVariantId);
     }
@@ -533,7 +621,7 @@ class ProductFormComponent extends Component {
       fetchCfg = fetchConfig('javascript', { body: formData });
       fetchCfg.headers = {
         ...fetchCfg.headers,
-        Accept: 'text/html',
+        Accept: 'application/javascript',
       };
     }
 
