@@ -411,7 +411,7 @@ export class CartUpsell extends HTMLElement {
         .filter((v) => v.available)
         .map(
           (v) =>
-            `<option value="${v.id}" data-price="${formatMoney(v.price, this.moneyFormat, this.currency)}">${v.title} - ${formatMoney(v.price, this.moneyFormat, this.currency)}</option>`
+            `<option value="${v.id}" data-price="${formatMoney(v.price, this.moneyFormat, this.currency)}">${v.title}${v.price !== variant.price ? ' · ' + formatMoney(v.price, this.moneyFormat, this.currency) : ''}</option>`
         )
         .join('');
 

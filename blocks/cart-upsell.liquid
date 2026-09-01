@@ -1,18 +1,80 @@
 {% doc %}
   Cart Upsell Block
-  Displays product recommendations on the cart page or within sections.
+  Displays product recommendations on the cart page or within sections with complete layout, sizing, and styling controls.
 {% enddoc %}
 
-{% liquid
+{%- liquid
   assign block_settings = block.settings
-  if block_settings.text_color != blank
-    render 'contrast-override', background_color: '', text_color: block_settings.text_color, section_id: block.id
+  assign card_style = block_settings.card_style | default: 'default'
+  assign button_style = block_settings.button_style | default: 'secondary'
+  assign image_size = block_settings.image_size | default: 50
+  assign image_radius = block_settings.image_border_radius | default: 6
+  assign gap_size = block_settings.gap | default: 10
+
+  assign style_class = 'button--' | append: button_style
+  if button_style == 'custom'
+    assign style_class = 'button--custom'
   endif
-  render 'button-custom-styles', block_settings: block_settings, block_id: block.id
-%}
+-%}
+
+{%- style -%}
+  .cart-upsell-block--{{ block.id }} {
+    {% if card_style == 'custom' %}
+      {% if block_settings.background_color != blank %}
+        --upsell-card-bg: {{ block_settings.background_color }};
+      {% endif %}
+      {% if block_settings.border_color != blank %}
+        --upsell-card-border: {{ block_settings.border_color }};
+      {% endif %}
+      {% if block_settings.border_width != blank %}
+        --upsell-border-width: {{ block_settings.border_width }}px;
+      {% endif %}
+      {% if block_settings.border_radius != blank %}
+        --upsell-border-radius: {{ block_settings.border_radius }}px;
+      {% endif %}
+    {% elsif card_style == 'minimal' %}
+      --upsell-card-bg: transparent;
+      --upsell-card-border: transparent;
+      --upsell-border-width: 0px;
+    {% elsif card_style == 'outline' %}
+      --upsell-card-bg: transparent;
+    {% endif %}
+
+    --upsell-img-size: {{ image_size }}px;
+    --upsell-img-radius: {{ image_radius }}px;
+    --upsell-gap: {{ gap_size }}px;
+
+    {% if block_settings.heading_color != blank %}
+      --upsell-heading-color: {{ block_settings.heading_color }};
+    {% endif %}
+    {% if block_settings.product_title_color != blank %}
+      --upsell-title-color: {{ block_settings.product_title_color }};
+    {% endif %}
+    {% if block_settings.price_color != blank %}
+      --upsell-price-color: {{ block_settings.price_color }};
+    {% endif %}
+  }
+
+  {% if button_style == 'custom' %}
+    .cart-upsell-block--{{ block.id }} .cart-upsell-card__add-btn {
+      {% if block_settings.button_background_color != blank %}
+        background-color: {{ block_settings.button_background_color }};
+      {% endif %}
+      {% if block_settings.button_text_color != blank %}
+        color: {{ block_settings.button_text_color }};
+      {% endif %}
+      {% if block_settings.button_border_color != blank %}
+        border-color: {{ block_settings.button_border_color }};
+      {% endif %}
+      {% if block_settings.button_border_radius != blank %}
+        border-radius: {{ block_settings.button_border_radius }}px;
+      {% endif %}
+    }
+  {% endif %}
+{%- endstyle -%}
 
 <div
-  class="cart-upsell-block spacing-style text-{{ block_settings.alignment }}{% if block_settings.text_color != blank %} color-custom-{{ block.id }}{% endif %}"
+  class="cart-upsell-block cart-upsell-block--{{ block.id }} spacing-style text-{{ block_settings.alignment }}"
   style="{% render 'spacing-style', settings: block_settings %}"
   {{ block.shopify_attributes }}
 >
@@ -23,7 +85,7 @@
     alignment: block_settings.alignment,
     layout: block_settings.layout,
     limit: block_settings.products_to_show,
-    style_class: block_settings.style_class,
+    style_class: style_class,
     block: block
   %}
 </div>
@@ -42,9 +104,17 @@
   "name": "Cart upsell",
   "settings": [
     {
+      "type": "paragraph",
+      "content": "Displays personalized complementary product recommendations with quick variant selection and 1-click add to cart."
+    },
+    {
+      "type": "header",
+      "content": "Content & Headings"
+    },
+    {
       "type": "inline_richtext",
       "id": "heading",
-      "label": "t:settings.heading",
+      "label": "Heading",
       "default": "Recommended for you"
     },
     {
@@ -54,15 +124,15 @@
       "options": [
         {
           "value": "list",
-          "label": "List"
-        },
-        {
-          "value": "grid_2",
-          "label": "2 column grid"
+          "label": "List (vertical stacked rows)"
         },
         {
           "value": "slider",
           "label": "Horizontal carousel"
+        },
+        {
+          "value": "grid_2",
+          "label": "2 column grid"
         }
       ],
       "default": "slider"
@@ -75,6 +145,174 @@
       "max": 8,
       "step": 1,
       "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Sizing & Spacing"
+    },
+    {
+      "type": "range",
+      "id": "image_size",
+      "label": "Product thumbnail size",
+      "min": 40,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 52
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Product thumbnail corner radius",
+      "min": 0,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Spacing between cards",
+      "min": 6,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Card Style & Colors"
+    },
+    {
+      "type": "select",
+      "id": "card_style",
+      "label": "Card container style",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default card"
+        },
+        {
+          "value": "minimal",
+          "label": "Minimal (borderless / transparent)"
+        },
+        {
+          "value": "outline",
+          "label": "Outline only"
+        },
+        {
+          "value": "custom",
+          "label": "Custom colors"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Card background color",
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Card border color",
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Card border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1,
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Card corner radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ block.settings.card_style == \"custom\" }}"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color"
+    },
+    {
+      "type": "color",
+      "id": "product_title_color",
+      "label": "Product title color"
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "Price color"
+    },
+    {
+      "type": "header",
+      "content": "Button Styling"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style preset",
+      "options": [
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "outline",
+          "label": "Outline"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ],
+      "default": "secondary"
+    },
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Custom button background",
+      "visible_if": "{{ block.settings.button_style == \"custom\" }}"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Custom button text color",
+      "visible_if": "{{ block.settings.button_style == \"custom\" }}"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Custom button border color",
+      "visible_if": "{{ block.settings.button_style == \"custom\" }}"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Button corner radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ block.settings.button_style == \"custom\" }}"
     },
     {
       "type": "header",
@@ -128,63 +366,6 @@
       "default": "left"
     },
     {
-      "type": "select",
-      "id": "style_class",
-      "label": "t:settings.style",
-      "options": [
-        {
-          "value": "button",
-          "label": "t:options.primary"
-        },
-        {
-          "value": "button-secondary",
-          "label": "t:options.secondary"
-        },
-        {
-          "value": "button-custom",
-          "label": "t:options.custom"
-        }
-      ],
-      "default": "button-secondary",
-      "info": "t:info.edit_button_style_in_theme_settings"
-    },
-    {
-      "type": "header",
-      "content": "t:content.button_colors",
-      "visible_if": "{{ block.settings.style_class == \"button-custom\" }}"
-    },
-    {
-      "type": "color",
-      "id": "custom_button_background",
-      "label": "t:settings.background",
-      "alpha": true,
-      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
-    },
-    {
-      "type": "color",
-      "id": "custom_button_text",
-      "label": "t:settings.text",
-      "alpha": true,
-      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
-    },
-    {
-      "type": "color",
-      "id": "custom_button_border",
-      "label": "t:settings.border",
-      "alpha": true,
-      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
-    },
-    {
-      "type": "header",
-      "content": "t:content.appearance"
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "t:settings.text_color",
-      "placeholder": "t:settings.default"
-    },
-    {
       "type": "header",
       "content": "t:content.padding"
     },
@@ -193,8 +374,8 @@
       "id": "padding-block-start",
       "label": "t:settings.top",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 64,
+      "step": 4,
       "unit": "px",
       "default": 16
     },
@@ -203,8 +384,8 @@
       "id": "padding-block-end",
       "label": "t:settings.bottom",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 64,
+      "step": 4,
       "unit": "px",
       "default": 16
     },
@@ -213,8 +394,8 @@
       "id": "padding-inline-start",
       "label": "t:settings.left",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 64,
+      "step": 4,
       "unit": "px",
       "default": 0
     },
@@ -223,8 +404,8 @@
       "id": "padding-inline-end",
       "label": "t:settings.right",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 64,
+      "step": 4,
       "unit": "px",
       "default": 0
     }

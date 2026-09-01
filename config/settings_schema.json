@@ -1669,19 +1669,170 @@
         "options": [
           {
             "value": "list",
-            "label": "List"
-          },
-          {
-            "value": "grid_2",
-            "label": "2 column grid"
+            "label": "List (vertical rows)"
           },
           {
             "value": "slider",
             "label": "Horizontal carousel"
+          },
+          {
+            "value": "grid_2",
+            "label": "2 column grid"
           }
         ],
         "default": "list",
         "visible_if": "{{ settings.enable_cart_drawer_upsell == true }}"
+      },
+      {
+        "type": "range",
+        "id": "cart_drawer_upsell_limit",
+        "label": "Max items to show",
+        "min": 2,
+        "max": 8,
+        "step": 1,
+        "default": 4,
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true }}"
+      },
+      {
+        "type": "header",
+        "content": "Drawer upsell card style & colors",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true }}"
+      },
+      {
+        "type": "select",
+        "id": "cart_drawer_upsell_card_style",
+        "label": "Card container style",
+        "options": [
+          {
+            "value": "default",
+            "label": "Default card"
+          },
+          {
+            "value": "minimal",
+            "label": "Minimal (borderless / transparent)"
+          },
+          {
+            "value": "outline",
+            "label": "Outline only"
+          },
+          {
+            "value": "custom",
+            "label": "Custom colors"
+          }
+        ],
+        "default": "default",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true }}"
+      },
+      {
+        "type": "color",
+        "id": "cart_drawer_upsell_bg_color",
+        "label": "Card background color",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true and settings.cart_drawer_upsell_card_style == 'custom' }}"
+      },
+      {
+        "type": "color",
+        "id": "cart_drawer_upsell_border_color",
+        "label": "Card border color",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true and settings.cart_drawer_upsell_card_style == 'custom' }}"
+      },
+      {
+        "type": "range",
+        "id": "cart_drawer_upsell_border_width",
+        "label": "Card border width",
+        "min": 0,
+        "max": 4,
+        "step": 1,
+        "unit": "px",
+        "default": 1,
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true and settings.cart_drawer_upsell_card_style == 'custom' }}"
+      },
+      {
+        "type": "range",
+        "id": "cart_drawer_upsell_border_radius",
+        "label": "Card corner radius",
+        "min": 0,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "default": 8,
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true and settings.cart_drawer_upsell_card_style == 'custom' }}"
+      },
+      {
+        "type": "color",
+        "id": "cart_drawer_upsell_heading_color",
+        "label": "Heading color",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true }}"
+      },
+      {
+        "type": "color",
+        "id": "cart_drawer_upsell_title_color",
+        "label": "Product title color",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true }}"
+      },
+      {
+        "type": "color",
+        "id": "cart_drawer_upsell_price_color",
+        "label": "Price color",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true }}"
+      },
+      {
+        "type": "header",
+        "content": "Drawer upsell button style",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true }}"
+      },
+      {
+        "type": "select",
+        "id": "cart_drawer_upsell_button_style",
+        "label": "Button style preset",
+        "options": [
+          {
+            "value": "secondary",
+            "label": "Secondary"
+          },
+          {
+            "value": "primary",
+            "label": "Primary"
+          },
+          {
+            "value": "outline",
+            "label": "Outline"
+          },
+          {
+            "value": "custom",
+            "label": "Custom"
+          }
+        ],
+        "default": "secondary",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true }}"
+      },
+      {
+        "type": "color",
+        "id": "cart_drawer_upsell_button_bg",
+        "label": "Custom button background",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true and settings.cart_drawer_upsell_button_style == 'custom' }}"
+      },
+      {
+        "type": "color",
+        "id": "cart_drawer_upsell_button_text",
+        "label": "Custom button text color",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true and settings.cart_drawer_upsell_button_style == 'custom' }}"
+      },
+      {
+        "type": "color",
+        "id": "cart_drawer_upsell_button_border",
+        "label": "Custom button border color",
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true and settings.cart_drawer_upsell_button_style == 'custom' }}"
+      },
+      {
+        "type": "range",
+        "id": "cart_drawer_upsell_button_radius",
+        "label": "Button corner radius",
+        "min": 0,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "default": 8,
+        "visible_if": "{{ settings.enable_cart_drawer_upsell == true and settings.cart_drawer_upsell_button_style == 'custom' }}"
       },
       {
         "type": "header",

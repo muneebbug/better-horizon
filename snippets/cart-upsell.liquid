@@ -123,6 +123,64 @@
   endif
 -%}
 
+{%- if context == 'drawer' -%}
+  {%- liquid
+    assign drawer_card_style = settings.cart_drawer_upsell_card_style | default: 'default'
+    assign drawer_button_style = settings.cart_drawer_upsell_button_style | default: 'secondary'
+  -%}
+  {%- style -%}
+    .cart-upsell--drawer {
+      {% if drawer_card_style == 'custom' %}
+        {% if settings.cart_drawer_upsell_bg_color != blank %}
+          --upsell-card-bg: {{ settings.cart_drawer_upsell_bg_color }};
+        {% endif %}
+        {% if settings.cart_drawer_upsell_border_color != blank %}
+          --upsell-card-border: {{ settings.cart_drawer_upsell_border_color }};
+        {% endif %}
+        {% if settings.cart_drawer_upsell_border_width != blank %}
+          --upsell-border-width: {{ settings.cart_drawer_upsell_border_width }}px;
+        {% endif %}
+        {% if settings.cart_drawer_upsell_border_radius != blank %}
+          --upsell-border-radius: {{ settings.cart_drawer_upsell_border_radius }}px;
+        {% endif %}
+      {% elsif drawer_card_style == 'minimal' %}
+        --upsell-card-bg: transparent;
+        --upsell-card-border: transparent;
+        --upsell-border-width: 0px;
+      {% elsif drawer_card_style == 'outline' %}
+        --upsell-card-bg: transparent;
+      {% endif %}
+
+      {% if settings.cart_drawer_upsell_heading_color != blank %}
+        --upsell-heading-color: {{ settings.cart_drawer_upsell_heading_color }};
+      {% endif %}
+      {% if settings.cart_drawer_upsell_title_color != blank %}
+        --upsell-title-color: {{ settings.cart_drawer_upsell_title_color }};
+      {% endif %}
+      {% if settings.cart_drawer_upsell_price_color != blank %}
+        --upsell-price-color: {{ settings.cart_drawer_upsell_price_color }};
+      {% endif %}
+    }
+
+    {% if drawer_button_style == 'custom' %}
+      .cart-upsell--drawer .cart-upsell-card__add-btn {
+        {% if settings.cart_drawer_upsell_button_bg != blank %}
+          background-color: {{ settings.cart_drawer_upsell_button_bg }};
+        {% endif %}
+        {% if settings.cart_drawer_upsell_button_text != blank %}
+          color: {{ settings.cart_drawer_upsell_button_text }};
+        {% endif %}
+        {% if settings.cart_drawer_upsell_button_border != blank %}
+          border-color: {{ settings.cart_drawer_upsell_button_border }};
+        {% endif %}
+        {% if settings.cart_drawer_upsell_button_radius != blank %}
+          border-radius: {{ settings.cart_drawer_upsell_button_radius }}px;
+        {% endif %}
+      }
+    {% endif %}
+  {%- endstyle -%}
+{%- endif -%}
+
 {%- if is_enabled -%}
   <script
     src="{{ 'cart-upsell.js' | asset_url }}"
@@ -250,7 +308,7 @@
                               data-price="{{ variant.price | money }}"
                               {% if variant.id == rec_variant.id %}selected{% endif %}
                             >
-                              {{ variant.title }} - {{ variant.price | money }}
+                              {{ variant.title }}{% if variant.price != rec_p.price %} · {{ variant.price | money }}{% endif %}
                             </option>
                           {%- endif -%}
                         {%- endfor -%}
@@ -314,14 +372,14 @@
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.05em;
-    color: var(--color-foreground);
+    color: var(--upsell-heading-color, var(--color-foreground));
     text-transform: uppercase;
     opacity: 0.8;
   }
 
   .cart-upsell--page .cart-upsell__heading {
     margin: 0;
-    color: var(--color-foreground);
+    color: var(--upsell-heading-color, var(--color-foreground));
     line-height: var(--font-heading--line-height, 1.2);
     letter-spacing: var(--font-heading--letter-spacing, normal);
   }
@@ -367,18 +425,20 @@
   }
 
   /* Quick Add Pill Button Styling */
+  /* Quick Add Pill Button Styling */
   .cart-upsell-card__add-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 5px 14px;
-    border-radius: 9999px;
+    padding: 6px 14px;
+    min-height: 32px;
+    border-radius: var(--upsell-btn-radius, 9999px);
     border: var(--style-border-width-secondary, 1.5px) solid rgb(var(--color-foreground-rgb) / 0.18);
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
     line-height: 1;
     cursor: pointer;
     white-space: nowrap;
@@ -399,8 +459,8 @@
   }
 
   .cart-upsell-card__btn-icon {
-    width: 15px;
-    height: 15px;
+    width: 14px;
+    height: 14px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -424,18 +484,20 @@
   .cart-upsell__items--list {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-sm, 8px);
+    gap: var(--upsell-gap, 8px);
   }
 
   .cart-upsell-card--list {
     display: flex;
     align-items: center;
-    gap: var(--gap-sm, 10px);
-    padding: 6px 10px;
-    background-color: rgb(var(--color-foreground-rgb) / 0.03);
-    border: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.1));
-    border-radius: var(--style-border-radius-inputs, 8px);
+    gap: var(--upsell-gap, 10px);
+    padding: 8px 12px;
+    background-color: var(--upsell-card-bg, rgb(var(--color-foreground-rgb) / 0.03));
+    border: var(--upsell-border-width, 1px) solid var(--upsell-card-border, rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.12)));
+    border-radius: var(--upsell-border-radius, var(--style-border-radius-inputs, 8px));
     transition: background-color var(--animation-speed, 0.2s) ease;
+    box-sizing: border-box;
+    width: 100%;
   }
 
   .cart-upsell-card--list:hover {
@@ -443,10 +505,10 @@
   }
 
   .cart-upsell-card--list .cart-upsell-card__media {
-    width: 48px;
-    height: 48px;
+    width: var(--upsell-img-size, 48px);
+    height: var(--upsell-img-size, 48px);
     flex-shrink: 0;
-    border-radius: calc(var(--style-border-radius-inputs, 8px) - 2px);
+    border-radius: var(--upsell-img-radius, calc(var(--style-border-radius-inputs, 8px) - 2px));
     overflow: hidden;
     background-color: rgb(var(--color-foreground-rgb) / 0.04);
   }
@@ -463,15 +525,15 @@
     flex-direction: column;
     flex: 1;
     min-width: 0;
-    gap: 2px;
+    gap: 3px;
   }
 
   .cart-upsell-card--list .cart-upsell-card__title {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
-    color: var(--color-foreground);
+    color: var(--upsell-title-color, var(--color-foreground));
     text-decoration: none;
-    line-height: 1.2;
+    line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -485,9 +547,9 @@
     display: flex;
     align-items: baseline;
     gap: 4px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    color: var(--color-foreground);
+    color: var(--upsell-price-color, var(--color-foreground));
   }
 
   .cart-upsell-card--list .cart-upsell-card__compare-price {
@@ -499,16 +561,26 @@
 
   .cart-upsell-card--list .cart-upsell-card__variant-wrapper {
     margin-top: 2px;
+    display: flex;
   }
 
   .cart-upsell-card--list .cart-upsell-card__variant-select {
-    width: 100%;
+    height: 26px;
+    padding: 2px 20px 2px 8px;
     font-size: 11px;
-    padding: 2px 4px;
-    border-radius: 4px;
-    border: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / 0.2);
+    font-weight: 500;
+    border-radius: 6px;
+    border: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / 0.18);
     background-color: var(--color-background);
     color: var(--color-foreground);
+    cursor: pointer;
+    max-width: 140px;
+    text-overflow: ellipsis;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5' fill='none'%3E%3Cpath d='M1 1L4 4L7 1' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
   }
 
   .cart-upsell-card--list .cart-upsell-card__add-btn {
@@ -523,17 +595,18 @@
   .cart-upsell__items--grid_2 {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--gap-sm, 8px);
+    gap: var(--upsell-gap, 8px);
   }
 
   .cart-upsell-card--grid_2 {
     display: flex;
     flex-direction: column;
     padding: 8px;
-    background-color: rgb(var(--color-foreground-rgb) / 0.03);
-    border: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.1));
-    border-radius: var(--style-border-radius-inputs, 8px);
+    background-color: var(--upsell-card-bg, rgb(var(--color-foreground-rgb) / 0.03));
+    border: var(--upsell-border-width, 1px) solid var(--upsell-card-border, rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.12)));
+    border-radius: var(--upsell-border-radius, var(--style-border-radius-inputs, 8px));
     transition: background-color var(--animation-speed, 0.2s) ease;
+    box-sizing: border-box;
   }
 
   .cart-upsell-card--grid_2:hover {
@@ -543,7 +616,7 @@
   .cart-upsell-card--grid_2 .cart-upsell-card__media {
     width: 100%;
     aspect-ratio: 1 / 1;
-    border-radius: calc(var(--style-border-radius-inputs, 8px) - 2px);
+    border-radius: var(--upsell-img-radius, calc(var(--style-border-radius-inputs, 8px) - 2px));
     overflow: hidden;
     background-color: rgb(var(--color-foreground-rgb) / 0.04);
     margin-bottom: 6px;
@@ -566,7 +639,7 @@
   .cart-upsell-card--grid_2 .cart-upsell-card__title {
     font-size: 12px;
     font-weight: 500;
-    color: var(--color-foreground);
+    color: var(--upsell-title-color, var(--color-foreground));
     text-decoration: none;
     line-height: 1.2;
     display: -webkit-box;
@@ -585,7 +658,7 @@
     gap: 4px;
     font-size: 12px;
     font-weight: 600;
-    color: var(--color-foreground);
+    color: var(--upsell-price-color, var(--color-foreground));
     margin-top: 2px;
   }
 
@@ -638,11 +711,11 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: var(--gap-sm, 12px);
+    gap: var(--upsell-gap, 12px);
     padding: 8px 12px;
-    background-color: rgb(var(--color-foreground-rgb) / 0.03);
-    border: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.1));
-    border-radius: var(--style-border-radius-inputs, 8px);
+    background-color: var(--upsell-card-bg, rgb(var(--color-foreground-rgb) / 0.03));
+    border: var(--upsell-border-width, 1px) solid var(--upsell-card-border, rgb(var(--color-foreground-rgb) / var(--opacity-10-25, 0.12)));
+    border-radius: var(--upsell-border-radius, var(--style-border-radius-inputs, 8px));
     box-sizing: border-box;
     transition: background-color var(--animation-speed, 0.2s) ease;
   }
@@ -652,10 +725,10 @@
   }
 
   .cart-upsell-card--slider .cart-upsell-card__media {
-    width: 52px;
-    height: 52px;
+    width: var(--upsell-img-size, 52px);
+    height: var(--upsell-img-size, 52px);
     flex-shrink: 0;
-    border-radius: calc(var(--style-border-radius-inputs, 8px) - 2px);
+    border-radius: var(--upsell-img-radius, calc(var(--style-border-radius-inputs, 8px) - 2px));
     overflow: hidden;
     background-color: rgb(var(--color-foreground-rgb) / 0.04);
   }
@@ -678,7 +751,7 @@
   .cart-upsell-card--slider .cart-upsell-card__title {
     font-size: 13px;
     font-weight: 500;
-    color: var(--color-foreground);
+    color: var(--upsell-title-color, var(--color-foreground));
     text-decoration: none;
     line-height: 1.3;
     white-space: nowrap;
@@ -696,7 +769,7 @@
     gap: 6px;
     font-size: 13px;
     font-weight: 600;
-    color: var(--color-foreground);
+    color: var(--upsell-price-color, var(--color-foreground));
   }
 
   .cart-upsell-card--slider .cart-upsell-card__compare-price {
