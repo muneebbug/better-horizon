@@ -12,13 +12,23 @@
   assign rows = block_settings.rows | default: 4
   assign help_id = 'FormField-Help-' | append: block.id
   assign max_chars = block_settings.max_characters | default: 0
+  assign min_height = block_settings.min_height | default: 100
 
   assign field_value = block_settings.default_value
 -%}
 
 <div
   class="custom-form__field custom-form__field--width-{{ field_width }} spacing-style"
-  style="{% render 'spacing-style', settings: block_settings %}"
+  style="
+    --form-textarea-min-height: {{ min_height }}px;
+    {% render 'spacing-style', settings: block_settings %}
+    {% if block_settings.override_colors %}
+      {% if block_settings.input_background_color != blank %}--color-input-background: {{ block_settings.input_background_color }};{% endif %}
+      {% if block_settings.input_text_color != blank %}--color-input-text: {{ block_settings.input_text_color }};{% endif %}
+      {% if block_settings.input_border_color != blank %}--color-input-border: {{ block_settings.input_border_color }};{% endif %}
+      {% if block_settings.input_border_radius != blank %}--style-border-radius-inputs: {{ block_settings.input_border_radius }}px;{% endif %}
+    {% endif %}
+  "
   {{ block.shopify_attributes }}
 >
   <label
@@ -43,17 +53,26 @@
     {% endif %}
     {% if max_chars > 0 %}
       maxlength="{{ max_chars }}"
+      oninput="const el = document.getElementById('{{ field_id }}-counter'); if(el) el.textContent = this.value.length + ' / {{ max_chars }}';"
     {% endif %}
     {% if block_settings.help_text != blank %}
       aria-describedby="{{ help_id }}"
     {% endif %}
   >{{ field_value | escape }}</textarea>
 
-  {%- if block_settings.help_text != blank -%}
-    <span id="{{ help_id }}" class="custom-form__help-text">
-      {{- block_settings.help_text -}}
-    </span>
-  {%- endif -%}
+  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+    {%- if block_settings.help_text != blank -%}
+      <span id="{{ help_id }}" class="custom-form__help-text">
+        {{- block_settings.help_text -}}
+      </span>
+    {%- endif -%}
+
+    {%- if max_chars > 0 and block_settings.show_counter -%}
+      <span id="{{ field_id }}-counter" class="custom-form__counter">
+        0 / {{ max_chars }}
+      </span>
+    {%- endif -%}
+  </div>
 </div>
 
 {% schema %}
@@ -108,12 +127,29 @@
     },
     {
       "type": "range",
+      "id": "min_height",
+      "label": "Minimum height",
+      "min": 60,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
       "id": "max_characters",
       "label": "Maximum character limit (0 for unlimited)",
       "min": 0,
       "max": 1000,
       "step": 50,
       "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "show_counter",
+      "label": "Show character counter",
+      "default": true,
+      "visible_if": "{{ block.settings.max_characters > 0 }}"
     },
     {
       "type": "select",
@@ -123,6 +159,10 @@
         {
           "value": "100",
           "label": "Full width (100%)"
+        },
+        {
+          "value": "75",
+          "label": "Three quarters (75%)"
         },
         {
           "value": "50",
@@ -139,6 +179,45 @@
       "type": "text",
       "id": "help_text",
       "label": "Helper text"
+    },
+    {
+      "type": "header",
+      "content": "Custom Styling Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_colors",
+      "label": "Override container styles for this field",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "input_background_color",
+      "label": "Background color",
+      "visible_if": "{{ block.settings.override_colors }}"
+    },
+    {
+      "type": "color",
+      "id": "input_text_color",
+      "label": "Text color",
+      "visible_if": "{{ block.settings.override_colors }}"
+    },
+    {
+      "type": "color",
+      "id": "input_border_color",
+      "label": "Border color",
+      "visible_if": "{{ block.settings.override_colors }}"
+    },
+    {
+      "type": "range",
+      "id": "input_border_radius",
+      "label": "Corner radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 6,
+      "visible_if": "{{ block.settings.override_colors }}"
     },
     {
       "type": "header",

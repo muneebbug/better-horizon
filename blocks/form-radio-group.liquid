@@ -7,7 +7,7 @@
   assign block_settings = block.settings
   assign field_name = block_settings.name | default: 'contact[inquiry_type]'
   assign field_label = block_settings.label | default: 'Inquiry type'
-  assign field_width = block_settings.width | default: '50'
+  assign field_width = block_settings.width | default: '100'
   assign layout = block_settings.layout | default: 'row'
   assign default_val = block_settings.default_option
   assign help_id = 'FormField-Help-' | append: block.id
@@ -18,7 +18,15 @@
 
 <div
   class="custom-form__field custom-form__field--width-{{ field_width }} spacing-style"
-  style="{% render 'spacing-style', settings: block_settings %}"
+  style="
+    {% render 'spacing-style', settings: block_settings %}
+    {% if block_settings.override_colors %}
+      {% if block_settings.active_background_color != blank %}--form-radio-active-bg: {{ block_settings.active_background_color }};{% endif %}
+      {% if block_settings.active_text_color != blank %}--form-radio-active-text: {{ block_settings.active_text_color }};{% endif %}
+      {% if block_settings.active_border_color != blank %}--form-radio-active-border: {{ block_settings.active_border_color }};{% endif %}
+      {% if block_settings.border_radius != blank %}--style-border-radius-inputs: {{ block_settings.border_radius }}px;{% endif %}
+    {% endif %}
+  "
   {{ block.shopify_attributes }}
 >
   <fieldset
@@ -102,12 +110,20 @@
       "label": "Options layout",
       "options": [
         {
+          "value": "row",
+          "label": "Horizontal (inline wrap)"
+        },
+        {
           "value": "column",
           "label": "Vertical (stacked)"
         },
         {
-          "value": "row",
-          "label": "Horizontal (inline)"
+          "value": "grid-2",
+          "label": "2 Columns Grid"
+        },
+        {
+          "value": "grid-3",
+          "label": "3 Columns Grid"
         }
       ],
       "default": "row"
@@ -128,6 +144,10 @@
           "label": "Full width (100%)"
         },
         {
+          "value": "75",
+          "label": "Three quarters (75%)"
+        },
+        {
           "value": "50",
           "label": "Half width (50%)"
         },
@@ -136,12 +156,51 @@
           "label": "Auto"
         }
       ],
-      "default": "50"
+      "default": "100"
     },
     {
       "type": "text",
       "id": "help_text",
       "label": "Helper text"
+    },
+    {
+      "type": "header",
+      "content": "Custom Styling Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_colors",
+      "label": "Override colors for radio buttons",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "active_background_color",
+      "label": "Active background color",
+      "visible_if": "{{ block.settings.override_colors }}"
+    },
+    {
+      "type": "color",
+      "id": "active_text_color",
+      "label": "Active text color",
+      "visible_if": "{{ block.settings.override_colors }}"
+    },
+    {
+      "type": "color",
+      "id": "active_border_color",
+      "label": "Active border color",
+      "visible_if": "{{ block.settings.override_colors }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Button corner radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 6,
+      "visible_if": "{{ block.settings.override_colors }}"
     },
     {
       "type": "header",

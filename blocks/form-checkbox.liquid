@@ -11,13 +11,29 @@
   assign field_value = block_settings.value | default: 'Yes'
   assign field_width = block_settings.width | default: '100'
   assign help_id = 'FormField-Help-' | append: block.id
+
+  assign size_val = '18px'
+  case block_settings.checkbox_size
+    when 'small'
+      assign size_val = '15px'
+    when 'large'
+      assign size_val = '22px'
+  endcase
 -%}
 
 {% render 'checkbox-styles' %}
 
 <div
   class="custom-form__field custom-form__field--width-{{ field_width }} spacing-style"
-  style="{% render 'spacing-style', settings: block_settings %}"
+  style="
+    --checkbox-size: {{ size_val }};
+    {% render 'spacing-style', settings: block_settings %}
+    {% if block_settings.override_colors %}
+      {% if block_settings.checkbox_active_color != blank %}--color-foreground: {{ block_settings.checkbox_active_color }};{% endif %}
+      {% if block_settings.checkbox_border_color != blank %}--color-input-border: {{ block_settings.checkbox_border_color }};{% endif %}
+      {% if block_settings.checkbox_text_color != blank %}color: {{ block_settings.checkbox_text_color }};{% endif %}
+    {% endif %}
+  "
   {{ block.shopify_attributes }}
 >
   <div class="checkbox">
@@ -53,7 +69,7 @@
     <span
       id="{{ help_id }}"
       class="custom-form__help-text"
-      style="margin-inline-start: calc(var(--checkbox-size) + var(--checkbox-label-padding));"
+      style="margin-inline-start: calc(var(--checkbox-size) + var(--checkbox-label-padding, 8px));"
     >
       {{- block_settings.help_text -}}
     </span>
@@ -98,6 +114,26 @@
     },
     {
       "type": "select",
+      "id": "checkbox_size",
+      "label": "Checkbox size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small (15px)"
+        },
+        {
+          "value": "medium",
+          "label": "Medium (18px)"
+        },
+        {
+          "value": "large",
+          "label": "Large (22px)"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
       "id": "width",
       "label": "Field width",
       "options": [
@@ -120,6 +156,34 @@
       "type": "text",
       "id": "help_text",
       "label": "Helper text"
+    },
+    {
+      "type": "header",
+      "content": "Custom Styling Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_colors",
+      "label": "Override colors for this checkbox",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "checkbox_active_color",
+      "label": "Active fill color",
+      "visible_if": "{{ block.settings.override_colors }}"
+    },
+    {
+      "type": "color",
+      "id": "checkbox_border_color",
+      "label": "Border color",
+      "visible_if": "{{ block.settings.override_colors }}"
+    },
+    {
+      "type": "color",
+      "id": "checkbox_text_color",
+      "label": "Label text color",
+      "visible_if": "{{ block.settings.override_colors }}"
     },
     {
       "type": "header",

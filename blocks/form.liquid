@@ -15,24 +15,79 @@
 
   assign success_msg = block_settings.success_message | default: 'Thank you for contacting us. We will get back to you as soon as possible.'
   assign error_msg = block_settings.error_message | default: 'Please adjust the errors below and try again.'
+
+  assign card_preset = block_settings.card_style | default: 'minimal'
+  assign input_size = block_settings.input_size | default: 'default'
+
+  assign input_height = '46px'
+  assign input_pad_y = '12px'
+  assign input_pad_x = '16px'
+  assign input_font_size = '14px'
+
+  case input_size
+    when 'compact'
+      assign input_height = '38px'
+      assign input_pad_y = '8px'
+      assign input_pad_x = '12px'
+      assign input_font_size = '13px'
+    when 'spacious'
+      assign input_height = '54px'
+      assign input_pad_y = '16px'
+      assign input_pad_x = '20px'
+      assign input_font_size = '16px'
+  endcase
+
+  assign label_font_size = '14px'
+  case block_settings.label_size
+    when 'small'
+      assign label_font_size = '12px'
+    when 'large'
+      assign label_font_size = '16px'
+  endcase
 -%}
 
 <div
-  class="custom-form spacing-style size-style{% if block_settings.text_color != blank %} color-custom-{{ block.id }}{% endif %}"
+  class="custom-form custom-form--card-{{ card_preset }} spacing-style size-style{% if block_settings.text_color != blank %} color-custom-{{ block.id }}{% endif %}"
   style="
     --form-gap: {{ block_settings.form_gap | default: 16 }}px;
+    --form-input-height: {{ input_height }};
+    --form-input-padding-y: {{ input_pad_y }};
+    --form-input-padding-x: {{ input_pad_x }};
+    --form-input-font-size: {{ input_font_size }};
+    --form-label-size: {{ label_font_size }};
+    --form-label-weight: {{ block_settings.label_weight | default: '500' }};
+    {% if block_settings.label_color != blank %}--form-label-color: {{ block_settings.label_color }};{% endif %}
+    {% if block_settings.help_text_color != blank %}--form-help-color: {{ block_settings.help_text_color }};{% endif %}
+    {% if card_preset == 'custom' %}
+      {% if block_settings.background_color != blank %}--form-card-bg: {{ block_settings.background_color }};{% endif %}
+      {% if block_settings.border_color != blank %}--form-card-border: {{ block_settings.border_color }};{% endif %}
+      --form-card-border-width: {{ block_settings.card_border_width | default: 1 }}px;
+      --form-card-border-radius: {{ block_settings.card_border_radius | default: 8 }}px;
+      --form-card-padding: {{ block_settings.card_padding | default: 24 }}px;
+    {% endif %}
     {% render 'spacing-style', settings: block_settings %}
     {% render 'size-style', settings: block_settings %}
-    {% if block_settings.background_color != blank %}background-color: {{ block_settings.background_color }};{% endif %}
     {% if block_settings.text_color != blank %}
       --color: {{ block_settings.text_color }};
       --color-rgb: {{ block_settings.text_color.rgb }};
     {% endif %}
     {% if custom_input_style %}
       {% render 'input-custom-styles', block_settings: block_settings %}
-      --style-border-width-inputs: {{ block_settings.border_width }}px;
-      --style-border-radius-inputs: {{ block_settings.border_radius }}px;
+      --style-border-width-inputs: {{ block_settings.border_width | default: 1 }}px;
+      --style-border-radius-inputs: {{ block_settings.border_radius | default: 6 }}px;
+      {% if block_settings.input_focus_border_color != blank %}
+        --color-input-focus-border: {{ block_settings.input_focus_border_color }};
+      {% endif %}
+      {% if block_settings.input_placeholder_color != blank %}
+        --form-input-placeholder: {{ block_settings.input_placeholder_color }};
+      {% endif %}
     {% endif %}
+    {% if block_settings.success_background_color != blank %}--form-success-bg: {{ block_settings.success_background_color }};{% endif %}
+    {% if block_settings.success_text_color != blank %}--form-success-text: {{ block_settings.success_text_color }};{% endif %}
+    {% if block_settings.success_border_color != blank %}--form-success-border: {{ block_settings.success_border_color }};{% endif %}
+    {% if block_settings.error_background_color != blank %}--form-error-bg: {{ block_settings.error_background_color }};{% endif %}
+    {% if block_settings.error_text_color != blank %}--form-error-text: {{ block_settings.error_text_color }};{% endif %}
+    {% if block_settings.error_border_color != blank %}--form-error-border: {{ block_settings.error_border_color }};{% endif %}
   "
   {{ block.shopify_attributes }}
 >
@@ -48,13 +103,27 @@
       if form.id == form_id or form.id == blank
         assign form_matches = true
       endif
+
+      assign has_errors = false
+      if form.errors and form_matches
+        assign has_errors = true
+      endif
+
+      assign is_successful = false
+      if form.posted_successfully? and form_matches
+        assign is_successful = true
+      endif
+
+      if request.design_mode
+        assign has_errors = true
+        assign is_successful = true
+      endif
     %}
 
-    {%- if form.errors and form_matches -%}
+    {%- if has_errors -%}
       <div
         class="custom-form__alert custom-form__alert--error"
         tabindex="-1"
-        autofocus
         role="alert"
       >
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -68,18 +137,18 @@
             {%- if field == 'form' -%}
               {{ form.errors.messages[field] }}
             {%- else -%}
-              — {{ form.errors.translated_fields[field] | capitalize }} {{ form.errors.messages[field] }}
+              — {{ form.errors.translated_fields[field] | capitalize }}
+              {{ form.errors.messages[field] }}
             {%- endif -%}
           {%- endfor -%}
         </span>
       </div>
     {%- endif -%}
 
-    {%- if form.posted_successfully? and form_matches -%}
+    {%- if is_successful -%}
       <div
         class="custom-form__alert custom-form__alert--success"
         tabindex="-1"
-        autofocus
         role="status"
       >
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -133,52 +202,182 @@
   "settings": [
     {
       "type": "header",
-      "content": "Messages"
+      "content": "Container & Card Styling"
     },
     {
-      "type": "text",
-      "id": "success_message",
-      "label": "Success message",
-      "default": "Thank you for contacting us. We will get back to you as soon as possible."
-    },
-    {
-      "type": "text",
-      "id": "error_message",
-      "label": "Error message",
-      "default": "Please adjust the errors below and try again."
-    },
-    {
-      "type": "header",
-      "content": "Layout & Gap"
-    },
-    {
-      "type": "range",
-      "id": "form_gap",
-      "label": "Field gap",
-      "min": 8,
-      "max": 48,
-      "step": 4,
-      "unit": "px",
-      "default": 16
-    },
-    {
-      "type": "header",
-      "content": "Appearance"
+      "type": "select",
+      "id": "card_style",
+      "label": "Container style",
+      "options": [
+        {
+          "value": "minimal",
+          "label": "Minimal (transparent / borderless)"
+        },
+        {
+          "value": "default",
+          "label": "Default card"
+        },
+        {
+          "value": "outline",
+          "label": "Outline only"
+        },
+        {
+          "value": "custom",
+          "label": "Custom colors"
+        }
+      ],
+      "default": "minimal"
     },
     {
       "type": "color",
       "id": "background_color",
-      "label": "Background color"
+      "label": "Container background color",
+      "visible_if": "{{ block.settings.card_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Container border color",
+      "visible_if": "{{ block.settings.card_style == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "label": "Container border width",
+      "min": 0,
+      "max": 6,
+      "step": 1,
+      "unit": "px",
+      "default": 1,
+      "visible_if": "{{ block.settings.card_style == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Container corner radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ block.settings.card_style == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Container inner padding",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24,
+      "visible_if": "{{ block.settings.card_style == 'custom' }}"
     },
     {
       "type": "color",
       "id": "text_color",
-      "label": "Text color"
+      "label": "General text color"
+    },
+    {
+      "type": "header",
+      "content": "Layout & Spacing"
+    },
+    {
+      "type": "range",
+      "id": "form_gap",
+      "label": "Field gap spacing",
+      "min": 4,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "input_size",
+      "label": "Field sizing",
+      "options": [
+        {
+          "value": "compact",
+          "label": "Compact (38px height)"
+        },
+        {
+          "value": "default",
+          "label": "Default (46px height)"
+        },
+        {
+          "value": "spacious",
+          "label": "Spacious (54px height)"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "header",
+      "content": "Label & Typography"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label text color"
+    },
+    {
+      "type": "select",
+      "id": "label_size",
+      "label": "Label font size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small (12px)"
+        },
+        {
+          "value": "medium",
+          "label": "Medium (14px)"
+        },
+        {
+          "value": "large",
+          "label": "Large (16px)"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "label_weight",
+      "label": "Label font weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semibold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "color",
+      "id": "help_text_color",
+      "label": "Helper text color"
+    },
+    {
+      "type": "header",
+      "content": "Input Fields Appearance"
     },
     {
       "type": "select",
       "id": "input_style",
-      "label": "Input styling",
+      "label": "Input color mode",
       "options": [
         {
           "value": "default",
@@ -186,10 +385,40 @@
         },
         {
           "value": "custom",
-          "label": "Custom"
+          "label": "Custom colors"
         }
       ],
       "default": "default"
+    },
+    {
+      "type": "color",
+      "id": "input_background_color",
+      "label": "Input background color",
+      "visible_if": "{{ block.settings.input_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "input_text_color",
+      "label": "Input text color",
+      "visible_if": "{{ block.settings.input_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "input_border_color",
+      "label": "Input border color",
+      "visible_if": "{{ block.settings.input_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "input_focus_border_color",
+      "label": "Input focus border color",
+      "visible_if": "{{ block.settings.input_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "input_placeholder_color",
+      "label": "Placeholder text color",
+      "visible_if": "{{ block.settings.input_style == 'custom' }}"
     },
     {
       "type": "range",
@@ -205,13 +434,59 @@
     {
       "type": "range",
       "id": "border_radius",
-      "label": "Input border radius",
+      "label": "Input corner radius",
       "min": 0,
       "max": 32,
       "step": 2,
       "unit": "px",
-      "default": 4,
+      "default": 6,
       "visible_if": "{{ block.settings.input_style == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "Status Messages"
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Success message",
+      "default": "Thank you for contacting us. We will get back to you as soon as possible."
+    },
+    {
+      "type": "color",
+      "id": "success_background_color",
+      "label": "Success alert background"
+    },
+    {
+      "type": "color",
+      "id": "success_text_color",
+      "label": "Success alert text color"
+    },
+    {
+      "type": "color",
+      "id": "success_border_color",
+      "label": "Success alert border color"
+    },
+    {
+      "type": "text",
+      "id": "error_message",
+      "label": "Error message",
+      "default": "Please adjust the errors below and try again."
+    },
+    {
+      "type": "color",
+      "id": "error_background_color",
+      "label": "Error alert background"
+    },
+    {
+      "type": "color",
+      "id": "error_text_color",
+      "label": "Error alert text color"
+    },
+    {
+      "type": "color",
+      "id": "error_border_color",
+      "label": "Error alert border color"
     },
     {
       "type": "header",
@@ -305,6 +580,7 @@
             "label": "Name",
             "placeholder": "Your name",
             "width": "50",
+            "icon": "user",
             "autocomplete": "name"
           }
         },
@@ -317,6 +593,7 @@
             "placeholder": "your.email@example.com",
             "required": true,
             "width": "50",
+            "icon": "email",
             "autocomplete": "email"
           }
         },
@@ -328,6 +605,7 @@
             "label": "Phone number",
             "placeholder": "+1 (555) 000-0000",
             "width": "50",
+            "icon": "phone",
             "autocomplete": "tel"
           }
         },

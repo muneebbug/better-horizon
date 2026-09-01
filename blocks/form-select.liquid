@@ -14,7 +14,15 @@
 
 <div
   class="custom-form__field custom-form__field--width-{{ field_width }} spacing-style"
-  style="{% render 'spacing-style', settings: block_settings %}"
+  style="
+    {% render 'spacing-style', settings: block_settings %}
+    {% if block_settings.override_colors %}
+      {% if block_settings.input_background_color != blank %}--color-input-background: {{ block_settings.input_background_color }};{% endif %}
+      {% if block_settings.input_text_color != blank %}--color-input-text: {{ block_settings.input_text_color }};{% endif %}
+      {% if block_settings.input_border_color != blank %}--color-input-border: {{ block_settings.input_border_color }};{% endif %}
+      {% if block_settings.input_border_radius != blank %}--style-border-radius-inputs: {{ block_settings.input_border_radius }}px;{% endif %}
+    {% endif %}
+  "
   {{ block.shopify_attributes }}
 >
   <label
@@ -116,12 +124,20 @@
           "label": "Full width (100%)"
         },
         {
+          "value": "75",
+          "label": "Three quarters (75%)"
+        },
+        {
           "value": "50",
           "label": "Half width (50%)"
         },
         {
           "value": "33",
           "label": "One third (33%)"
+        },
+        {
+          "value": "25",
+          "label": "One quarter (25%)"
         },
         {
           "value": "auto",
@@ -134,6 +150,45 @@
       "type": "text",
       "id": "help_text",
       "label": "Helper text"
+    },
+    {
+      "type": "header",
+      "content": "Custom Styling Override"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_colors",
+      "label": "Override container styles for this field",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "input_background_color",
+      "label": "Background color",
+      "visible_if": "{{ block.settings.override_colors }}"
+    },
+    {
+      "type": "color",
+      "id": "input_text_color",
+      "label": "Text color",
+      "visible_if": "{{ block.settings.override_colors }}"
+    },
+    {
+      "type": "color",
+      "id": "input_border_color",
+      "label": "Border color",
+      "visible_if": "{{ block.settings.override_colors }}"
+    },
+    {
+      "type": "range",
+      "id": "input_border_radius",
+      "label": "Corner radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 6,
+      "visible_if": "{{ block.settings.override_colors }}"
     },
     {
       "type": "header",
@@ -178,9 +233,16 @@
             "label": "Order support",
             "value": "Order support"
           }
+        },
+        "option_3": {
+          "type": "_form-select-option",
+          "settings": {
+            "label": "Wholesale & B2B",
+            "value": "Wholesale & B2B"
+          }
         }
       },
-      "block_order": ["option_1", "option_2"]
+      "block_order": ["option_1", "option_2", "option_3"]
     }
   ]
 }

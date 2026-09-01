@@ -9,16 +9,31 @@
   assign style_class = block_settings.style_class | default: 'button-primary'
   assign alignment = block_settings.alignment | default: 'left'
   assign width = block_settings.width | default: 'auto'
+  assign button_size = block_settings.button_size | default: 'medium'
+
+  assign is_custom = false
+  if style_class == 'button-custom'
+    assign is_custom = true
+  endif
 -%}
 
 <div
   class="custom-form__submit-wrapper custom-form__submit-wrapper--{{ alignment }}{% if width == 'full_width' %} custom-form__submit-wrapper--full-width{% endif %} spacing-style"
-  style="{% render 'spacing-style', settings: block_settings %}"
+  style="
+    {% render 'spacing-style', settings: block_settings %}
+    {% if is_custom %}
+      {% if block_settings.button_background_color != blank %}--form-btn-bg: {{ block_settings.button_background_color }};{% endif %}
+      {% if block_settings.button_text_color != blank %}--form-btn-text: {{ block_settings.button_text_color }};{% endif %}
+      {% if block_settings.button_border_color != blank %}--form-btn-border: {{ block_settings.button_border_color }};{% endif %}
+      --form-btn-border-width: {{ block_settings.button_border_width | default: 1 }}px;
+      --form-btn-radius: {{ block_settings.button_border_radius | default: 6 }}px;
+    {% endif %}
+  "
   {{ block.shopify_attributes }}
 >
   <button
     type="submit"
-    class="button {{ style_class }} custom-form__submit-button{% if width == 'full_width' %} custom-form__submit-button--full-width{% endif %}"
+    class="button {% if is_custom %}custom-form__submit-button--custom{% else %}{{ style_class }}{% endif %} custom-form__submit-button custom-form__submit-button--{{ button_size }}{% if width == 'full_width' %} custom-form__submit-button--full-width{% endif %}"
   >
     {{- label -}}
   </button>
@@ -51,9 +66,73 @@
         {
           "value": "button-outline",
           "label": "Outline"
+        },
+        {
+          "value": "button-custom",
+          "label": "Custom colors"
         }
       ],
       "default": "button-primary"
+    },
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Button background color",
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Button border color",
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "label": "Button border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Button corner radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 6,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button sizing",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small (compact)"
+        },
+        {
+          "value": "medium",
+          "label": "Medium (default)"
+        },
+        {
+          "value": "large",
+          "label": "Large (spacious)"
+        }
+      ],
+      "default": "medium"
     },
     {
       "type": "select",
@@ -62,7 +141,7 @@
       "options": [
         {
           "value": "auto",
-          "label": "Auto"
+          "label": "Auto (fit content)"
         },
         {
           "value": "full_width",
@@ -74,7 +153,7 @@
     {
       "type": "select",
       "id": "alignment",
-      "label": "Alignment",
+      "label": "Button alignment",
       "options": [
         {
           "value": "left",
