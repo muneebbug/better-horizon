@@ -1,114 +1,218 @@
+{% doc %}
+  Product Inventory & Low-Stock Indicator Block
+  Displays real-time inventory count, pulsing status indicators, custom threshold messaging, and animated progress bar.
+{% enddoc %}
+
 {%- liquid
   assign block_settings = block.settings
   assign variant = closest.product.selected_or_first_available_variant
+
+  assign inventory_managed = false
   if variant.inventory_management == 'shopify'
     assign inventory_managed = true
   endif
-  assign inventory_quantity = variant.inventory_quantity
-  assign inventory_policy = variant.inventory_policy
-  assign threshold = block_settings.inventory_threshold
 
-  if inventory_managed
-    if inventory_quantity > 0
-      if inventory_quantity <= threshold
-        assign status = 'low'
-        assign show_quantity = block_settings.show_inventory_quantity
-        if show_quantity == false
-          assign translation_key = 'content.inventory_low_stock'
-        endif
-      else
-        assign status = 'in_stock'
-        assign translation_key = 'content.inventory_in_stock'
-      endif
-    else
-      if inventory_policy == 'continue'
-        assign status = 'in_stock'
-        assign translation_key = 'content.inventory_in_stock'
+  assign quantity = variant.inventory_quantity | default: 0
+  assign policy = variant.inventory_policy
+  assign low_threshold = block_settings.low_stock_threshold | default: 10
+  assign nearly_sold_out_threshold = block_settings.nearly_sold_out_threshold | default: 3
+  assign max_count = block_settings.progress_bar_max | default: 30
+
+  assign in_stock_color = block_settings.color_in_stock | default: '#10B981'
+  assign low_stock_color = block_settings.color_low_stock | default: '#F59E0B'
+  assign nearly_sold_out_color = block_settings.color_nearly_sold_out | default: '#EF4444'
+  assign out_of_stock_color = block_settings.color_out_of_stock | default: '#6B7280'
+
+  if variant == null or variant.available == false
+    assign status = 'out_of_stock'
+    assign status_color = out_of_stock_color
+    assign status_text = block_settings.text_out_of_stock | default: 'Currently out of stock'
+    assign percentage = 0
+  elsif inventory_managed
+    if quantity <= 0
+      if policy == 'continue'
+        assign status = 'preorder'
+        assign status_color = in_stock_color
+        assign status_text = block_settings.text_preorder | default: 'Available for pre-order'
+        assign percentage = 100
       else
         assign status = 'out_of_stock'
-        assign translation_key = 'content.inventory_out_of_stock'
+        assign status_color = out_of_stock_color
+        assign status_text = block_settings.text_out_of_stock | default: 'Currently out of stock'
+        assign percentage = 0
       endif
+    elsif quantity <= nearly_sold_out_threshold
+      assign status = 'nearly_sold_out'
+      assign status_color = nearly_sold_out_color
+      assign raw_text = block_settings.text_nearly_sold_out | default: 'Hurry! Only [count] remaining!'
+      assign status_text = raw_text | replace: '[count]', quantity | replace: '{count}', quantity | replace: '[quantity]', quantity
+      assign percentage = quantity | times: 100.0 | divided_by: max_count | at_most: 100 | at_least: 6
+    elsif quantity <= low_threshold
+      assign status = 'low_stock'
+      assign status_color = low_stock_color
+      assign raw_text = block_settings.text_low_stock | default: 'Only [count] left in stock - order soon!'
+      assign status_text = raw_text | replace: '[count]', quantity | replace: '{count}', quantity | replace: '[quantity]', quantity
+      assign percentage = quantity | times: 100.0 | divided_by: max_count | at_most: 100 | at_least: 10
+    else
+      assign status = 'in_stock'
+      assign status_color = in_stock_color
+      if block_settings.show_inventory_quantity
+        assign raw_text = block_settings.text_in_stock | default: '[count] in stock'
+        assign status_text = raw_text | replace: '[count]', quantity | replace: '{count}', quantity | replace: '[quantity]', quantity
+      else
+        assign raw_text = block_settings.text_in_stock | default: 'In stock, ready to ship'
+        assign status_text = raw_text | replace: '[count]', '' | replace: '{count}', '' | replace: '[quantity]', '' | strip
+        if status_text == blank or status_text == 'in stock'
+          assign status_text = 'In stock, ready to ship'
+        endif
+      endif
+      assign percentage = 100
     endif
   else
-    if closest.product.selected_or_first_available_variant != null
-      assign status = 'in_stock'
-      assign translation_key = 'content.inventory_in_stock'
-    else
-      assign status = 'out_of_stock'
-      assign translation_key = 'content.inventory_out_of_stock'
+    assign status = 'in_stock'
+    assign status_color = in_stock_color
+    assign raw_text = block_settings.text_in_stock | default: 'In stock, ready to ship'
+    assign status_text = raw_text | replace: '[count]', '' | replace: '{count}', '' | replace: '[quantity]', '' | strip
+    if status_text == blank or status_text == 'in stock'
+      assign status_text = 'In stock, ready to ship'
     endif
+    assign percentage = 100
+  endif
+
+  assign is_hidden = false
+  if block_settings.hide_when_out_of_stock and status == 'out_of_stock'
+    assign is_hidden = true
+  endif
+  if block_settings.hide_when_high_stock and status == 'in_stock'
+    assign is_hidden = true
   endif
 -%}
 
-{% if block_settings.text_color != blank %}
-  {% style %}
-    .product-inventory-{{ block.id }} {
-      color: {{ block_settings.text_color }};
-    }
-  {% endstyle %}
-{% endif %}
-
 <product-inventory
-  class="
-    product-inventory product-inventory-{{ block.id }} spacing-style
-    {% if block_settings.type_preset != '' %}{{ block_settings.type_preset }}{% endif%}
+  class="product-inventory product-inventory-{{ block.id }} spacing-style"
+  style="
+    --status-color: {{ status_color }};
+    --progress-height: {{ block_settings.progress_bar_height | default: 6 }}px;
+    {% if block_settings.progress_bg_color != blank %}--progress-bg: {{ block_settings.progress_bg_color }};{% endif %}
+    {% render 'spacing-style', settings: block_settings %}
   "
-  style="{% render 'spacing-style', settings: block_settings %}"
+  data-product-id="{{ closest.product.id }}"
+  data-status="{{ status }}"
+  {% if is_hidden %}
+    hidden
+  {% endif %}
   {{ block.shopify_attributes }}
-  data-product-id="{{ product.id }}"
 >
-  <span
-    class="product-inventory__status"
-  >
+  <div class="product-inventory__status">
     <span
-      class="svg-wrapper product-inventory__icon product-inventory__icon-{{ status }}"
-    >
-      {{ 'icon-inventory.svg' | inline_asset_content }}
-    </span>
+      class="product-inventory__dot product-inventory__dot--{{ status }}{% if block_settings.animate_pulse %} product-inventory__dot--pulse{% endif %}"
+      aria-hidden="true"
+    ></span>
     <span
       class="product-inventory__text"
       id="Inventory-{{ section.id }}"
       role="status"
       aria-label="{{ 'accessibility.inventory_status' | t }}"
     >
-      {%- if show_quantity -%}
-        {{ 'content.inventory_low_stock_show_count' | t: count: inventory_quantity }}
-      {%- else -%}
-        {{- translation_key | t -}}
-      {%- endif -%}
+      {{- status_text -}}
     </span>
-  </span>
+  </div>
+
+  {%- if block_settings.show_progress_bar -%}
+    <div
+      class="product-inventory__progress-track"
+      role="progressbar"
+      aria-valuenow="{{ quantity }}"
+      aria-valuemin="0"
+      aria-valuemax="{{ max_count }}"
+      aria-label="Stock availability"
+    >
+      <div
+        class="product-inventory__progress-bar product-inventory__progress-bar--{{ status }}"
+        style="width: {{ percentage | round }}%;"
+      ></div>
+    </div>
+  {%- endif -%}
 </product-inventory>
 
 {% stylesheet %}
+  .product-inventory {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    width: 100%;
+  }
+
+  .product-inventory[hidden] {
+    display: none;
+  }
+
   .product-inventory__status {
     display: flex;
     align-items: center;
+    gap: var(--gap-xs);
     font-size: var(--font-paragraph--size);
-    line-height: var(--font-paragraph--line-height);
-    gap: var(--padding-xs);
+    line-height: normal;
+    color: inherit;
   }
 
-  .product-inventory__icon,
-  .product-inventory__icon svg {
-    width: var(--icon-size-sm);
-    height: var(--icon-size-sm);
+  .product-inventory__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--status-color, #10b981);
+    flex-shrink: 0;
+    position: relative;
+    box-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px color-mix(in srgb, var(--status-color) 25%, transparent);
   }
 
-  .product-inventory__icon-low {
-    color: var(--color-lowstock);
+  .product-inventory__dot--pulse::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background-color: var(--status-color, #10b981);
+    opacity: 0.4;
+    animation: inventory-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
-  .product-inventory__icon-in_stock {
-    color: var(--color-instock);
+  @keyframes inventory-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.4;
+    }
+    50% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
   }
 
-  .product-inventory__icon-out_of_stock {
-    color: var(--color-outofstock);
+  .product-inventory__progress-track {
+    width: 100%;
+    height: var(--progress-height, 6px);
+    background-color: var(--progress-bg, rgb(var(--color-foreground-rgb) / var(--opacity-10)));
+    border-radius: var(--progress-height, 6px);
+    overflow: hidden;
+    position: relative;
   }
 
-  .product-inventory__icon circle:first-of-type {
-    opacity: 0.3;
+  .product-inventory__progress-bar {
+    height: 100%;
+    background-color: var(--status-color, #10b981);
+    border-radius: var(--progress-height, 6px);
+    transition: width 0.4s var(--animation-easing), background-color 0.3s ease;
+    background-image: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.2) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.2) 75%,
+      transparent 75%,
+      transparent
+    );
+    background-size: 16px 16px;
   }
 {% endstylesheet %}
 
@@ -122,29 +226,148 @@
       "content": "t:content.resource_reference_product_inventory"
     },
     {
+      "type": "header",
+      "content": "Thresholds & Visibility"
+    },
+    {
       "type": "range",
-      "id": "inventory_threshold",
-      "label": "t:settings.inventory_threshold",
-      "min": 0,
-      "max": 100,
+      "id": "low_stock_threshold",
+      "label": "Low stock threshold",
+      "min": 1,
+      "max": 50,
       "step": 1,
       "default": 10
     },
     {
+      "type": "range",
+      "id": "nearly_sold_out_threshold",
+      "label": "Nearly sold out threshold",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 3
+    },
+    {
       "type": "checkbox",
       "id": "show_inventory_quantity",
-      "label": "t:settings.show_inventory_quantity",
+      "label": "Show exact inventory count",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_when_out_of_stock",
+      "label": "Hide when out of stock",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_when_high_stock",
+      "label": "Hide when in stock (only show low stock)",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Progress Bar"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_progress_bar",
+      "label": "Show inventory progress bar",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "progress_bar_max",
+      "label": "Progress bar max baseline count",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "progress_bar_height",
+      "label": "Progress bar height",
+      "min": 4,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "checkbox",
+      "id": "animate_pulse",
+      "label": "Animate status dot pulse",
       "default": true
     },
     {
       "type": "header",
-      "content": "t:content.appearance"
+      "content": "Custom Messages"
+    },
+    {
+      "type": "text",
+      "id": "text_in_stock",
+      "label": "In stock text",
+      "default": "[count] in stock",
+      "info": "Use [count] for exact quantity"
+    },
+    {
+      "type": "text",
+      "id": "text_low_stock",
+      "label": "Low stock text",
+      "default": "Only [count] left in stock - order soon!"
+    },
+    {
+      "type": "text",
+      "id": "text_nearly_sold_out",
+      "label": "Nearly sold out text",
+      "default": "Hurry! Only [count] remaining!"
+    },
+    {
+      "type": "text",
+      "id": "text_out_of_stock",
+      "label": "Out of stock text",
+      "default": "Currently out of stock"
+    },
+    {
+      "type": "text",
+      "id": "text_preorder",
+      "label": "Pre-order text",
+      "default": "Available for pre-order",
+      "info": "Displayed when quantity is tracked by Shopify, quantity is 0 or less, and 'Continue selling when out of stock' is enabled on the variant."
+    },
+    {
+      "type": "header",
+      "content": "Colors"
     },
     {
       "type": "color",
-      "id": "text_color",
-      "label": "t:settings.text_color",
-      "placeholder": "t:settings.default"
+      "id": "color_in_stock",
+      "label": "In stock color",
+      "default": "#10B981"
+    },
+    {
+      "type": "color",
+      "id": "color_low_stock",
+      "label": "Low stock color",
+      "default": "#F59E0B"
+    },
+    {
+      "type": "color",
+      "id": "color_nearly_sold_out",
+      "label": "Nearly sold out color",
+      "default": "#EF4444"
+    },
+    {
+      "type": "color",
+      "id": "color_out_of_stock",
+      "label": "Out of stock color",
+      "default": "#6B7280"
+    },
+    {
+      "type": "color",
+      "id": "progress_bg_color",
+      "label": "Progress bar background"
     },
     {
       "type": "header",
@@ -155,28 +378,28 @@
       "id": "padding-block-start",
       "label": "t:settings.top",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 64,
+      "step": 4,
       "unit": "px",
-      "default": 0
+      "default": 4
     },
     {
       "type": "range",
       "id": "padding-block-end",
       "label": "t:settings.bottom",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 64,
+      "step": 4,
       "unit": "px",
-      "default": 0
+      "default": 4
     },
     {
       "type": "range",
       "id": "padding-inline-start",
       "label": "t:settings.left",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 64,
+      "step": 4,
       "unit": "px",
       "default": 0
     },
@@ -185,8 +408,8 @@
       "id": "padding-inline-end",
       "label": "t:settings.right",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 64,
+      "step": 4,
       "unit": "px",
       "default": 0
     }

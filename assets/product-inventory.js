@@ -38,6 +38,20 @@ class ProductInventory extends Component {
         const newInventory = html.querySelector('product-inventory');
         if (!newInventory) return;
 
+        if (newInventory.hasAttribute('hidden')) {
+          this.setAttribute('hidden', '');
+        } else {
+          this.removeAttribute('hidden');
+        }
+
+        if (newInventory.dataset.status) {
+          this.dataset.status = newInventory.dataset.status;
+        }
+
+        if (newInventory.getAttribute('style')) {
+          this.setAttribute('style', newInventory.getAttribute('style'));
+        }
+
         morph(this, newInventory, { childrenOnly: true });
       })
       .catch((error) => {

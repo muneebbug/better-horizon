@@ -38,6 +38,7 @@ You can preview the theme here:
 - [Architecture Overview](/getting-started/architecture) — Liquid Storefronts, Theme Blocks, and Custom Elements lifecycle.
 
 ### Core Features
+- [Real-Time Low-Stock Indicator & Progress Bar](/features/product-inventory) — Real-time inventory status, threshold alerts, and animated stock availability progress bar.
 - [Custom Forms & Form Blocks](/features/custom-forms) — Block-based form builder supporting inputs, textareas, selects, checkboxes, and radio groups.
 - [Estimated Delivery Date](/features/delivery-estimate) — Dynamic delivery timeframe calculator with postal code estimation and shipping cutoffs.
 - [Gift Wrap & Custom Note](/features/gift-wrap) — Gift packaging addon with nested line items support and message cards.

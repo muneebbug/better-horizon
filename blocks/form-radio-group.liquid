@@ -7,8 +7,8 @@
   assign block_settings = block.settings
   assign field_name = block_settings.name | default: 'contact[inquiry_type]'
   assign field_label = block_settings.label | default: 'Inquiry type'
-  assign field_width = block_settings.width | default: '100'
-  assign layout = block_settings.layout | default: 'column'
+  assign field_width = block_settings.width | default: '50'
+  assign layout = block_settings.layout | default: 'row'
   assign default_val = block_settings.default_option
   assign help_id = 'FormField-Help-' | append: block.id
 
@@ -110,7 +110,7 @@
           "label": "Horizontal (inline)"
         }
       ],
-      "default": "column"
+      "default": "row"
     },
     {
       "type": "checkbox",
@@ -136,7 +136,7 @@
           "label": "Auto"
         }
       ],
-      "default": "100"
+      "default": "50"
     },
     {
       "type": "text",

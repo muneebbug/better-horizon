@@ -325,6 +325,35 @@
                 "size_chart_VYypew"
               ]
             },
+            "product_inventory_status": {
+              "type": "product-inventory",
+              "name": "Inventory & stock indicator",
+              "settings": {
+                "low_stock_threshold": 10,
+                "nearly_sold_out_threshold": 3,
+                "show_inventory_quantity": true,
+                "hide_when_out_of_stock": false,
+                "hide_when_high_stock": false,
+                "show_progress_bar": true,
+                "progress_bar_max": 30,
+                "progress_bar_height": 6,
+                "animate_pulse": true,
+                "text_in_stock": "[count] in stock",
+                "text_low_stock": "Only [count] left in stock - order soon!",
+                "text_nearly_sold_out": "Hurry! Only [count] remaining!",
+                "text_out_of_stock": "Currently out of stock",
+                "text_preorder": "Available for pre-order",
+                "color_in_stock": "#10B981",
+                "color_low_stock": "#F59E0B",
+                "color_nearly_sold_out": "#EF4444",
+                "color_out_of_stock": "#6B7280",
+                "padding-block-start": 4,
+                "padding-block-end": 8,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
             "buy_buttons_eYQEYi": {
               "type": "buy-buttons",
               "settings": {
@@ -485,6 +514,7 @@
             "gift_wrap_d7JCKJ",
             "back_in_stock_Ab76JE",
             "group_6br3kT",
+            "product_inventory_status",
             "buy_buttons_eYQEYi",
             "delivery_estimate_pdp",
             "frequently_bought_together_VBWnqk",

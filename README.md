@@ -21,6 +21,7 @@ Better Horizon builds these features directly into the theme using clean Liquid 
 
 ## Built-in Features
 
+- **Real-Time Low-Stock Indicator:** Dynamic inventory counter showing exact stock ("Only 3 left"), pulsing status dots, customizable urgency thresholds, and animated progress bars.
 - **Custom Form Builder:** Fully modular block-based forms (inputs, textareas, dropdowns with nested options, checkboxes, radio groups) that submit natively through Shopify without third-party form apps.
 - **Estimated Delivery Date:** Real-time shipping calculation showing earliest and latest delivery dates, order cut-off countdowns, and optional postal code lookup.
 - **Gift Wrap & Message:** Gift packaging option with nested line item pricing and custom gift note handling.
