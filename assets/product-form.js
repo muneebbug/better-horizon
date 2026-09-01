@@ -432,8 +432,14 @@ class ProductFormComponent extends Component {
       if (item instanceof HTMLElement && item.dataset.sectionId) {
         cartItemComponentsSectionIds.push(item.dataset.sectionId);
       }
-      formData.append('sections', cartItemComponentsSectionIds.join(','));
     });
+    formData.append('sections', cartItemComponentsSectionIds.join(','));
+
+    // Check if there is an active nested product (e.g. Gift Wrap product)
+    const nestedVariantId =
+      formData.get('nested_gift_wrap_id') ||
+      form.querySelector('[data-nested-gift-wrap]:not([disabled])')?.value ||
+      document.querySelector(`input[data-nested-gift-wrap][form="${form.id}"]:not([disabled])`)?.value;
 
     const itemCount = Number(formData.get('quantity')) || Number(this.dataset.quantityDefault);
     const deferredEventPromise = CartLinesUpdateEvent.createPromise();
@@ -447,19 +453,92 @@ class ProductFormComponent extends Component {
             merchandiseId: /** @type {string} */ (formData.get('id')),
             quantity: itemCount,
           },
+          ...(nestedVariantId
+            ? [
+                {
+                  merchandiseId: nestedVariantId,
+                  quantity: itemCount,
+                },
+              ]
+            : []),
         ],
         promise: deferredEventPromise.promise,
       })
     );
 
-    const fetchCfg = fetchConfig('javascript', { body: formData });
+    let fetchCfg;
+    if (nestedVariantId) {
+      const rawParentId = formData.get('id');
+      const parentId = Number(rawParentId) || rawParentId;
+      const childId = Number(nestedVariantId) || nestedVariantId;
+
+      const parentProperties = {};
+      const nestedProperties = {};
+
+      for (const [key, value] of formData.entries()) {
+        if (key.startsWith('properties[') && key.endsWith(']')) {
+          const propKey = key.slice(11, -1);
+          if (value) {
+            // Omit redundant boolean flag "Gift wrap: Yes" when gift wrap is its own line item
+            const isWrapFlag =
+              propKey.toLowerCase().includes('wrap') &&
+              (value === 'Yes' || value === 'true' || value === '1');
+
+            if (isWrapFlag) {
+              continue;
+            }
+
+            const isGiftProperty =
+              propKey.toLowerCase().includes('gift') ||
+              propKey.toLowerCase().includes('note') ||
+              propKey === 'To' ||
+              propKey === 'From';
+
+            if (isGiftProperty) {
+              nestedProperties[propKey] = value;
+            } else {
+              parentProperties[propKey] = value;
+            }
+          }
+        }
+      }
+
+      const payload = {
+        items: [
+          {
+            id: parentId,
+            quantity: itemCount,
+            properties: parentProperties,
+          },
+          {
+            id: childId,
+            quantity: itemCount,
+            parent_id: parentId,
+            properties: nestedProperties,
+          },
+        ],
+        sections: cartItemComponentsSectionIds.join(','),
+      };
+
+      fetchCfg = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify(payload),
+      };
+    } else {
+      fetchCfg = fetchConfig('javascript', { body: formData });
+      fetchCfg.headers = {
+        ...fetchCfg.headers,
+        Accept: 'text/html',
+      };
+    }
 
     fetch(Theme.routes.cart_add_url, {
       ...fetchCfg,
-      headers: {
-        ...fetchCfg.headers,
-        Accept: 'text/html',
-      },
     })
       .then((response) => response.json())
       .then(async (response) => {

@@ -12,6 +12,7 @@ The **Gift Note & Gift Wrap Option** allows merchants to offer gift wrapping ser
 
 ## Key Features
 
+- **Nested Cart Lines & Paid Gift Wrap Product:** Select a dedicated gift wrap product in the block schema to automatically display the additional cost (`Add gift wrapping (+ $5.00)`) and add it to the cart as a Shopify Nested Line Item (`parent_id`) linked to the parent product.
 - **100% Native Shopify Line-Item Properties:** Submits properties directly on the active cart item (`properties[Gift wrap]`, `properties[Gift note]`, `properties[To]`, `properties[From]`), which surface on orders in the Shopify Admin, cart drawer, cart page, and order notifications.
 - **Multiple Display Modes:**
   - `Checkbox with collapsible gift note`: Checking the gift wrap checkbox smoothly expands the message textarea. Unchecking automatically collapses and disables fields so empty properties are not submitted.
@@ -33,6 +34,7 @@ When placed as a Theme Block on the product page or sections, configure the foll
 | :--- | :--- | :--- | :--- |
 | `display_mode` | select | `collapsible` | Choose between `collapsible`, `always_visible`, `wrap_only`, or `note_only`. |
 | `enable_gift_wrap` | checkbox | `true` | Show the gift wrap checkbox. |
+| `gift_wrap_product` | product | `nil` | Optional product to charge for gift wrap as a nested cart line. |
 | `wrap_label` | text | `"Add gift wrapping"` | Label displayed next to the checkbox. |
 | `wrap_property_name` | text | `"Gift wrap"` | Line-item property key submitted to Shopify. |
 | `enable_gift_note` | checkbox | `true` | Enable personalized message textarea. |

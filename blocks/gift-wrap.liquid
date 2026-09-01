@@ -28,7 +28,24 @@
   assign wrap_prop_name = block_settings.wrap_property_name | default: 'Gift wrap'
   assign note_prop_name = block_settings.note_property_name | default: 'Gift note'
   assign default_wrap_label = 'content.gift_wrap_option_label' | t
-  assign wrap_label = block_settings.wrap_label | default: default_wrap_label
+  assign base_wrap_label = block_settings.wrap_label | default: default_wrap_label
+
+  assign gift_wrap_product = block_settings.gift_wrap_product
+  assign gift_wrap_variant = nil
+  assign has_gift_product = false
+  if gift_wrap_product != blank
+    assign gift_wrap_variant = gift_wrap_product.selected_or_first_available_variant
+    if gift_wrap_variant != blank and gift_wrap_variant.available
+      assign has_gift_product = true
+    endif
+  endif
+
+  if has_gift_product
+    assign wrap_price_formatted = gift_wrap_variant.price | money
+    assign wrap_label = base_wrap_label | append: ' (+' | append: wrap_price_formatted | append: ')'
+  else
+    assign wrap_label = base_wrap_label
+  endif
 
   assign default_note_label = 'content.gift_wrap_note_checkbox_label' | t
   assign note_label = block_settings.note_label | default: default_note_label
@@ -77,7 +94,22 @@
     data-mode="{{ mode }}"
     data-section-id="{{ section.id }}"
     data-block-id="{{ block.id }}"
+    {% if has_gift_product %}
+      data-has-product="true"
+      data-variant-id="{{ gift_wrap_variant.id }}"
+    {% endif %}
   >
+    {%- if has_gift_product -%}
+      <input
+        ref="nestedProductInput"
+        type="hidden"
+        name="nested_gift_wrap_id"
+        value="{{ gift_wrap_variant.id }}"
+        data-nested-gift-wrap
+        form="{{ product_form_id }}"
+        disabled
+      >
+    {%- endif -%}
     <div
       ref="liveRegion"
       role="status"
@@ -523,6 +555,12 @@
       "id": "enable_gift_wrap",
       "label": "Enable gift wrap checkbox",
       "default": true
+    },
+    {
+      "type": "product",
+      "id": "gift_wrap_product",
+      "label": "Gift wrap product",
+      "info": "Optionally select a product to charge for gift wrapping as a nested line item. If empty, gift wrap is added as a standard note without additional charge."
     },
     {
       "type": "text",

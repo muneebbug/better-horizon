@@ -12,6 +12,7 @@ import { StandardEvents } from '@shopify/events';
 /**
  * @typedef {object} GiftWrapRefs
  * @property {HTMLInputElement} [toggleCheckbox] - Checkbox triggering gift wrap or note.
+ * @property {HTMLInputElement} [nestedProductInput] - Hidden input containing variant ID for nested product.
  * @property {HTMLElement} [disclosurePanel] - Collapsible container holding note fields.
  * @property {HTMLTextAreaElement} [noteTextarea] - Gift note message textarea.
  * @property {HTMLInputElement} [toInput] - Optional recipient name input.
@@ -59,6 +60,9 @@ export class GiftWrapOption extends Component {
       this.#updateVisibility(this.refs.toggleCheckbox.checked, false);
     } else {
       this.#enableFields();
+      if (this.refs.nestedProductInput && this.refs.toggleCheckbox) {
+        this.refs.nestedProductInput.disabled = !this.refs.toggleCheckbox.checked;
+      }
     }
     this.#updateCharacterCount();
   }
@@ -91,9 +95,14 @@ export class GiftWrapOption extends Component {
   #updateVisibility(isExpanded, announce = true) {
     const panel = this.refs.disclosurePanel;
     const checkbox = this.refs.toggleCheckbox;
+    const nestedInput = this.refs.nestedProductInput || this.querySelector('[data-nested-gift-wrap]');
 
     if (checkbox) {
       checkbox.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+    }
+
+    if (nestedInput) {
+      nestedInput.disabled = !isExpanded;
     }
 
     if (panel) {
@@ -187,6 +196,11 @@ export class GiftWrapOption extends Component {
    * @returns {void}
    */
   #resetForm() {
+    const nestedInput = this.refs.nestedProductInput || this.querySelector('[data-nested-gift-wrap]');
+    if (nestedInput) {
+      nestedInput.disabled = true;
+    }
+
     if (this.refs.toggleCheckbox) {
       this.refs.toggleCheckbox.checked = false;
       this.#updateVisibility(false, false);
