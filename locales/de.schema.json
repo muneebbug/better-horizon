@@ -978,9 +978,7 @@
     "gift_card_products": "Gutscheinprodukte",
     "disclosures": "Pflichtangaben",
     "disclosures_metafield_content": "Erforderliche Sicherheitshinweise und gesetzliche Pflichtangaben für dieses Produkt.",
-    "page_text_color_contrast_info": "Abschnitte mit einer benutzerdefinierten Hintergrundfarbe verwenden diese Textfarbe nur bei ausreichendem Farbkontrast.",
-    "delivery_estimate_delivering_to": "Delivering to",
-    "delivery_estimate_zip_change": "Change"
+    "page_text_color_contrast_info": "Abschnitte mit einer benutzerdefinierten Hintergrundfarbe verwenden diese Textfarbe nur bei ausreichendem Farbkontrast."
   },
   "html_defaults": {
     "share_information_about_your": "<p>Teile Informationen über deine Marke mit deinen Kunden. Beschreibe ein Produkt, mache Ankündigungen oder heiße Kunden in deinem Shop willkommen.</p>",

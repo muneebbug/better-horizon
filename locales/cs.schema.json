@@ -978,9 +978,7 @@
     "gift_card_products": "Produkty dárkové karty",
     "disclosures": "Prohlášení",
     "disclosures_metafield_content": "Povinná bezpečnostní varování a zákonná prohlášení pro tento produkt.",
-    "page_text_color_contrast_info": "Sekce s vlastní barvou pozadí použijí tuto barvu textu pouze v případě dostatečného barevného kontrastu.",
-    "delivery_estimate_delivering_to": "Delivering to",
-    "delivery_estimate_zip_change": "Change"
+    "page_text_color_contrast_info": "Sekce s vlastní barvou pozadí použijí tuto barvu textu pouze v případě dostatečného barevného kontrastu."
   },
   "html_defaults": {
     "share_information_about_your": "<p>Sdílejte informace o značce se zákazníky. Popište produkt, oznamte novinky nebo přivítejte zákazníky v obchodě.</p>",

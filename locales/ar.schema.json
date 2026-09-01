@@ -146,9 +146,7 @@
     "disclosures": "عمليات الإفصاح",
     "disclosures_metafield_content": "تحذيرات السلامة وعمليات الإفصاح التنظيمية المطلوبة لهذا المنتج.",
     "app_required_for_ratings": "يلزم وجود تطبيق لتقييمات المنتج. [تعرّف على المزيد](https://help.shopify.com/manual/apps)",
-    "navigation": "التنقل",
-    "delivery_estimate_delivering_to": "Delivering to",
-    "delivery_estimate_zip_change": "Change"
+    "navigation": "التنقل"
   },
   "html_defaults": {
     "join_our_email_list": "<h2>انضم إلى قائمتنا البريدية</h2>",

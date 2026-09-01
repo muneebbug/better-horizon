@@ -12,6 +12,7 @@
   @param {boolean} [show_zip_estimator] - Show postal code estimator
   @param {string} [context] - 'pdp', 'cart_drawer', or 'cart_page'
   @param {string} [heading] - Custom block heading
+  @param {boolean} [show_icon] - Whether to show the delivery truck icon
   @param {boolean} [is_block] - Rendered as a standalone block container
 {% enddoc %}
 
@@ -40,7 +41,7 @@
   assign show_icon_val = true
   if show_icon == false
     assign show_icon_val = false
-  elsif show_icon == null and settings.delivery_estimate_show_icon == false
+  elsif show_icon == blank and settings.delivery_estimate_show_icon == false
     assign show_icon_val = false
   endif
 

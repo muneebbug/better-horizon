@@ -146,9 +146,7 @@
     "disclosures": "ڈسکلوزر",
     "disclosures_metafield_content": "اس پروڈکٹ کے لیے درکار حفاظتی انتباہات اور ریگولیٹری ڈسکلوزر۔",
     "app_required_for_ratings": "پروڈکٹ کی ریٹنگز کے لیے ایک ایپ درکار ہے۔ [مزید جانیں](https://help.shopify.com/manual/apps)",
-    "navigation": "نیویگیشن",
-    "delivery_estimate_delivering_to": "Delivering to",
-    "delivery_estimate_zip_change": "Change"
+    "navigation": "نیویگیشن"
   },
   "html_defaults": {
     "join_our_email_list": "<h2>ہماری ای میل لسٹ میں شامل ہوں</h2>",

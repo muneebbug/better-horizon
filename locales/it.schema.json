@@ -978,9 +978,7 @@
     "gift_card_products": "Prodotti buono regalo",
     "disclosures": "Informative",
     "disclosures_metafield_content": "Avvertenze di sicurezza e informative normative obbligatorie per questo prodotto.",
-    "page_text_color_contrast_info": "Le sezioni con un colore di sfondo personalizzato useranno questo colore del testo solo quando il contrasto cromatico è sufficiente.",
-    "delivery_estimate_delivering_to": "Delivering to",
-    "delivery_estimate_zip_change": "Change"
+    "page_text_color_contrast_info": "Le sezioni con un colore di sfondo personalizzato useranno questo colore del testo solo quando il contrasto cromatico è sufficiente."
   },
   "html_defaults": {
     "share_information_about_your": "<p>Condividi informazioni sul tuo brand con i clienti. Descrivi un prodotto, fai annunci o dai il benvenuto ai clienti nel tuo negozio.</p>",

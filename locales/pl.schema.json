@@ -978,9 +978,7 @@
     "gift_card_products": "Produkty typu karta prezentowa",
     "disclosures": "Informacje prawne",
     "disclosures_metafield_content": "Wymagane ostrzeżenia dotyczące bezpieczeństwa i informacje prawne dla tego produktu.",
-    "page_text_color_contrast_info": "Sekcje z niestandardowym kolorem tła będą używać tego koloru tekstu tylko w przypadku wystarczającego kontrastu kolorów.",
-    "delivery_estimate_delivering_to": "Delivering to",
-    "delivery_estimate_zip_change": "Change"
+    "page_text_color_contrast_info": "Sekcje z niestandardowym kolorem tła będą używać tego koloru tekstu tylko w przypadku wystarczającego kontrastu kolorów."
   },
   "html_defaults": {
     "share_information_about_your": "<p>Podziel się informacjami o swojej marce z klientami. Opisz produkt, ogłaszaj nowości lub witaj klientów w swoim sklepie.</p>",

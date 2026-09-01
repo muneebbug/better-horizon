@@ -978,9 +978,7 @@
     "gift_card_products": "สินค้าบัตรของขวัญ",
     "disclosures": "การเปิดเผยข้อมูล",
     "disclosures_metafield_content": "คำเตือนด้านความปลอดภัยและข้อมูลตามระเบียบข้อบังคับที่ต้องเปิดเผยสำหรับสินค้านี้",
-    "page_text_color_contrast_info": "ส่วนที่มีสีพื้นหลังแบบกำหนดเองจะใช้สีตัวอักษรนี้ก็ต่อเมื่อมีความเปรียบต่างของสีเพียงพอ",
-    "delivery_estimate_delivering_to": "Delivering to",
-    "delivery_estimate_zip_change": "Change"
+    "page_text_color_contrast_info": "ส่วนที่มีสีพื้นหลังแบบกำหนดเองจะใช้สีตัวอักษรนี้ก็ต่อเมื่อมีความเปรียบต่างของสีเพียงพอ"
   },
   "html_defaults": {
     "share_information_about_your": "<p>แชร์ข้อมูลเกี่ยวกับแบรนด์ของคุณกับลูกค้า อธิบายสินค้า ประกาศข่าวสาร หรือต้อนรับลูกค้าสู่ร้านค้าของคุณ</p>",

@@ -978,9 +978,7 @@
     "gift_card_products": "礼品卡产品",
     "disclosures": "披露信息",
     "disclosures_metafield_content": "此产品所需的安全警告和监管披露信息。",
-    "page_text_color_contrast_info": "具有自定义背景色的分区仅在颜色对比度足够时才会使用此文本颜色。",
-    "delivery_estimate_delivering_to": "Delivering to",
-    "delivery_estimate_zip_change": "Change"
+    "page_text_color_contrast_info": "具有自定义背景色的分区仅在颜色对比度足够时才会使用此文本颜色。"
   },
   "html_defaults": {
     "share_information_about_your": "<p>与您的客户分享有关您品牌的信息。描述产品、发布公告或欢迎客户光临您的商店。</p>",

@@ -95,7 +95,7 @@
               }
             },
             "cart_totals": {
-              "type": "_cart-totals",
+              "type": "cart-totals",
               "settings": {}
             },
             "cart_upsell": {
