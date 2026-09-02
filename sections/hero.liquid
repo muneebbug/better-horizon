@@ -464,9 +464,15 @@
   id="Hero-{{ section.id }}"
   class="hero section section--{{ section.settings.section_width }} disable-section-top-offset{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}{% if section.blocks.size == 0 and section.settings.section_height == 'auto' %} hero--no-blocks-auto-height{% endif %}{% if section.settings.stack_media_on_mobile %} hero--stack-mobile{% endif %}"
   style="
-    --hero-border-style: {{ section.settings.border }};
-    --hero-border-width: {{ section.settings.border_width }}px;
-    --hero-border-opacity: {{ section.settings.border_opacity }}%;
+    --hero-border-style: {{ section.settings.border | default: 'none' }};
+    --hero-border-width: {{ section.settings.border_width | default: 1 }}px;
+    --hero-border-opacity: {{ section.settings.border_opacity | default: 100 }}%;
+    {% if section.settings.border_color != blank %}
+      --hero-border-color: {{ section.settings.border_color }};
+    {% else %}
+      --hero-border-color: rgb(var(--color-border-rgb) / var(--hero-border-opacity));
+    {% endif %}
+    --hero-border-radius: {{ section.settings.border_radius | default: 0 }}px;
     --blur-opacity: {{ section.settings.reflection_opacity | divided_by: 100.0 }};
     {% if section.settings.section_height == 'custom' %}
       --hero-min-height: {{ section.settings.section_height_custom }}svh;
@@ -567,7 +573,8 @@
   .hero__container {
     position: relative;
     overflow: hidden;
-    border: var(--hero-border-width) var(--hero-border-style) rgb(var(--color-border-rgb) / var(--hero-border-opacity));
+    border: var(--hero-border-width, 0px) var(--hero-border-style, none) var(--hero-border-color, rgb(var(--color-border-rgb) / var(--hero-border-opacity, 1)));
+    border-radius: var(--hero-border-radius, 0px);
     min-height: inherit;
     align-items: var(--vertical-alignment-mobile);
     justify-content: var(--horizontal-alignment);
@@ -580,7 +587,7 @@
   }
 
   .section--page-width > .hero__container {
-    border-radius: var(--style-border-radius, var(--border-radius, 8px));
+    border-radius: var(--hero-border-radius, var(--style-border-radius, 0px));
   }
 
   .hero__content-wrapper {
@@ -1233,6 +1240,65 @@
       "unit": "%",
       "default": 75,
       "visible_if": "{{ section.settings.blurred_reflection and section.settings.media_type_1 != 'video' or section.settings.media_type_2 != 'video' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.borders"
+    },
+    {
+      "type": "select",
+      "id": "border",
+      "label": "t:settings.style",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.none"
+        },
+        {
+          "value": "solid",
+          "label": "t:options.solid"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "t:settings.thickness",
+      "default": 1,
+      "visible_if": "{{ section.settings.border != 'none' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "t:settings.opacity",
+      "default": 100,
+      "visible_if": "{{ section.settings.border != 'none' }}"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "t:settings.color",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ section.settings.border != 'none' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
     },
     {
       "type": "header",
