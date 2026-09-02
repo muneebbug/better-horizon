@@ -458,8 +458,11 @@
 {% render 'measure-header-heights', only_when_first_section: true %}
 
 <div
+  class="section-background{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
+></div>
+<div
   id="Hero-{{ section.id }}"
-  class="hero{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}{% if section.blocks.size == 0 and section.settings.section_height == 'auto' %} hero--no-blocks-auto-height{% endif %}{% if section.settings.stack_media_on_mobile %} hero--stack-mobile{% endif %}"
+  class="hero section section--{{ section.settings.section_width }} disable-section-top-offset{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}{% if section.blocks.size == 0 and section.settings.section_height == 'auto' %} hero--no-blocks-auto-height{% endif %}{% if section.settings.stack_media_on_mobile %} hero--stack-mobile{% endif %}"
   style="
     --hero-border-style: {{ section.settings.border }};
     --hero-border-width: {{ section.settings.border_width }}px;
@@ -499,13 +502,8 @@
     {% endif %}
   {% endif %}
 
-  {% comment %}
-    Hardcoded to section--full-width bc the media has to be full width in all cases.
-    hero__content-wrapper applies section_width.
-  {% endcomment %}
-
   <div
-    class="hero__container spacing-style section section--full-width"
+    class="hero__container spacing-style"
     style="{% render 'spacing-style', settings: section.settings %}"
   >
     {%- if section.settings.link != blank -%}
@@ -536,7 +534,6 @@
         layout-panel-flex--{{ section.settings.content_direction }}
         {% if section.settings.vertical_on_mobile %}mobile-column{% endif %}
         section-content-wrapper
-        {{section.settings.section_width}}
         {% if request.design_mode %}hero__content-wrapper--design-mode{% endif %}
       "
       style="{% render 'layout-panel-style', settings: section.settings %}"
@@ -575,19 +572,21 @@
     align-items: var(--vertical-alignment-mobile);
     justify-content: var(--horizontal-alignment);
     z-index: var(--layer-base);
+    width: 100%;
 
     @media screen and (min-width: 750px) {
       align-items: var(--vertical-alignment);
     }
   }
 
-  .hero__content-wrapper.page-width {
-    grid-column: 2 / 3;
+  .section--page-width > .hero__container {
+    border-radius: var(--style-border-radius, var(--border-radius, 8px));
   }
 
   .hero__content-wrapper {
     position: relative;
     inset: 0;
+    width: 100%;
     z-index: var(--layer-flat);
   }
 
@@ -1095,6 +1094,10 @@
       "step": 1,
       "unit": "px",
       "default": 12
+    },
+    {
+      "type": "header",
+      "content": "t:content.size"
     },
     {
       "type": "select",
