@@ -156,7 +156,7 @@
               <select
                 class="bundle-item__variant-select"
                 data-bundle-variant-select
-                aria-label="{{ product.title | escape }} {{ 'products.product.variant' | t | default: 'Variant' }}"
+                aria-label="{{ product.title | escape }} {{ 'content.variant' | t | default: 'Variant' }}"
               >
                 {%- for variant in product.variants -%}
                   <option
@@ -174,7 +174,7 @@
                       class="is-unavailable"
                     {% endunless %}
                   >
-                    {{ variant.title }}{% unless variant.available %} - {{ 'products.product.sold_out' | t | default: 'Sold out' }}{% endunless %}
+                    {{ variant.title }}{% unless variant.available %} - {{ 'content.product_badge_sold_out' | t | default: 'Sold out' }}{% endunless %}
                   </option>
                 {%- endfor -%}
               </select>
@@ -232,7 +232,7 @@
                       <select
                         class="bundle-item__variant-select"
                         data-bundle-variant-select
-                        aria-label="{{ rec_product.title | escape }} {{ 'products.product.variant' | t | default: 'Variant' }}"
+                        aria-label="{{ rec_product.title | escape }} {{ 'content.variant' | t | default: 'Variant' }}"
                       >
                         {%- for variant in rec_product.variants -%}
                           <option
@@ -249,7 +249,7 @@
                               class="is-unavailable"
                             {% endunless %}
                           >
-                            {{ variant.title }}{% unless variant.available %} - {{ 'products.product.sold_out' | t | default: 'Sold out' }}{% endunless %}
+                            {{ variant.title }}{% unless variant.available %} - {{ 'content.product_badge_sold_out' | t | default: 'Sold out' }}{% endunless %}
                           </option>
                         {%- endfor -%}
                       </select>

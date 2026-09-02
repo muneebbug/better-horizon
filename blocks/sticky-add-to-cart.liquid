@@ -18,8 +18,6 @@
   assign mobile_position = block_settings.mobile_position | default: 'bottom'
   assign bar_width = block_settings.bar_width | default: 'default'
   assign custom_width = block_settings.custom_width | default: 600
-  assign card_style = block_settings.card_style | default: 'solid'
-  assign border_radius = block_settings.border_radius | default: 16
   assign button_style = block_settings.button_style | default: 'primary'
 
   assign show_image = block_settings.show_image | default: true
@@ -88,7 +86,7 @@
 
 <sticky-add-to-cart
   id="StickyAddToCart--{{ block.id }}"
-  class="sticky-add-to-cart sticky-add-to-cart-block--{{ block.id }} sticky-add-to-cart--pos-{{ position }} sticky-add-to-cart--mobile-{{ mobile_position }} sticky-add-to-cart--style-{{ card_style }}"
+  class="sticky-add-to-cart sticky-add-to-cart-block--{{ block.id }} sticky-add-to-cart--pos-{{ position }} sticky-add-to-cart--mobile-{{ mobile_position }}"
   data-position="{{ position }}"
   data-mobile-position="{{ mobile_position }}"
   data-variant-available="{{ current_variant.available }}"
@@ -141,7 +139,7 @@
           <select
             class="sticky-add-to-cart__variant-select"
             data-sticky-variant-select
-            aria-label="{{ product.title | escape }} {{ 'products.product.variant' | t | default: 'Variant' }}"
+            aria-label="{{ product.title | escape }} {{ 'content.variant' | t | default: 'Variant' }}"
           >
             {% for variant in product.variants %}
               <option
@@ -159,7 +157,7 @@
                   class="is-unavailable"
                 {% endunless %}
               >
-                {{ variant.title }}{% unless variant.available %} - {{ 'products.product.sold_out' | t | default: 'Sold out' }}{% endunless %}
+                {{ variant.title }}{% unless variant.available %} - {{ 'content.product_badge_sold_out' | t | default: 'Sold out' }}{% endunless %}
               </option>
             {% endfor %}
           </select>
@@ -203,7 +201,7 @@
           type="button"
           class="sticky-add-to-cart__qty-btn"
           data-qty-action="decrease"
-          aria-label="{{ 'products.product.quantity.decrease' | t | default: 'Decrease quantity' }}"
+          aria-label="{{ 'accessibility.decrease_quantity' | t | default: 'Decrease quantity' }}"
         >
           {{ 'icon-minus.svg' | inline_asset_content }}
         </button>
@@ -212,7 +210,7 @@
           type="button"
           class="sticky-add-to-cart__qty-btn"
           data-qty-action="increase"
-          aria-label="{{ 'products.product.quantity.increase' | t | default: 'Increase quantity' }}"
+          aria-label="{{ 'accessibility.increase_quantity' | t | default: 'Increase quantity' }}"
         >
           {{ 'icon-plus.svg' | inline_asset_content }}
         </button>
