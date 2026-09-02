@@ -10,6 +10,7 @@ import { StandardEvents, ProductSelectEvent, CartLinesUpdateEvent, CartErrorEven
  * @property {string} [title] - Variant title
  * @property {string} [name] - Variant name
  * @property {boolean} [available] - Whether variant is available
+ * @property {number} [price] - Variant price
  * @property {Object} [featured_media] - Featured media object
  * @property {Object} [featured_media.preview_image] - Preview image data
  * @property {string} [featured_media.preview_image.src] - Image source URL
@@ -30,12 +31,14 @@ import { StandardEvents, ProductSelectEvent, CartLinesUpdateEvent, CartErrorEven
  * @property {HTMLButtonElement} addToCartButton - Sticky bar's button
  * @property {HTMLElement} quantityDisplay - Quantity display container
  * @property {HTMLElement} quantityNumber - Quantity number element
- * @property {HTMLImageElement} productImage - Product image element
+ * @property {HTMLImageElement} [productImage] - Product image element
  */
 
 /**
  * A custom element that manages a sticky add-to-cart bar.
  * Shows when the main buy buttons scroll out of view.
+ * Supports inline variant selection with disabled/strikethrough states,
+ * custom positioning (top/bottom), quantity adjustment, and two-way sync with the page.
  *
  * @extends {Component<StickyAddToCartRefs>}
  */
@@ -73,10 +76,12 @@ class StickyAddToCartComponent extends Component {
     super.connectedCallback();
 
     this.#setupIntersectionObserver();
+    this.#setupVariantSelect();
+    this.#setupQuantityControls();
 
     const { signal } = this.#abortController;
-    const target = this.closest('.shopify-section');
-    target?.addEventListener(StandardEvents.productSelect, this.#handleProductSelect, { signal });
+    const target = this.closest('.shopify-section') || document;
+    target.addEventListener(StandardEvents.productSelect, this.#handleProductSelect, { signal });
 
     document.addEventListener(StandardEvents.cartLinesUpdate, this.#handleCartAddComplete, { signal });
     document.addEventListener(StandardEvents.cartError, this.#handleCartAddComplete, { signal });
@@ -84,10 +89,7 @@ class StickyAddToCartComponent extends Component {
 
     this.#getInitialQuantity();
 
-    // IntersectionObserver callbacks gate visibility on #isChatActive(), but
-    // if the shopper scrolls before the Inbox bundle has upgraded
-    // <shopify-chat>, the bar shows and nothing re-runs that check. Hide it
-    // once the element is defined so the bar doesn't overlap the chat UI.
+    // Hide bar if chat is already active
     customElements.whenDefined('shopify-chat').then(() => {
       if (signal.aborted) return;
       if (this.#isStuck && this.#isChatActive()) this.#hideStickyBar();
@@ -105,7 +107,203 @@ class StickyAddToCartComponent extends Component {
   }
 
   /**
-   * Sets up the IntersectionObserver to watch the buy buttons visibility
+   * Sets up event listeners on the inline variant select dropdown.
+   */
+  #setupVariantSelect() {
+    const select = /** @type {HTMLSelectElement | null} */ (
+      this.querySelector('[data-sticky-variant-select]')
+    );
+    if (!select) return;
+
+    select.removeEventListener('change', this.#handleVariantSelectChange);
+    select.addEventListener('change', this.#handleVariantSelectChange);
+  }
+
+  /**
+   * Handles user changing the variant dropdown within the sticky bar.
+   * Updates internal state, displays, button availability, and triggers sync to the main variant-picker.
+   *
+   * @param {Event} event
+   */
+  #handleVariantSelectChange = (event) => {
+    const select = /** @type {HTMLSelectElement} */ (event.target);
+    if (!select) return;
+
+    const selectedOption = select.options[select.selectedIndex];
+    if (!selectedOption) return;
+
+    const variantId = selectedOption.value;
+    const priceCents = parseInt(selectedOption.dataset.priceCents || '0', 10);
+    const imageUrl = selectedOption.dataset.image;
+    const isAvailable = !selectedOption.disabled;
+
+    this.dataset.currentVariantId = variantId;
+    this.dataset.variantAvailable = String(isAvailable);
+
+    // Update sticky button state
+    if (this.refs.addToCartButton) {
+      this.refs.addToCartButton.disabled = !isAvailable;
+      const textSpan = this.refs.addToCartButton.querySelector('.add-to-cart-text__content span:first-child');
+      if (textSpan) {
+        textSpan.textContent = isAvailable
+          ? window.theme?.translations?.addToCart || 'Add to cart'
+          : window.theme?.translations?.soldOut || 'Sold out';
+      }
+    }
+
+    // Update thumbnail image
+    if (imageUrl && this.refs.productImage) {
+      this.refs.productImage.src = imageUrl;
+    }
+
+    // Sync to main page variant-picker
+    this.#syncToMainVariantPicker(variantId);
+  };
+
+  /**
+   * Synchronizes the chosen variant ID with the main page variant picker.
+   *
+   * @param {string} variantId
+   */
+  #syncToMainVariantPicker(variantId) {
+    const cleanId = String(variantId).split('/').pop();
+    const productId = this.dataset.productId;
+    const section = this.closest('.shopify-section') || document;
+    const variantPicker = section.querySelector(`variant-picker[data-product-id="${productId}"]`);
+    if (!variantPicker) return;
+
+    // 1. Single-variant input direct match (e.g. combined listing / single variant)
+    const directInput = variantPicker.querySelector(
+      `input[data-variant-id="${cleanId}"], option[data-variant-id="${cleanId}"]`
+    );
+    if (directInput instanceof HTMLInputElement && !directInput.checked) {
+      directInput.checked = true;
+      if (typeof variantPicker.updateSelectedOption === 'function') {
+        variantPicker.updateSelectedOption(directInput);
+      }
+      directInput.dispatchEvent(new Event('change', { bubbles: true }));
+      return;
+    }
+
+    // 2. Retrieve option values for this variant
+    let optionValues = [];
+    const select = /** @type {HTMLSelectElement | null} */ (
+      this.querySelector('[data-sticky-variant-select]')
+    );
+    const selectedOption = select?.options[select.selectedIndex];
+    if (selectedOption?.dataset?.options) {
+      optionValues = selectedOption.dataset.options.split('|||');
+    }
+
+    if (optionValues.length === 0) {
+      const script = this.querySelector('script[data-product-variants]');
+      if (script) {
+        try {
+          const parsed = JSON.parse(script.textContent || '[]');
+          const variantsList = Array.isArray(parsed) ? parsed : [parsed];
+          const targetVariant = variantsList.find((v) => String(v.id) === cleanId);
+          if (targetVariant && Array.isArray(targetVariant.options)) {
+            optionValues = targetVariant.options;
+          }
+        } catch (e) {
+          console.warn('[sticky-add-to-cart] Could not parse variants JSON:', e);
+        }
+      }
+    }
+
+    if (optionValues.length === 0) {
+      // Fallback: update hidden input[name="id"] in product form
+      const form = this.#getProductForm();
+      if (form) {
+        const idInput = /** @type {HTMLInputElement | null} */ (form.querySelector('input[name="id"]'));
+        if (idInput) {
+          idInput.value = cleanId;
+          idInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+      return;
+    }
+
+    // 3. Update fieldsets and selects in the variant-picker
+    const fieldsets = variantPicker.querySelectorAll('fieldset');
+    const selects = variantPicker.querySelectorAll('select');
+    let triggerElement = null;
+
+    if (fieldsets.length > 0) {
+      fieldsets.forEach((fieldset, idx) => {
+        const targetVal = optionValues[idx];
+        if (!targetVal) return;
+
+        const radios = Array.from(fieldset.querySelectorAll('input'));
+        const matchingRadio = radios.find((r) => r.value === targetVal);
+        if (matchingRadio) {
+          if (!matchingRadio.checked) {
+            matchingRadio.checked = true;
+            triggerElement = matchingRadio;
+          }
+          if (typeof variantPicker.updateSelectedOption === 'function') {
+            variantPicker.updateSelectedOption(matchingRadio);
+          }
+        }
+      });
+    }
+
+    if (selects.length > 0) {
+      selects.forEach((sel, idx) => {
+        const targetVal = optionValues[idx];
+        if (!targetVal) return;
+
+        if (sel.value !== targetVal) {
+          sel.value = targetVal;
+          triggerElement = sel;
+          if (typeof variantPicker.updateSelectedOption === 'function') {
+            variantPicker.updateSelectedOption(sel);
+          }
+        }
+      });
+    }
+
+    // 4. Trigger change event to fetch updated section and update main page UI
+    if (triggerElement) {
+      triggerElement.dispatchEvent(new Event('change', { bubbles: true }));
+    } else {
+      const anyChecked = variantPicker.querySelector('input:checked, select');
+      if (anyChecked) {
+        anyChecked.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+  }
+
+  /**
+   * Sets up quantity buttons in the sticky bar if present.
+   */
+  #setupQuantityControls() {
+    const qtyWrapper = this.querySelector('.sticky-add-to-cart__quantity-wrapper');
+    if (!qtyWrapper) return;
+
+    const decreaseBtn = qtyWrapper.querySelector('[data-qty-action="decrease"]');
+    const increaseBtn = qtyWrapper.querySelector('[data-qty-action="increase"]');
+    const qtyValueEl = qtyWrapper.querySelector('[data-sticky-qty-value]');
+
+    const updateQty = (newQty) => {
+      this.#currentQuantity = Math.max(1, newQty);
+      if (qtyValueEl) qtyValueEl.textContent = String(this.#currentQuantity);
+      this.#updateButtonText();
+
+      // Sync with main page quantity input
+      const mainQtyInput = document.querySelector('quantity-selector input[name="quantity"]');
+      if (mainQtyInput instanceof HTMLInputElement) {
+        mainQtyInput.value = String(this.#currentQuantity);
+        mainQtyInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    };
+
+    decreaseBtn?.addEventListener('click', () => updateQty(this.#currentQuantity - 1));
+    increaseBtn?.addEventListener('click', () => updateQty(this.#currentQuantity + 1));
+  }
+
+  /**
+   * Sets up the IntersectionObserver to watch the buy buttons visibility.
    */
   #setupIntersectionObserver() {
     const productForm = this.#getProductForm();
@@ -114,7 +312,6 @@ class StickyAddToCartComponent extends Component {
     const buyButtonsBlock = productForm.closest('.buy-buttons-block');
     if (!buyButtonsBlock) return;
 
-    // In themes migrated from 2.0, the footer element doesn't exist
     const footer = document.querySelector('footer') ?? document.querySelector('[class*="footer-group"]');
     if (!footer) return;
 
@@ -123,15 +320,12 @@ class StickyAddToCartComponent extends Component {
       const [entry] = entries;
       if (!entry) return;
 
-      // Only show sticky bar if buy buttons have been scrolled past (above viewport)
       if (!entry.isIntersecting && !this.#isStuck) {
-        // Check if the element is above the viewport (scrolled past) or below (not yet reached)
         const rect = entry.target.getBoundingClientRect();
         if (rect.bottom < 0 || rect.top < 0) {
           if (this.#isChatActive()) return;
           this.#showStickyBar();
         }
-        // If rect.top >= 0, element is below viewport - don't show sticky bar yet
       } else if (entry.isIntersecting && this.#isStuck) {
         this.#hiddenByBottom = false;
         this.#hideStickyBar();
@@ -148,9 +342,7 @@ class StickyAddToCartComponent extends Component {
           this.#hiddenByBottom = true;
           this.#hideStickyBar();
         } else if (!entry.isIntersecting && this.#hiddenByBottom) {
-          // Footer out of view - check if we should show sticky bar again
           const rect = buyButtonsBlock.getBoundingClientRect();
-          // Only show if buy buttons are above the viewport (scrolled past)
           if (rect.bottom < 0 || rect.top < 0) {
             this.#hiddenByBottom = false;
             if (!this.#isChatActive()) {
@@ -171,10 +363,17 @@ class StickyAddToCartComponent extends Component {
 
   // Public action handlers
   /**
-   * Handles the add to cart button click in the sticky bar
+   * Handles the add to cart button click in the sticky bar.
    */
   handleAddToCartClick = async () => {
+    if (!this.#targetAddToCartButton) {
+      const productForm = this.#getProductForm();
+      if (productForm) {
+        this.#targetAddToCartButton = productForm.querySelector('[ref="addToCartButton"]');
+      }
+    }
     if (!this.#targetAddToCartButton) return;
+
     this.#targetAddToCartButton.dataset.puppet = 'true';
     this.#targetAddToCartButton.click();
     const cartIcon = document.querySelector('.header-actions__cart-icon');
@@ -187,8 +386,6 @@ class StickyAddToCartComponent extends Component {
     if (this.#resetTimeout) clearTimeout(this.#resetTimeout);
 
     const flyToCartElement = /** @type {FlyToCart} */ (document.createElement('fly-to-cart'));
-    const sourceStyles = getComputedStyle(this.refs.productImage);
-
     flyToCartElement.classList.add('fly-to-cart--sticky');
     flyToCartElement.style.setProperty('background-image', `url(${this.refs.productImage.src})`);
     flyToCartElement.useSourceSize = 'true';
@@ -204,61 +401,59 @@ class StickyAddToCartComponent extends Component {
   };
 
   /**
-   * Handles product select events (variant selected and updated)
-   * @param {ProductSelectEvent} event - The product select event
+   * Handles product select events (variant selected and updated on the main page).
+   * Synchronizes the sticky bar dropdown, thumbnail, price, and availability.
+   *
+   * @param {ProductSelectEvent} event
    */
   #handleProductSelect = (event) => {
     if (!(event.target instanceof Element) || event.target.closest('product-card')) return;
 
-    // Update variant ID from the event detail (variant:selected part)
     const { optionValueId } = event.detail ?? {};
     if (optionValueId) {
       this.dataset.currentVariantId = optionValueId;
     }
 
-    // Wait for the promise to resolve with variant update data
     event.promise
       .then(({ detail }) => {
         if (!detail?.html) return;
 
         const { html, productId, resource: variant } = detail;
-
         if (productId && productId !== this.dataset.productId) return;
 
-        // Get the new sticky add to cart HTML from the server response
         const newStickyAddToCart = /** @type {HTMLElement | null} */ (html.querySelector('sticky-add-to-cart'));
-        if (!newStickyAddToCart) return;
+        if (newStickyAddToCart) {
+          const newStickyBar = newStickyAddToCart.querySelector('[ref="stickyBar"]');
+          if (newStickyBar) {
+            const currentStuck = this.refs.stickyBar.getAttribute('data-stuck') || 'false';
+            const variantAvailable = newStickyAddToCart.dataset.variantAvailable;
 
-        const newStickyBar = newStickyAddToCart.querySelector('[ref="stickyBar"]');
-        if (!newStickyBar) return;
+            morph(this.refs.stickyBar, newStickyBar, { childrenOnly: true });
 
-        // Store current visibility state before morphing
-        const currentStuck = this.refs.stickyBar.getAttribute('data-stuck') || 'false';
-        const variantAvailable = newStickyAddToCart.dataset.variantAvailable;
+            this.refs.stickyBar.setAttribute('data-stuck', currentStuck);
+            this.dataset.variantAvailable = variantAvailable;
 
-        // Morph the entire sticky bar content
-        morph(this.refs.stickyBar, newStickyBar, { childrenOnly: true });
+            if (variant && variant.id) {
+              const cleanId = String(variant.id).split('/').pop();
+              this.dataset.currentVariantId = cleanId || String(variant.id);
+            }
 
-        // Restore visibility state after morphing
-        this.refs.stickyBar.setAttribute('data-stuck', currentStuck);
-        this.dataset.variantAvailable = variantAvailable;
+            const productForm = this.#getProductForm();
+            if (productForm) {
+              this.#targetAddToCartButton = productForm.querySelector('[ref="addToCartButton"]');
+            }
 
-        // Update the dataset attributes with new variant info
+            this.#setupVariantSelect();
+            this.#setupQuantityControls();
+            this.#updateButtonText();
+            return;
+          }
+        }
+
+        // Fallback if sticky-add-to-cart was not morphed in the HTML response
         if (variant && variant.id) {
-          this.dataset.currentVariantId = variant.id;
+          this.#syncFromMainProduct(variant);
         }
-
-        // Re-cache the target add to cart button after morphing
-        const productForm = this.#getProductForm();
-        if (productForm) {
-          this.#targetAddToCartButton = productForm.querySelector('[ref="addToCartButton"]');
-        }
-
-        if (variant == null) {
-          this.#handleVariantUnavailable();
-        }
-        // Restore the current quantity display if needed
-        this.#updateButtonText();
       })
       .catch((error) => {
         if (error?.name !== 'AbortError') console.warn('[sticky-add-to-cart] Event promise rejected:', error);
@@ -266,37 +461,51 @@ class StickyAddToCartComponent extends Component {
   };
 
   /**
-   * Updates the variant title based on selected options when the variant is unavailable
+   * Synchronizes local state from variant data when server HTML does not contain sticky-add-to-cart.
+   *
+   * @param {ProductVariant} variant
    */
-  #handleVariantUnavailable = () => {
-    this.dataset.currentVariantId = '';
-    const variantTitleElement = this.querySelector('.sticky-add-to-cart__variant');
-    const productId = this.dataset.productId;
-    const variantPicker = document.querySelector(`variant-picker[data-product-id="${productId}"]`);
-    if (!variantTitleElement || !variantPicker) return;
+  #syncFromMainProduct(variant) {
+    if (!variant?.id) return;
+    const cleanId = String(variant.id).split('/').pop();
+    if (!cleanId) return;
 
-    const selectedOptions = Array.from(variantPicker.querySelectorAll('input:checked'))
-      .map((option) => /** @type {HTMLInputElement} */ (option).value)
-      .filter((value) => value !== '')
-      .join(' / ');
-    if (!selectedOptions) return;
-    variantTitleElement.textContent = selectedOptions;
-  };
+    this.dataset.currentVariantId = cleanId;
+    this.dataset.variantAvailable = String(variant.available ?? true);
+
+    const select = /** @type {HTMLSelectElement | null} */ (
+      this.querySelector('[data-sticky-variant-select]')
+    );
+    if (select) {
+      const matchingOption = Array.from(select.options).find(
+        (opt) => opt.value === cleanId || opt.value === String(variant.id)
+      );
+      if (matchingOption && select.value !== matchingOption.value) {
+        select.value = matchingOption.value;
+      }
+    }
+
+    if (this.refs.addToCartButton) {
+      this.refs.addToCartButton.disabled = !(variant.available ?? true);
+    }
+
+    if (variant.featured_media?.preview_image?.src && this.refs.productImage) {
+      this.refs.productImage.src = variant.featured_media.preview_image.src;
+    }
+  }
 
   /**
-   * Handles cart add complete (success or error) - resets puppet flag
-   * @param {CartLinesUpdateEvent | CartErrorEvent} event - The cart event
+   * Handles cart add complete (success or error) - resets puppet flag.
+   *
+   * @param {CartLinesUpdateEvent | CartErrorEvent} event
    */
   #handleCartAddComplete = (event) => {
-    // Reset the puppet flag only after the cart operation's promise settles,
-    // not when the event is first dispatched (before the HTTP request completes).
     const resetPuppet = () => {
       if (this.#targetAddToCartButton) {
         this.#targetAddToCartButton.dataset.puppet = 'false';
       }
     };
 
-    // CartLinesUpdateEvent has a promise; CartErrorEvent does not (error already happened).
     if ('promise' in event && event.promise instanceof Promise) {
       event.promise.finally(resetPuppet);
     } else {
@@ -305,19 +514,21 @@ class StickyAddToCartComponent extends Component {
   };
 
   /**
-   * Handles quantity selector update events
-   * @param {QuantitySelectorUpdateEvent} event - The quantity update event
+   * Handles quantity selector update events from elsewhere on the page.
+   *
+   * @param {QuantitySelectorUpdateEvent} event
    */
   #handleQuantityUpdate = (event) => {
-    // Only respond to product page quantity selector updates, not cart drawer
     if (event.detail.cartLine) return;
 
     this.#currentQuantity = event.detail.quantity;
+    const qtyValueEl = this.querySelector('[data-sticky-qty-value]');
+    if (qtyValueEl) qtyValueEl.textContent = String(this.#currentQuantity);
     this.#updateButtonText();
   };
 
   /**
-   * Shows the sticky bar with animation
+   * Shows the sticky bar with animation.
    */
   #showStickyBar() {
     const { stickyBar } = this.refs;
@@ -326,7 +537,7 @@ class StickyAddToCartComponent extends Component {
   }
 
   /**
-   * Hides the sticky bar with animation
+   * Hides the sticky bar with animation.
    */
   #hideStickyBar() {
     const { stickyBar } = this.refs;
@@ -334,17 +545,8 @@ class StickyAddToCartComponent extends Component {
     stickyBar.dataset.stuck = 'false';
   }
 
-  // Helper methods
   /**
    * Checks whether the Shopify Chat is active on the page.
-   * When active, the sticky bar must stay hidden to avoid overlapping the chat UI.
-   *
-   * <shopify-chat> is rendered unconditionally by chat-drawer.liquid, but
-   * the "Ask anything" button only paints once the Inbox app has installed
-   * and upgraded the element. Gate on the registration of the custom element
-   * (the same signal chat-drawer.liquid uses via customElements.whenDefined)
-   * so the inert placeholder on shops without Inbox doesn't suppress the
-   * sticky bar.
    *
    * @returns {boolean}
    */
@@ -354,7 +556,8 @@ class StickyAddToCartComponent extends Component {
   }
 
   /**
-   * Gets the product form element
+   * Gets the product form element.
+   *
    * @returns {HTMLElement | null}
    */
   #getProductForm() {
@@ -371,7 +574,7 @@ class StickyAddToCartComponent extends Component {
   }
 
   /**
-   * Gets the initial quantity from the data attribute
+   * Gets the initial quantity from the data attribute.
    */
   #getInitialQuantity() {
     this.#currentQuantity = parseInt(this.dataset.initialQuantity || '1') || 1;
@@ -379,17 +582,15 @@ class StickyAddToCartComponent extends Component {
   }
 
   /**
-   * Updates the button text to include quantity
+   * Updates the button text to include quantity.
    */
   #updateButtonText() {
     const { addToCartButton, quantityDisplay, quantityNumber } = this.refs;
+    if (!addToCartButton || !quantityDisplay || !quantityNumber) return;
 
     const available = !addToCartButton.disabled;
-
-    // Update the quantity number
     quantityNumber.textContent = this.#currentQuantity.toString();
 
-    // Show/hide the quantity display based on availability and quantity
     if (available && this.#currentQuantity > 1) {
       quantityDisplay.style.display = 'inline';
     } else {

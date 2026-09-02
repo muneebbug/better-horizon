@@ -123,7 +123,8 @@
 
     <div class="bundle-block__items" data-bundle-items>
       {%- comment -%} Main Product Item {%- endcomment -%}
-      <div class="bundle-item">
+      {%- assign main_image = main_variant.featured_image | default: product.featured_image -%}
+      <div class="bundle-item bundle-item--main" data-product-id="{{ product.id }}">
         <label class="bundle-item__checkbox-label">
           <input
             type="checkbox"
@@ -136,10 +137,10 @@
           >
           <span class="bundle-item__badge">This item:</span>
         </label>
-        {%- if product.featured_image -%}
+        {%- if main_image -%}
           <img
-            src="{{ product.featured_image | image_url: width: 160 }}"
-            alt="{{ product.featured_image.alt | default: product.title | escape }}"
+            src="{{ main_image | image_url: width: 160 }}"
+            alt="{{ main_image.alt | default: product.title | escape }}"
             class="bundle-item__image"
             width="{{ image_size }}"
             height="{{ image_size }}"
@@ -148,7 +149,43 @@
         {%- endif -%}
         <div class="bundle-item__info">
           <span class="bundle-item__title">{{ product.title }}</span>
-          <span class="bundle-item__price">{{ main_variant.price | money }}</span>
+          <span class="bundle-item__price" data-item-price>{{ main_variant.price | money }}</span>
+
+          {%- if product.variants.size > 1 -%}
+            <div class="bundle-item__select-wrapper">
+              <select
+                class="bundle-item__variant-select"
+                data-bundle-variant-select
+                aria-label="{{ product.title | escape }} {{ 'products.product.variant' | t | default: 'Variant' }}"
+              >
+                {%- for variant in product.variants -%}
+                  <option
+                    value="{{ variant.id }}"
+                    data-price-cents="{{ variant.price }}"
+                    data-options="{{ variant.options | join: '|||' | escape }}"
+                    {% if variant.featured_image %}
+                      data-image="{{ variant.featured_image | image_url: width: 160 }}"
+                    {% endif %}
+                    {% if variant.id == main_variant.id %}
+                      selected
+                    {% endif %}
+                    {% unless variant.available %}
+                      disabled
+                      class="is-unavailable"
+                    {% endunless %}
+                  >
+                    {{ variant.title }}{% unless variant.available %} - {{ 'products.product.sold_out' | t | default: 'Sold out' }}{% endunless %}
+                  </option>
+                {%- endfor -%}
+              </select>
+              <span class="svg-wrapper bundle-item__select-caret">
+                {{ 'icon-caret.svg' | inline_asset_content }}
+              </span>
+              <script type="application/json" data-product-variants>
+                {{ product.variants | json }}
+              </script>
+            </div>
+          {%- endif -%}
         </div>
       </div>
 
@@ -159,12 +196,13 @@
           {%- if rendered_count >= max_items -%}
             {%- break -%}
           {%- endif -%}
-          {%- if rec_product.id != product.id -%}
+          {%- if rec_product.id != product.id and rec_product.available -%}
             {%- assign rec_variant = rec_product.selected_or_first_available_variant -%}
-            {%- if rec_variant and rec_variant.available -%}
+            {%- if rec_variant -%}
               {%- assign rendered_count = rendered_count | plus: 1 -%}
               {%- assign bundle_total_cents = bundle_total_cents | plus: rec_variant.price -%}
-              <div class="bundle-item">
+              {%- assign rec_image = rec_variant.featured_image | default: rec_product.featured_image -%}
+              <div class="bundle-item" data-product-id="{{ rec_product.id }}">
                 <label class="bundle-item__checkbox-label">
                   <input
                     type="checkbox"
@@ -175,10 +213,10 @@
                     aria-label="{{ rec_product.title | escape }}"
                   >
                 </label>
-                {%- if rec_product.featured_image -%}
+                {%- if rec_image -%}
                   <img
-                    src="{{ rec_product.featured_image | image_url: width: 160 }}"
-                    alt="{{ rec_product.featured_image.alt | default: rec_product.title | escape }}"
+                    src="{{ rec_image | image_url: width: 160 }}"
+                    alt="{{ rec_image.alt | default: rec_product.title | escape }}"
                     class="bundle-item__image"
                     width="{{ image_size }}"
                     height="{{ image_size }}"
@@ -187,7 +225,39 @@
                 {%- endif -%}
                 <div class="bundle-item__info">
                   <a href="{{ rec_product.url }}" class="bundle-item__title">{{ rec_product.title }}</a>
-                  <span class="bundle-item__price">{{ rec_variant.price | money }}</span>
+                  <span class="bundle-item__price" data-item-price>{{ rec_variant.price | money }}</span>
+
+                  {%- if rec_product.variants.size > 1 -%}
+                    <div class="bundle-item__select-wrapper">
+                      <select
+                        class="bundle-item__variant-select"
+                        data-bundle-variant-select
+                        aria-label="{{ rec_product.title | escape }} {{ 'products.product.variant' | t | default: 'Variant' }}"
+                      >
+                        {%- for variant in rec_product.variants -%}
+                          <option
+                            value="{{ variant.id }}"
+                            data-price-cents="{{ variant.price }}"
+                            {% if variant.featured_image %}
+                              data-image="{{ variant.featured_image | image_url: width: 160 }}"
+                            {% endif %}
+                            {% if variant.id == rec_variant.id %}
+                              selected
+                            {% endif %}
+                            {% unless variant.available %}
+                              disabled
+                              class="is-unavailable"
+                            {% endunless %}
+                          >
+                            {{ variant.title }}{% unless variant.available %} - {{ 'products.product.sold_out' | t | default: 'Sold out' }}{% endunless %}
+                          </option>
+                        {%- endfor -%}
+                      </select>
+                      <span class="svg-wrapper bundle-item__select-caret">
+                        {{ 'icon-caret.svg' | inline_asset_content }}
+                      </span>
+                    </div>
+                  {%- endif -%}
                 </div>
               </div>
             {%- endif -%}
@@ -307,6 +377,62 @@
     font-size: var(--font-body--size, 13px);
     color: var(--bundle-price-color, var(--color-foreground-subdued, rgb(var(--color-foreground-rgb) / 0.7)));
     font-weight: 500;
+  }
+
+  .bundle-item__select-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    max-width: 220px;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .bundle-item__variant-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 6px 28px 6px 10px;
+    font-size: calc(var(--font-body--size, 14px) * 0.88);
+    line-height: 1.3;
+    color: var(--color-foreground);
+    background-color: var(--color-input-background, var(--color-background));
+    border: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / 0.2);
+    border-radius: var(--style-border-radius-inputs, 6px);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .bundle-item__variant-select:focus-visible {
+    outline: none;
+    border-color: var(--color-foreground);
+    box-shadow: 0 0 0 1px var(--color-foreground);
+  }
+
+  .bundle-item__variant-select option[disabled],
+  .bundle-item__variant-select option:disabled,
+  .bundle-item__variant-select .is-unavailable {
+    color: rgb(var(--color-foreground-rgb) / 0.4);
+    text-decoration: line-through;
+  }
+
+  .bundle-item__select-caret {
+    position: absolute;
+    right: 8px;
+    pointer-events: none;
+    width: 12px;
+    height: 12px;
+    color: var(--color-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bundle-item__select-caret svg {
+    width: 10px;
+    height: 10px;
   }
 
   .bundle-item__empty-note {

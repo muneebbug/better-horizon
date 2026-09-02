@@ -1,13 +1,14 @@
 /**
  * Better Horizon — Frequently Bought Together / Bundle Recommendations
  * Fetches native Shopify recommendations or renders curated metafield items,
- * calculates bundle totals, and adds all selected items to cart.
+ * calculates bundle totals, handles variant selection, and adds all selected items to cart.
  *
  * @module bundle-recommendations
  */
 
 import { formatMoney } from '@theme/money-formatting';
 import { updateCartState } from './wishlist.js';
+import { StandardEvents } from '@shopify/events';
 
 /**
  * @typedef {object} CartItemPayload
@@ -17,7 +18,7 @@ import { updateCartState } from './wishlist.js';
 
 /**
  * Custom element managing the Frequently Bought Together bundle recommendations,
- * live price aggregation, and multi-item cart dispatch.
+ * live price aggregation, variant selection, and multi-item cart dispatch.
  *
  * @extends {HTMLElement}
  */
@@ -61,11 +62,28 @@ export class BundleRecommendations extends HTMLElement {
     this.itemsContainer = this.querySelector('[data-bundle-items]');
 
     this.initCheckboxes();
+    this.initVariantSelects();
     this.updateTotal();
 
     if (this.addButton) {
       this.addButton.addEventListener('click', this.handleAddBundle.bind(this));
     }
+
+    const target =
+      this.closest('.shopify-section, dialog, [id*="ProductInformation-"], [id*="QuickAdd-"]') ||
+      document;
+    target.addEventListener(StandardEvents.productSelect, this.#handleProductSelect);
+  }
+
+  /**
+   * Cleans up event listeners upon disconnection.
+   * @returns {void}
+   */
+  disconnectedCallback() {
+    const target =
+      this.closest('.shopify-section, dialog, [id*="ProductInformation-"], [id*="QuickAdd-"]') ||
+      document;
+    target.removeEventListener(StandardEvents.productSelect, this.#handleProductSelect);
   }
 
   /**
@@ -79,6 +97,233 @@ export class BundleRecommendations extends HTMLElement {
       checkbox.addEventListener('change', () => this.updateTotal());
     });
   }
+
+  /**
+   * Attaches change event listeners to all variant selection dropdowns.
+   * @returns {void}
+   */
+  initVariantSelects() {
+    /** @type {NodeListOf<HTMLSelectElement>} */
+    const selects = this.querySelectorAll('[data-bundle-variant-select]');
+    selects.forEach((select) => {
+      select.addEventListener('change', (event) => this.handleVariantChange(event));
+    });
+  }
+
+  /**
+   * Handles changes to an item's variant select dropdown.
+   * Updates checkbox data attributes, displayed price, thumbnail image, and bundle total.
+   *
+   * @param {Event | { target: HTMLSelectElement }} event - The select change event.
+   * @returns {void}
+   */
+  handleVariantChange(event) {
+    const select = /** @type {HTMLSelectElement} */ (event.target);
+    if (!select) return;
+
+    const bundleItem = select.closest('.bundle-item');
+    if (!bundleItem) return;
+
+    const selectedOption = select.options[select.selectedIndex];
+    if (!selectedOption) return;
+
+    const variantId = selectedOption.value;
+    const priceCents = parseInt(selectedOption.dataset.priceCents || '0', 10);
+    const imageUrl = selectedOption.dataset.image;
+
+    // Update checkbox data attributes
+    const checkbox = /** @type {HTMLInputElement | null} */ (
+      bundleItem.querySelector('input[type="checkbox"]')
+    );
+    if (checkbox) {
+      checkbox.dataset.variantId = variantId;
+      checkbox.dataset.priceCents = String(priceCents);
+    }
+
+    // Update item price display
+    const priceEl = bundleItem.querySelector('[data-item-price]');
+    if (priceEl) {
+      priceEl.textContent = formatMoney(priceCents, this.moneyFormat, this.currency);
+    }
+
+    // Update item image if variant has its own image
+    if (imageUrl) {
+      const img = /** @type {HTMLImageElement | null} */ (
+        bundleItem.querySelector('.bundle-item__image')
+      );
+      if (img) {
+        img.src = imageUrl;
+      }
+    }
+
+    // Recalculate bundle total
+    this.updateTotal();
+
+    // If this is the main item, sync to main page variant-picker
+    if (bundleItem.classList.contains('bundle-item--main')) {
+      this.#syncToMainVariantPicker(variantId, select);
+    }
+  }
+
+  /**
+   * Synchronizes the chosen variant ID with the main page variant picker.
+   *
+   * @param {string} variantId
+   * @param {HTMLSelectElement} selectElement
+   */
+  #syncToMainVariantPicker(variantId, selectElement) {
+    const cleanId = String(variantId).split('/').pop();
+    const productId = this.productId;
+    const section = this.closest('.shopify-section') || document;
+    const variantPicker = section.querySelector(`variant-picker[data-product-id="${productId}"]`);
+    if (!variantPicker) return;
+
+    // 1. Single-variant input direct match
+    const directInput = variantPicker.querySelector(
+      `input[data-variant-id="${cleanId}"], option[data-variant-id="${cleanId}"]`
+    );
+    if (directInput instanceof HTMLInputElement && !directInput.checked) {
+      directInput.checked = true;
+      if (typeof variantPicker.updateSelectedOption === 'function') {
+        variantPicker.updateSelectedOption(directInput);
+      }
+      directInput.dispatchEvent(new Event('change', { bubbles: true }));
+      return;
+    }
+
+    // 2. Retrieve option values for this variant
+    let optionValues = [];
+    const selectedOption = selectElement?.options[selectElement.selectedIndex];
+    if (selectedOption?.dataset?.options) {
+      optionValues = selectedOption.dataset.options.split('|||');
+    }
+
+    if (optionValues.length === 0) {
+      const script = this.querySelector('script[data-product-variants]');
+      if (script) {
+        try {
+          const parsed = JSON.parse(script.textContent || '[]');
+          const variantsList = Array.isArray(parsed) ? parsed : [parsed];
+          const targetVariant = variantsList.find((v) => String(v.id) === cleanId);
+          if (targetVariant && Array.isArray(targetVariant.options)) {
+            optionValues = targetVariant.options;
+          }
+        } catch (e) {
+          console.warn('[bundle-recommendations] Could not parse variants JSON:', e);
+        }
+      }
+    }
+
+    if (optionValues.length === 0) return;
+
+    // 3. Update fieldsets and selects in the variant-picker
+    const fieldsets = variantPicker.querySelectorAll('fieldset');
+    const selects = variantPicker.querySelectorAll('select');
+    let triggerElement = null;
+
+    if (fieldsets.length > 0) {
+      fieldsets.forEach((fieldset, idx) => {
+        const targetVal = optionValues[idx];
+        if (!targetVal) return;
+
+        const radios = Array.from(fieldset.querySelectorAll('input'));
+        const matchingRadio = radios.find((r) => r.value === targetVal);
+        if (matchingRadio) {
+          if (!matchingRadio.checked) {
+            matchingRadio.checked = true;
+            triggerElement = matchingRadio;
+          }
+          if (typeof variantPicker.updateSelectedOption === 'function') {
+            variantPicker.updateSelectedOption(matchingRadio);
+          }
+        }
+      });
+    }
+
+    if (selects.length > 0) {
+      selects.forEach((sel, idx) => {
+        const targetVal = optionValues[idx];
+        if (!targetVal) return;
+
+        if (sel.value !== targetVal) {
+          sel.value = targetVal;
+          triggerElement = sel;
+          if (typeof variantPicker.updateSelectedOption === 'function') {
+            variantPicker.updateSelectedOption(sel);
+          }
+        }
+      });
+    }
+
+    // 4. Trigger change event
+    if (triggerElement) {
+      triggerElement.dispatchEvent(new Event('change', { bubbles: true }));
+    } else {
+      const anyChecked = variantPicker.querySelector('input:checked, select');
+      if (anyChecked) {
+        anyChecked.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+  }
+
+  /**
+   * Handles page-level variant changes to keep the main bundle item in sync.
+   *
+   * @param {any} event - The product select event.
+   * @returns {void}
+   */
+  #handleProductSelect = (event) => {
+    if (!(event.target instanceof Element) || event.target.closest('product-card')) return;
+
+    event.promise
+      ?.then(({ variant, detail }) => {
+        const rawId = detail?.variantId || variant?.id || detail?.resource?.id;
+        if (!rawId) return;
+
+        const cleanId = String(rawId).split('/').pop();
+        if (!cleanId) return;
+
+        const mainItem = this.querySelector('.bundle-item--main');
+        if (!mainItem) return;
+
+        const select = /** @type {HTMLSelectElement | null} */ (
+          mainItem.querySelector('[data-bundle-variant-select]')
+        );
+
+        if (select) {
+          const matchingOption = Array.from(select.options).find(
+            (opt) => opt.value === cleanId || opt.value === String(rawId)
+          );
+
+          if (matchingOption) {
+            if (select.value !== matchingOption.value) {
+              select.value = matchingOption.value;
+              this.handleVariantChange({ target: select });
+            }
+          }
+        } else {
+          const priceCents = variant?.price?.amount
+            ? Math.round(parseFloat(variant.price.amount) * 100)
+            : detail?.resource?.price;
+
+          const checkbox = /** @type {HTMLInputElement | null} */ (
+            mainItem.querySelector('input[type="checkbox"]')
+          );
+          if (checkbox) {
+            checkbox.dataset.variantId = cleanId;
+            if (priceCents) checkbox.dataset.priceCents = String(priceCents);
+          }
+
+          const priceEl = mainItem.querySelector('[data-item-price]');
+          if (priceEl && priceCents) {
+            priceEl.textContent = formatMoney(priceCents, this.moneyFormat, this.currency);
+          }
+
+          this.updateTotal();
+        }
+      })
+      .catch(() => {});
+  };
 
   /**
    * Computes the sum of all currently checked bundle items and updates the formatted total UI using theme money formatting.
@@ -164,4 +409,3 @@ export class BundleRecommendations extends HTMLElement {
 if (!customElements.get('bundle-recommendations')) {
   customElements.define('bundle-recommendations', BundleRecommendations);
 }
-

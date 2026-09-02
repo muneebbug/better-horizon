@@ -554,7 +554,7 @@ class ProductFormComponent extends Component {
       })
     );
 
-    let fetchCfg;
+    let fetchPromise;
     if (nestedVariantId) {
       const rawParentId = formData.get('id');
       const parentId = Number(rawParentId) || rawParentId;
@@ -562,6 +562,7 @@ class ProductFormComponent extends Component {
 
       const parentProperties = {};
       const nestedProperties = {};
+      let hasFileInProperties = false;
 
       for (const [key, value] of formData.entries()) {
         if (key.startsWith('properties[') && key.endsWith(']')) {
@@ -586,49 +587,146 @@ class ProductFormComponent extends Component {
               nestedProperties[propKey] = value;
             } else {
               parentProperties[propKey] = value;
+              if (
+                (typeof File !== 'undefined' && value instanceof File && value.size > 0) ||
+                (typeof Blob !== 'undefined' && value instanceof Blob && value.size > 0)
+              ) {
+                hasFileInProperties = true;
+              }
             }
           }
         }
       }
 
-      const payload = {
-        items: [
-          {
-            id: parentId,
-            quantity: itemCount,
-            properties: parentProperties,
-          },
-          {
-            id: childId,
-            quantity: itemCount,
-            parent_id: parentId,
-            properties: nestedProperties,
-          },
-        ],
-        sections: cartItemComponentsSectionIds.join(','),
-      };
+      if (hasFileInProperties) {
+        // Step 1: Submit parent product via multipart FormData so files upload to Shopify CDN
+        const parentFormData = new FormData();
+        parentFormData.append('id', parentId.toString());
+        parentFormData.append('quantity', itemCount.toString());
 
-      fetchCfg = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-        body: JSON.stringify(payload),
-      };
+        for (const [propKey, propVal] of Object.entries(parentProperties)) {
+          parentFormData.append(`properties[${propKey}]`, propVal);
+        }
+
+        for (const [key, val] of formData.entries()) {
+          if (key.startsWith('attributes[') || key === 'selling_plan') {
+            parentFormData.append(key, val);
+          }
+        }
+
+        parentFormData.append('sections', cartItemComponentsSectionIds.join(','));
+
+        fetchPromise = fetch(Theme.routes.cart_add_url, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            Accept: 'application/javascript',
+          },
+          body: parentFormData,
+        })
+          .then((res) => res.json())
+          .then(async (parentResponse) => {
+            if (parentResponse.status) {
+              return parentResponse;
+            }
+
+            // Step 2: Submit nested gift wrap product, linked to parent and requesting updated cart sections
+            const childItem = {
+              id: parseInt(childId, 10) || childId,
+              quantity: itemCount,
+            };
+
+            if (Object.keys(nestedProperties).length > 0) {
+              childItem.properties = nestedProperties;
+            }
+
+            const parentKey = parentResponse?.key || parentResponse?.items?.[0]?.key;
+            if (parentKey) {
+              childItem.parent_line_key = parentKey;
+            }
+
+            try {
+              let childRes = await fetch(Theme.routes.cart_add_url, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Accept: 'application/json',
+                  'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({
+                  items: [childItem],
+                  sections: cartItemComponentsSectionIds.join(','),
+                }),
+              });
+              let childData = await childRes.json();
+
+              // If parent_line_key was rejected (e.g. 422 status), retry without parent_line_key
+              if ((!childRes.ok || childData.status) && childItem.parent_line_key) {
+                delete childItem.parent_line_key;
+                childRes = await fetch(Theme.routes.cart_add_url, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                  },
+                  body: JSON.stringify({
+                    items: [childItem],
+                    sections: cartItemComponentsSectionIds.join(','),
+                  }),
+                });
+                childData = await childRes.json();
+              }
+
+              if (childData.sections) {
+                parentResponse.sections = childData.sections;
+              }
+            } catch (err) {
+              console.error('Failed to add nested gift wrap item:', err);
+            }
+
+            return parentResponse;
+          });
+      } else {
+        const payload = {
+          items: [
+            {
+              id: parentId,
+              quantity: itemCount,
+              properties: parentProperties,
+            },
+            {
+              id: childId,
+              quantity: itemCount,
+              parent_id: parentId,
+              properties: nestedProperties,
+            },
+          ],
+          sections: cartItemComponentsSectionIds.join(','),
+        };
+
+        const fetchCfg = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: JSON.stringify(payload),
+        };
+
+        fetchPromise = fetch(Theme.routes.cart_add_url, fetchCfg).then((res) => res.json());
+      }
     } else {
-      fetchCfg = fetchConfig('javascript', { body: formData });
+      const fetchCfg = fetchConfig('javascript', { body: formData });
       fetchCfg.headers = {
         ...fetchCfg.headers,
         Accept: 'application/javascript',
       };
+      fetchPromise = fetch(Theme.routes.cart_add_url, fetchCfg).then((res) => res.json());
     }
 
-    fetch(Theme.routes.cart_add_url, {
-      ...fetchCfg,
-    })
-      .then((response) => response.json())
+    fetchPromise
       .then(async (response) => {
         if (response.status) {
           this.dispatchEvent(

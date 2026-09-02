@@ -6,7 +6,12 @@
  * @module form-file-input
  */
 
+import { StandardEvents } from '@shopify/events';
+
 export class FormFileInput extends HTMLElement {
+  /** @type {((event: any) => void) | null} */
+  #cartAddEventBound = null;
+
   /** @type {HTMLInputElement | null} */
   fileInput = null;
 
@@ -64,10 +69,36 @@ export class FormFileInput extends HTMLElement {
     }
 
     this.#bindEvents();
+
+    this.#cartAddEventBound = (event) => {
+      if (event.action === 'add') {
+        event.promise?.then(() => this.clear()).catch(() => {});
+      }
+    };
+    document.addEventListener(StandardEvents.cartLinesUpdate, this.#cartAddEventBound);
   }
 
   disconnectedCallback() {
     this.#revokeAllUrls();
+    if (this.#cartAddEventBound) {
+      document.removeEventListener(StandardEvents.cartLinesUpdate, this.#cartAddEventBound);
+      this.#cartAddEventBound = null;
+    }
+  }
+
+  /**
+   * Resets all selected files, revokes temporary URLs, and renders dropzone.
+   * @returns {void}
+   */
+  clear() {
+    this.#revokeAllUrls();
+    this.selectedFiles = [];
+    this.activePreviewFile = null;
+    if (this.fileInput) {
+      this.fileInput.value = '';
+    }
+    this.#syncNativeInput();
+    this.#render();
   }
 
   #bindEvents() {

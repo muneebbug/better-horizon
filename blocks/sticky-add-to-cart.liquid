@@ -1,0 +1,801 @@
+{% doc %}
+  Sticky Add to Cart Theme Block
+  Floating bar that appears when the main buy buttons scroll out of view.
+  Supports position (top/bottom), customizable widths, and an inline variant selector with strikethrough states.
+{% enddoc %}
+
+{%- liquid
+  assign block_settings = block.settings
+  assign product = closest.product
+  if request.visual_preview_mode and product == blank
+    assign product = collections.all.products.first
+  endif
+
+  assign current_variant = product.selected_or_first_available_variant
+  assign initial_quantity = current_variant.quantity_rule.min | default: 1
+
+  assign position = block_settings.position | default: 'bottom'
+  assign mobile_position = block_settings.mobile_position | default: 'bottom'
+  assign bar_width = block_settings.bar_width | default: 'default'
+  assign custom_width = block_settings.custom_width | default: 600
+  assign card_style = block_settings.card_style | default: 'solid'
+  assign border_radius = block_settings.border_radius | default: 16
+  assign button_style = block_settings.button_style | default: 'primary'
+
+  assign show_image = block_settings.show_image | default: true
+  assign show_title = block_settings.show_title | default: true
+  assign show_price = block_settings.show_price | default: true
+  assign show_variant_selector = block_settings.show_variant_selector | default: true
+  assign show_quantity = block_settings.show_quantity | default: false
+
+  assign image_to_show = current_variant.featured_image | default: product.featured_image
+-%}
+
+{%- style -%}
+  .sticky-add-to-cart-block--{{ block.id }} {
+    --sticky-radius: {{ block_settings.border_radius | default: 16 }}px;
+    --sticky-border-width: {{ block_settings.border_width | default: 1 }}px;
+    --sticky-border-style: {{ block_settings.border_style | default: 'solid' }};
+    --sticky-border-color: {{ block_settings.border_color | default: '#e5e5e5' }};
+    --sticky-bg: {{ block_settings.background_color | default: '#ffffff' }};
+
+    {% if bar_width == 'compact' %}
+      --sticky-max-width: 520px;
+    {% elsif bar_width == 'wide' %}
+      --sticky-max-width: 800px;
+    {% elsif bar_width == 'full' %}
+      --sticky-max-width: calc(100vw - 40px);
+    {% elsif bar_width == 'custom' %}
+      --sticky-max-width: {{ custom_width }}px;
+    {% else %}
+      --sticky-max-width: 640px;
+    {% endif %}
+
+    {% if block_settings.text_color != blank %}
+      --sticky-color: {{ block_settings.text_color }};
+    {% endif %}
+  }
+
+  {% if block_settings.enable_shadow == false %}
+    .sticky-add-to-cart-block--{{ block.id }} .sticky-add-to-cart__bar {
+      box-shadow: none;
+    }
+  {% endif %}
+
+  {% if button_style == 'custom' %}
+    .sticky-add-to-cart-block--{{ block.id }} .sticky-add-to-cart__button {
+      {% if block_settings.button_background_color != blank %}
+        background-color: {{ block_settings.button_background_color }};
+      {% endif %}
+      {% if block_settings.button_text_color != blank %}
+        color: {{ block_settings.button_text_color }};
+      {% endif %}
+      {% if block_settings.button_border_color != blank %}
+        border-color: {{ block_settings.button_border_color }};
+      {% endif %}
+    }
+  {% endif %}
+{%- endstyle -%}
+
+{% render 'fly-to-cart-styles' %}
+{% render 'add-to-cart-button-styles' %}
+
+<script
+  src="{{ 'sticky-add-to-cart.js' | asset_url }}"
+  defer
+  type="module"
+></script>
+
+<sticky-add-to-cart
+  id="StickyAddToCart--{{ block.id }}"
+  class="sticky-add-to-cart sticky-add-to-cart-block--{{ block.id }} sticky-add-to-cart--pos-{{ position }} sticky-add-to-cart--mobile-{{ mobile_position }} sticky-add-to-cart--style-{{ card_style }}"
+  data-position="{{ position }}"
+  data-mobile-position="{{ mobile_position }}"
+  data-variant-available="{{ current_variant.available }}"
+  data-product-id="{{ product.id }}"
+  data-current-variant-id="{{ current_variant.id }}"
+  data-initial-quantity="{{ initial_quantity }}"
+  data-default-variant-title="{{ 'products.product.default_title' | t }}"
+  {{ block.shopify_attributes }}
+>
+  <div
+    class="sticky-add-to-cart__bar"
+    data-stuck="false"
+    ref="stickyBar"
+    role="region"
+    aria-label="{{ 'products.product.sticky_add_to_cart' | t }}"
+  >
+    {% if show_image and image_to_show %}
+      <div class="sticky-add-to-cart__image">
+        {% assign image_alt = image_to_show.alt | default: product.title | escape %}
+        {{
+          image_to_show
+          | image_url: width: 120
+          | image_tag:
+            loading: 'lazy',
+            alt: image_alt,
+            class: 'sticky-add-to-cart__image-img',
+            data-testid: 'sticky-product-image',
+            srcset: null,
+            sizes: null,
+            ref: 'productImage'
+        }}
+      </div>
+    {% endif %}
+
+    <div
+      class="sticky-add-to-cart__info"
+      data-has-image="{% if show_image and image_to_show %}true{% else %}false{% endif %}"
+    >
+      {% if show_title %}
+        <p
+          class="sticky-add-to-cart__title"
+          data-testid="sticky-product-title"
+        >
+          {{ product.title | escape }}
+        </p>
+      {% endif %}
+
+      {% if show_variant_selector and product.variants.size > 1 %}
+        <div class="sticky-add-to-cart__select-wrapper">
+          <select
+            class="sticky-add-to-cart__variant-select"
+            data-sticky-variant-select
+            aria-label="{{ product.title | escape }} {{ 'products.product.variant' | t | default: 'Variant' }}"
+          >
+            {% for variant in product.variants %}
+              <option
+                value="{{ variant.id }}"
+                data-price-cents="{{ variant.price }}"
+                data-options="{{ variant.options | join: '|||' | escape }}"
+                {% if variant.featured_image %}
+                  data-image="{{ variant.featured_image | image_url: width: 120 }}"
+                {% endif %}
+                {% if variant.id == current_variant.id %}
+                  selected
+                {% endif %}
+                {% unless variant.available %}
+                  disabled
+                  class="is-unavailable"
+                {% endunless %}
+              >
+                {{ variant.title }}{% unless variant.available %} - {{ 'products.product.sold_out' | t | default: 'Sold out' }}{% endunless %}
+              </option>
+            {% endfor %}
+          </select>
+          <span class="svg-wrapper sticky-add-to-cart__select-caret">
+            {{ 'icon-caret.svg' | inline_asset_content }}
+          </span>
+          <script type="application/json" data-product-variants>
+            {{ product.variants | json }}
+          </script>
+        </div>
+      {% else %}
+        <div
+          class="sticky-add-to-cart__variant"
+          data-testid="sticky-variant-title"
+          {% if product.has_only_default_variant %}
+            style="display: none;"
+          {% endif %}
+        >
+          {% unless product.has_only_default_variant %}
+            {% if current_variant != blank %}
+              {% assign variant_title = current_variant.title | escape %}
+            {% endif %}
+            {{ variant_title }}
+          {% endunless %}
+        </div>
+      {% endif %}
+    </div>
+
+    {% if show_price %}
+      <div
+        class="sticky-add-to-cart__price"
+        data-testid="sticky-price-display"
+      >
+        {% render 'price', product_resource: product, show_sale_price_first: true %}
+      </div>
+    {% endif %}
+
+    {% if show_quantity %}
+      <div class="sticky-add-to-cart__quantity-wrapper">
+        <button
+          type="button"
+          class="sticky-add-to-cart__qty-btn"
+          data-qty-action="decrease"
+          aria-label="{{ 'products.product.quantity.decrease' | t | default: 'Decrease quantity' }}"
+        >
+          {{ 'icon-minus.svg' | inline_asset_content }}
+        </button>
+        <span class="sticky-add-to-cart__qty-value" data-sticky-qty-value>{{ initial_quantity }}</span>
+        <button
+          type="button"
+          class="sticky-add-to-cart__qty-btn"
+          data-qty-action="increase"
+          aria-label="{{ 'products.product.quantity.increase' | t | default: 'Increase quantity' }}"
+        >
+          {{ 'icon-plus.svg' | inline_asset_content }}
+        </button>
+      </div>
+    {% endif %}
+
+    <button
+      type="button"
+      class="sticky-add-to-cart__button add-to-cart-button button button--{{ button_style }}"
+      ref="addToCartButton"
+      on:click="/handleAddToCartClick"
+      {% unless current_variant.available %}
+        disabled
+      {% endunless %}
+    >
+      <span class="add-to-cart-text">
+        {% if current_variant.available %}
+          <span class="svg-wrapper">
+            {{- 'icon-add-to-cart.svg' | inline_asset_content -}}
+          </span>
+        {% endif %}
+        <span class="add-to-cart-text__content">
+          <span>
+            {%- if current_variant.available -%}
+              {{- 'products.product.add_to_cart' | t -}}
+            {%- elsif current_variant == blank -%}
+              {{- 'products.product.unavailable' | t -}}
+            {%- else -%}
+              {{- 'products.product.sold_out' | t -}}
+            {%- endif -%}
+          </span>
+          <span
+            ref="quantityDisplay"
+            {% if current_variant.available and initial_quantity > 1 %}
+              style="display: inline;"
+            {% else %}
+              style="display: none;"
+            {% endif %}
+          >
+            {{- ' (' -}}
+            <span ref="quantityNumber">{{- initial_quantity -}}</span>
+            {{- ')' -}}
+          </span>
+        </span>
+      </span>
+      <span class="add-to-cart__added">
+        <span class="svg-wrapper add-to-cart__added-icon">
+          {{- 'icon-checkmark-burst.svg' | inline_asset_content -}}
+        </span>
+      </span>
+    </button>
+  </div>
+</sticky-add-to-cart>
+
+{% stylesheet %}
+  .sticky-add-to-cart {
+    display: contents;
+  }
+
+  .sticky-add-to-cart__bar {
+    position: fixed;
+    left: 50%;
+    opacity: 0;
+    z-index: calc(var(--layer-sticky, 500) - 1);
+    display: flex;
+    align-items: center;
+    gap: var(--gap-md, 14px);
+    width: min(var(--sticky-max-width, 640px), calc(100vw - 32px));
+    padding: var(--padding-sm, 10px) var(--padding-md, 16px);
+    border-radius: var(--sticky-radius, 16px);
+    box-sizing: border-box;
+    color: var(--sticky-color, var(--color-foreground));
+    background: var(--sticky-bg, #ffffff);
+    background-color: var(--sticky-bg, #ffffff);
+    border: var(--sticky-border-width, 1px) var(--sticky-border-style, solid) var(--sticky-border-color, #e5e5e5);
+    box-shadow: 0 10px 30px -4px rgb(0 0 0 / 0.12);
+  }
+
+  /* Bottom position (default) */
+  .sticky-add-to-cart--pos-bottom .sticky-add-to-cart__bar {
+    bottom: max(20px, var(--safe-area-inset-bottom, 0px));
+    transform: translateX(-50%) translateY(calc(100% + 40px));
+  }
+
+  .sticky-add-to-cart--pos-bottom .sticky-add-to-cart__bar[data-stuck='true'] {
+    transform: translateX(-50%) translateY(0%);
+    opacity: 1;
+  }
+
+  /* Top position */
+  .sticky-add-to-cart--pos-top .sticky-add-to-cart__bar {
+    top: max(20px, calc(var(--header-height, 64px) + 12px));
+    transform: translateX(-50%) translateY(calc(-100% - 40px));
+  }
+
+  .sticky-add-to-cart--pos-top .sticky-add-to-cart__bar[data-stuck='true'] {
+    transform: translateX(-50%) translateY(0%);
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .sticky-add-to-cart__bar {
+      transition-property: transform, opacity, display;
+      transition-duration: 0.3s;
+      transition-timing-function: var(--ease-out-quad, cubic-bezier(0.25, 1, 0.5, 1));
+      transition-behavior: allow-discrete;
+    }
+  }
+
+  sticky-add-to-cart:not([data-variant-available='true']) .sticky-add-to-cart__bar {
+    opacity: 0;
+    pointer-events: none;
+    display: none;
+  }
+
+  .sticky-add-to-cart__image {
+    flex-shrink: 0;
+    aspect-ratio: 1;
+    height: var(--height-buy-buttons, 44px);
+    width: var(--height-buy-buttons, 44px);
+    overflow: hidden;
+    border-radius: var(--style-border-radius-buttons-primary, 8px);
+    background: var(--color-background-secondary, rgb(var(--color-foreground-rgb) / 0.05));
+  }
+
+  .sticky-add-to-cart__image-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .sticky-add-to-cart__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .sticky-add-to-cart__info[data-has-image='false'] {
+    padding-left: 0;
+  }
+
+  .sticky-add-to-cart__title {
+    font-size: var(--font-paragraph-medium--size, 14px);
+    font-weight: var(--font-weight-semibold, 600);
+    line-height: 1.3;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--sticky-color, var(--color-foreground));
+  }
+
+  .sticky-add-to-cart__variant {
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text, 0.7));
+    font-size: var(--font-paragraph-small--size, 12px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Variant Selector */
+  .sticky-add-to-cart__select-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    max-width: 210px;
+    width: 100%;
+    margin-top: 2px;
+  }
+
+  .sticky-add-to-cart__variant-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 5px 24px 5px 8px;
+    font-size: calc(var(--font-body--size, 14px) * 0.85);
+    line-height: 1.25;
+    color: var(--sticky-color, var(--color-foreground));
+    background-color: var(--color-input-background, var(--color-background));
+    border: var(--style-border-width, 1px) solid var(--sticky-border, rgb(var(--color-foreground-rgb) / 0.2));
+    border-radius: var(--style-border-radius-inputs, 6px);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .sticky-add-to-cart__variant-select:focus-visible {
+    outline: none;
+    border-color: var(--color-foreground);
+    box-shadow: 0 0 0 1px var(--color-foreground);
+  }
+
+  .sticky-add-to-cart__variant-select option[disabled],
+  .sticky-add-to-cart__variant-select option:disabled,
+  .sticky-add-to-cart__variant-select .is-unavailable {
+    color: rgb(var(--color-foreground-rgb) / 0.4);
+    text-decoration: line-through;
+  }
+
+  .sticky-add-to-cart__select-caret {
+    position: absolute;
+    right: 8px;
+    pointer-events: none;
+    width: 10px;
+    height: 10px;
+    color: var(--color-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sticky-add-to-cart__select-caret svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .sticky-add-to-cart__price {
+    font-weight: var(--font-weight-semibold, 600);
+    font-size: var(--font-paragraph--size, 14px);
+    white-space: nowrap;
+    color: var(--sticky-color, var(--color-foreground));
+  }
+
+  /* Quantity Selector in Sticky Bar */
+  .sticky-add-to-cart__quantity-wrapper {
+    display: inline-flex;
+    align-items: center;
+    border: var(--style-border-width, 1px) solid rgb(var(--color-foreground-rgb) / 0.2);
+    border-radius: var(--style-border-radius-inputs, 6px);
+    background: var(--color-input-background, var(--color-background));
+    height: var(--height-buy-buttons, 44px);
+    padding: 0 4px;
+    box-sizing: border-box;
+  }
+
+  .sticky-add-to-cart__qty-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-foreground);
+    padding: 0;
+  }
+
+  .sticky-add-to-cart__qty-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .sticky-add-to-cart__qty-value {
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .sticky-add-to-cart__button {
+    height: var(--height-buy-buttons, 44px);
+    position: relative;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Mobile Layout */
+  @media screen and (max-width: 749px) {
+    .sticky-add-to-cart--mobile-bottom .sticky-add-to-cart__bar {
+      bottom: 0;
+      top: auto;
+      left: 0;
+      width: 100%;
+      max-width: 100vw;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      border-bottom: none;
+      border-top: var(--sticky-border-width, 1px) var(--sticky-border-style, solid) var(--sticky-border-color, #e5e5e5);
+      padding-block-end: calc(var(--padding-sm, 10px) + var(--safe-area-inset-bottom, 0px));
+      padding-inline: var(--padding-md, 14px);
+      transform: translateY(calc(100% + 20px));
+    }
+
+    .sticky-add-to-cart--mobile-bottom .sticky-add-to-cart__bar[data-stuck='true'] {
+      transform: translateY(0%);
+    }
+
+    .sticky-add-to-cart--mobile-top .sticky-add-to-cart__bar {
+      top: var(--header-height, 60px);
+      bottom: auto;
+      left: 0;
+      width: 100%;
+      max-width: 100vw;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      border-top: none;
+      border-bottom: var(--sticky-border-width, 1px) var(--sticky-border-style, solid) var(--sticky-border-color, #e5e5e5);
+      padding-inline: var(--padding-md, 14px);
+      transform: translateY(calc(-100% - 20px));
+    }
+
+    .sticky-add-to-cart--mobile-top .sticky-add-to-cart__bar[data-stuck='true'] {
+      transform: translateY(0%);
+    }
+
+    .sticky-add-to-cart__select-wrapper {
+      max-width: 150px;
+    }
+
+    .sticky-add-to-cart__title {
+      font-size: calc(var(--font-paragraph--size, 14px) * 0.9);
+    }
+
+    .sticky-add-to-cart__image {
+      width: 36px;
+      height: 36px;
+    }
+
+    .sticky-add-to-cart__quantity-wrapper {
+      display: none;
+    }
+
+    .sticky-add-to-cart__button {
+      padding-inline: var(--padding-md, 14px);
+    }
+  }
+
+  @media screen and (max-width: 380px) {
+    .sticky-add-to-cart__price {
+      display: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Sticky add to cart",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Displays a floating Add to Cart bar when the main buy buttons scroll out of view."
+    },
+    {
+      "type": "header",
+      "content": "Position & Sizing"
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Desktop position",
+      "options": [
+        {
+          "value": "bottom",
+          "label": "Bottom of screen"
+        },
+        {
+          "value": "top",
+          "label": "Top of screen"
+        }
+      ],
+      "default": "bottom"
+    },
+    {
+      "type": "select",
+      "id": "mobile_position",
+      "label": "Mobile position",
+      "options": [
+        {
+          "value": "bottom",
+          "label": "Bottom of screen"
+        },
+        {
+          "value": "top",
+          "label": "Top of screen"
+        }
+      ],
+      "default": "bottom"
+    },
+    {
+      "type": "select",
+      "id": "bar_width",
+      "label": "Bar width",
+      "options": [
+        {
+          "value": "compact",
+          "label": "Compact (520px)"
+        },
+        {
+          "value": "default",
+          "label": "Standard (640px)"
+        },
+        {
+          "value": "wide",
+          "label": "Wide (800px)"
+        },
+        {
+          "value": "full",
+          "label": "Full width"
+        },
+        {
+          "value": "custom",
+          "label": "Custom width"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "range",
+      "id": "custom_width",
+      "label": "Custom width (px)",
+      "min": 400,
+      "max": 1200,
+      "step": 20,
+      "unit": "px",
+      "default": 640,
+      "visible_if": "{{ block.settings.bar_width == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "Content Toggles"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image",
+      "label": "Show product image",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "Show product title",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show price",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_variant_selector",
+      "label": "Show variant dropdown",
+      "info": "Displays a dropdown selector when the product has multiple variants.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quantity",
+      "label": "Show quantity selector",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Card Styling & Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Card background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "placeholder": "Default"
+    },
+    {
+      "type": "header",
+      "content": "Card Border"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "border_style",
+      "label": "Border style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Corner radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_shadow",
+      "label": "Enable card drop shadow",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Button Styling"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "custom",
+          "label": "Custom colors"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Button background",
+      "visible_if": "{{ block.settings.button_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "visible_if": "{{ block.settings.button_style == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Button border color",
+      "visible_if": "{{ block.settings.button_style == 'custom' }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sticky add to cart"
+    }
+  ]
+}
+{% endschema %}

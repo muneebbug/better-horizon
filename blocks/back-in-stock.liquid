@@ -94,12 +94,24 @@
   type="module"
 ></script>
 
-<div
-  class="back-in-stock-block back-in-stock-block--{{ block.id }} spacing-style{% unless is_sold_out or request.design_mode %} is-hidden{% endunless %}"
+<back-in-stock
+  id="BackInStock--{{ block.id }}"
+  class="back-in-stock-block back-in-stock-block--{{ block.id }} spacing-style"
   style="{% render 'spacing-style', settings: block_settings %}"
+  data-block-id="{{ block.id }}"
+  data-product-id="{{ product.id }}"
+  data-product-title="{{ product.title | escape }}"
+  data-product-handle="{{ product.handle }}"
+  data-variant-id="{{ selected_variant.id }}"
+  data-variant-title="{% if selected_variant.title != blank and selected_variant.title != 'Default Title' %}{{ selected_variant.title | escape }}{% endif %}"
+  data-variant-sku="{{ selected_variant.sku | default: 'N/A' }}"
+  data-shop-url="{{ shop.url }}"
+  {% unless is_sold_out or request.design_mode %}
+    hidden
+  {% endunless %}
   {{ block.shopify_attributes }}
 >
-  <back-in-stock-form class="back-in-stock-form-wrapper">
+  <div class="back-in-stock-form-wrapper">
     <div class="back-in-stock__header">
       {%- if block_settings.heading != blank -%}
         <h3 class="back-in-stock__title">{{ block_settings.heading }}</h3>
@@ -109,16 +121,36 @@
       {%- endif -%}
     </div>
 
+    {%- liquid
+      assign variant_title_clean = ''
+      if selected_variant.title != blank and selected_variant.title != 'Default Title'
+        assign variant_title_clean = selected_variant.title
+      endif
+
+      if variant_title_clean != blank
+        assign full_product_title = product.title | append: ' - ' | append: variant_title_clean
+      else
+        assign full_product_title = product.title
+      endif
+
+      assign variant_url = shop.url | append: selected_variant.url
+    -%}
+
     {%- form 'contact', id: 'BackInStockForm', class: 'back-in-stock__form' -%}
       <input
         type="hidden"
-        name="contact[tags]"
-        value="back-in-stock-request"
+        name="contact[Product]"
+        value="{{ full_product_title | escape }}"
       >
       <input
         type="hidden"
-        name="contact[body]"
-        value="Customer requested notification when '{{ product.title | escape }}' (SKU: {{ selected_variant.sku | default: 'N/A' }}) is back in stock."
+        name="contact[Variant Link]"
+        value="{{ variant_url }}"
+      >
+      <input
+        type="hidden"
+        name="contact[SKU]"
+        value="{{ selected_variant.sku | default: 'N/A' }}"
       >
 
       <div class="back-in-stock__input-group back-in-stock__input-group--{{ layout }}">
@@ -155,11 +187,12 @@
       </span>
       <p>{{ block_settings.success_message }}</p>
     </div>
-  </back-in-stock-form>
-</div>
+  </div>
+</back-in-stock>
 
 {% stylesheet %}
   .back-in-stock-block {
+    display: block;
     margin: 0;
     padding: var(--padding-lg, 20px);
     background-color: var(--bis-bg, rgb(var(--color-foreground-rgb) / 0.03));
@@ -169,8 +202,9 @@
     width: 100%;
   }
 
+  .back-in-stock-block[hidden],
   .back-in-stock-block.is-hidden {
-    display: none;
+    display: none !important;
   }
 
   .back-in-stock__header {
@@ -264,6 +298,10 @@
     font-weight: 500;
     margin-top: var(--margin-md, 14px);
     line-height: 1.4;
+  }
+
+  .back-in-stock__success[hidden] {
+    display: none !important;
   }
 
   .back-in-stock__success p {

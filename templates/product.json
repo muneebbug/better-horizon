@@ -601,6 +601,30 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
+            },
+            "sticky_add_to_cart": {
+              "type": "sticky-add-to-cart",
+              "name": "Sticky add to cart",
+              "settings": {
+                "position": "bottom",
+                "mobile_position": "bottom",
+                "bar_width": "default",
+                "custom_width": 640,
+                "show_image": true,
+                "show_title": true,
+                "show_price": true,
+                "show_variant_selector": true,
+                "show_quantity": false,
+                "border_width": 1,
+                "border_style": "solid",
+                "border_color": "#e5e5e5",
+                "border_radius": 16,
+                "enable_shadow": true,
+                "button_style": "primary",
+                "background_color": "#ffffff",
+                "text_color": "#000000"
+              },
+              "blocks": {}
             }
           },
           "block_order": [
@@ -616,7 +640,8 @@
             "trust_badge_bar_dRtmVT",
             "delivery_estimate_pdp",
             "frequently_bought_together_VBWnqk",
-            "text_aEtTtq"
+            "text_aEtTtq",
+            "sticky_add_to_cart"
           ]
         }
       },
@@ -629,7 +654,6 @@
         "equal_columns": false,
         "limit_details_width": false,
         "gap": 48,
-        "enable_sticky_add_to_cart": true,
         "background_color": "",
         "padding-block-start": 0,
         "padding-block-end": 0

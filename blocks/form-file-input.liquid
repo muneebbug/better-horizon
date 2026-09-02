@@ -188,7 +188,9 @@
 
       <div class="custom-form__file-dropzone-content" aria-hidden="true">
         <div class="custom-form__file-dropzone-icon">
-          {{- 'icon-upload.svg' | inline_asset_content -}}
+          <span class="svg-wrapper">
+            {{- 'icon-upload.svg' | inline_asset_content -}}
+          </span>
         </div>
         <span class="custom-form__file-dropzone-title">
           {{ block_settings.dropzone_text | default: 'Choose file or drag & drop here' }}
