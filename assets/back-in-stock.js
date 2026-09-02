@@ -233,7 +233,3 @@ export class BackInStock extends Component {
 if (!customElements.get('back-in-stock')) {
   customElements.define('back-in-stock', BackInStock);
 }
-
-if (!customElements.get('back-in-stock-form')) {
-  customElements.define('back-in-stock-form', BackInStock);
-}
