@@ -83,16 +83,9 @@
       {% content_for 'blocks' %}
     </select>
 
-    <svg
-      aria-hidden="true"
-      focusable="false"
-      class="icon icon-caret"
-      viewBox="0 0 10 6"
-      width="10"
-      height="6"
-    >
-      {%- render 'icon', icon: 'caret' -%}
-    </svg>
+    <span class="svg-wrapper icon-caret" aria-hidden="true">
+      {{- 'icon-caret.svg' | inline_asset_content -}}
+    </span>
   </div>
 
   {%- if block_settings.help_text != blank -%}

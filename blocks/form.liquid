@@ -125,11 +125,7 @@
         role="alert"
       >
         <div class="custom-form__alert-icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="2"/>
-            <path d="M10 6V11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <circle cx="10" cy="14.5" r="1" fill="currentColor"/>
-          </svg>
+          {{- 'icon-alert-error.svg' | inline_asset_content -}}
         </div>
         <div class="custom-form__alert-body">
           <div class="custom-form__alert-title">{{- error_msg -}}</div>
@@ -157,10 +153,7 @@
         role="status"
       >
         <div class="custom-form__alert-icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="2"/>
-            <path d="M6 10.5L8.5 13L14 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          {{- 'icon-alert-success.svg' | inline_asset_content -}}
         </div>
         <div class="custom-form__alert-body">
           <div class="custom-form__alert-title">{{ success_msg }}</div>
