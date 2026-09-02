@@ -1,7 +1,7 @@
 ---
 title: Right-to-Left (RTL) Support
 description: Native bidirectional layout support for Arabic, Hebrew, Urdu, and Persian storefronts.
-sidebar_position: 10
+sidebar_position: 12
 ---
 
 # Right-to-Left (RTL) Support

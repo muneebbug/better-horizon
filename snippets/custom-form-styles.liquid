@@ -9,8 +9,74 @@
 {% stylesheet %}
   .custom-form {
     display: block;
-    width: 100%;
     box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .custom-form.size-style {
+    width: var(--size-style-width-mobile, var(--size-style-width, 100%));
+    max-width: var(--size-style-width-mobile, var(--size-style-width, 100%));
+  }
+
+  @media screen and (min-width: 750px) {
+    .custom-form.size-style {
+      width: var(--size-style-width, 100%);
+      max-width: var(--size-style-width, 100%);
+    }
+  }
+
+  /* Shopify Theme Editor block wrapper sizing */
+  .shopify-block:has(> .custom-form.size-style) {
+    width: var(--size-style-width-mobile, var(--size-style-width, 100%));
+    max-width: var(--size-style-width-mobile, var(--size-style-width, 100%));
+  }
+
+  @media screen and (min-width: 750px) {
+    .shopify-block:has(> .custom-form.size-style) {
+      width: var(--size-style-width, 100%);
+      max-width: var(--size-style-width, 100%);
+    }
+  }
+
+  /* Flex item sizing when inside layout-panel-flex */
+  .layout-panel-flex--row > .custom-form,
+  .layout-panel-flex--row > :has(> .custom-form) {
+    flex-shrink: 0;
+  }
+
+  .layout-panel-flex--row > .custom-form--width-fit-content,
+  .layout-panel-flex--row > :has(> .custom-form--width-fit-content) {
+    flex: 0 1 auto;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .layout-panel-flex--row > .custom-form--width-fill,
+  .layout-panel-flex--row > :has(> .custom-form--width-fill) {
+    flex: 1 1 0%;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .layout-panel-flex--row > .custom-form--width-custom,
+  .layout-panel-flex--row > :has(> .custom-form--width-custom) {
+    flex: 0 0 var(--size-style-width);
+    flex-basis: var(--size-style-width);
+    width: var(--size-style-width);
+    max-width: var(--size-style-width);
+  }
+
+  .layout-panel-flex--column > .custom-form--width-custom,
+  .layout-panel-flex--column > :has(> .custom-form--width-custom) {
+    width: var(--size-style-width);
+    max-width: var(--size-style-width);
+  }
+
+  .layout-panel-flex--column > .custom-form--width-fit-content,
+  .layout-panel-flex--column > :has(> .custom-form--width-fit-content) {
+    width: fit-content;
+    max-width: 100%;
   }
 
   /* Card Container Styles */

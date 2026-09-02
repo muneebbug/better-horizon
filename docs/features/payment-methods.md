@@ -1,7 +1,7 @@
 ---
 title: Payment Methods Block
 description: Dynamic payment methods icons block displaying all store-enabled payment gateways with customizable headings and alignments.
-sidebar_position: 8
+sidebar_position: 10
 ---
 
 # Payment Methods Block

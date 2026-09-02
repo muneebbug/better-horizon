@@ -1,7 +1,7 @@
 ---
 title: Geo Market Suggestion Banner
 description: Localized country and regional currency suggestion banner for international Shopify Markets.
-sidebar_position: 9
+sidebar_position: 11
 ---
 
 # Geo Market Suggestion Banner

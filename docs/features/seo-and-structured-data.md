@@ -1,7 +1,7 @@
 ---
 title: SEO & Structured Data
 description: Automated JSON-LD rich snippets for Google Search, Organization data, and OpenGraph social metadata.
-sidebar_position: 11
+sidebar_position: 13
 ---
 
 # SEO & Structured Data

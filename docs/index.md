@@ -54,6 +54,7 @@ You can preview the theme here:
 - [Geo Market Banner](/features/market-banner) — Localized currency and regional store suggestion banner.
 - [RTL Language Support](/features/rtl-support) — Bi-directional layouts for Arabic, Hebrew, and Urdu.
 - [SEO & Structured Data](/features/seo-and-structured-data) — Automated JSON-LD rich snippets.
+- [Brands & Logo List](/features/brands) — Responsive brand logo showcase using native Theme Blocks with grayscale filters and hover effects.
 
 ### Development & Extensibility
 - [Theme Blocks Guide](/development/theme-blocks) — Creating and configuring theme blocks.

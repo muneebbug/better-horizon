@@ -1,7 +1,7 @@
 ---
 title: Custom Forms & Form Blocks
 description: Modular form builder blocks for contact forms, product line item properties, cart attributes, file uploads, and custom form fields.
-sidebar_position: 15
+sidebar_position: 17
 ---
 
 # Custom Forms & Modular Form Blocks
@@ -31,7 +31,12 @@ All form blocks are found under the **Forms** category in the Shopify Theme Edit
 - **File:** `blocks/form.liquid`
 - **Purpose:** Form root container. Renders `<form>` tags, handles hidden metadata, and displays success/error alerts.
 - **Allowed Child Blocks:** `form-input`, `form-textarea`, `form-select`, `form-checkbox`, `form-radio-group`, `form-file-input`, `form-submit-button`, `text`, `group`, `_divider`, `@app`.
-- **Key Settings:** Container card style (`minimal`, `default`, `outline`, `custom`), field gap (4–48px), field sizing (`compact`, `default`, `spacious`), label typography and colors, input color overrides, and alert messages.
+- **Size Options:**
+  - `Width (Desktop)`: `Fit content`, `Fill (100%)`, or `Custom percentage`.
+  - `Custom width (Desktop)`: Range slider (0–100%) active when Width is set to Custom.
+  - `Width (Mobile)`: Independent mobile width control (`Fit content`, `Fill`, `Custom`).
+  - `Custom width (Mobile)`: Mobile percentage slider (0–100%).
+- **Styling Settings:** Container card style (`minimal`, `default`, `outline`, `custom`), field gap (4–48px), field sizing (`compact`, `default`, `spacious`), label typography and colors, input color overrides, and alert messages.
 
 ### 2. `Input field`
 - **File:** `blocks/form-input.liquid`

@@ -45,7 +45,7 @@
 -%}
 
 <div
-  class="custom-form custom-form--card-{{ card_preset }} spacing-style size-style{% if block_settings.text_color != blank %} color-custom-{{ block.id }}{% endif %}"
+  class="custom-form custom-form--card-{{ card_preset }} custom-form--width-{{ block_settings.width | default: 'fill' }}{% if block_settings.width_mobile != blank %} custom-form--width-mobile-{{ block_settings.width_mobile }}{% endif %} spacing-style size-style{% if block_settings.text_color != blank %} color-custom-{{ block.id }}{% endif %}"
   style="
     --form-gap: {{ block_settings.form_gap | default: 16 }}px;
     --form-input-height: {{ input_height }};
@@ -521,12 +521,43 @@
       "type": "range",
       "id": "custom_width",
       "label": "t:settings.custom_width",
-      "min": 10,
+      "min": 0,
       "max": 100,
       "step": 1,
       "unit": "%",
       "default": 100,
       "visible_if": "{{ block.settings.width == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "width_mobile",
+      "label": "t:settings.width_mobile",
+      "options": [
+        {
+          "value": "fit-content",
+          "label": "t:options.fit_content"
+        },
+        {
+          "value": "fill",
+          "label": "t:options.fill"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "fill"
+    },
+    {
+      "type": "range",
+      "id": "custom_width_mobile",
+      "label": "t:settings.custom_width",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 100,
+      "visible_if": "{{ block.settings.width_mobile == 'custom' }}"
     },
     {
       "type": "header",
