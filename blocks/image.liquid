@@ -7,6 +7,8 @@
       assign ratio = '16 / 9'
     when 'portrait'
       assign ratio = '4 / 5'
+    when 'square'
+      assign ratio = '1 / 1'
     when 'adapt'
       assign ratio = block_settings.image.aspect_ratio
   endcase
@@ -17,17 +19,36 @@
 %}
 
 {% capture class %}
-  image-block image-block--{{ block.id }} image-block--height-{{ block_settings.height }} spacing-style size-style
+  image-block image-block--{{ block.id }} image-block--height-{{ block_settings.height }} image-block--fit-{{ block_settings.object_fit | default: 'cover' }}{% if block_settings.grayscale != blank and block_settings.grayscale != 'none' %} image-block--grayscale-{{ block_settings.grayscale }}{% endif %}{% if block_settings.hover_effect != blank and block_settings.hover_effect != 'none' %} image-block--hover-{{ block_settings.hover_effect }}{% endif %} spacing-style size-style
 {% endcapture %}
 
 {% capture style %}
-  --ratio: {{ ratio }};
+  {% if block_settings.object_fit != 'contain' %}
+    --ratio: {{ ratio }};
+  {% endif %}
+  {% if block_settings.max_height > 0 %}
+    --image-max-height: {{ block_settings.max_height }}px;
+  {% endif %}
+  {% if block_settings.max_height_mobile > 0 %}
+    --image-max-height-mobile: {{ block_settings.max_height_mobile }}px;
+  {% endif %}
+  {% if block_settings.max_width_px > 0 %}
+    --image-max-width-px: {{ block_settings.max_width_px }}px;
+  {% endif %}
+  {% if block_settings.opacity != blank and block_settings.opacity < 100 %}
+    --image-opacity: {{ block_settings.opacity | divided_by: 100.0 }};
+  {% endif %}
+  {% if block_settings.hover_opacity != blank and block_settings.hover_opacity < 100 %}
+    --image-hover-opacity: {{ block_settings.hover_opacity | divided_by: 100.0 }};
+  {% endif %}
   {% render 'size-style', settings: block_settings %}
   {% render 'spacing-style', settings: block_settings %}
 {% endcapture %}
 
 {% capture image_border_style %}
-  --ratio: {{ ratio }};
+  {% if block_settings.object_fit != 'contain' %}
+    --ratio: {{ ratio }};
+  {% endif %}
   {% render 'border-override', settings: block_settings %}
 {% endcapture %}
 
@@ -89,24 +110,91 @@
 
   .placeholder-image {
     position: relative;
-    aspect-ratio: var(--ratio);
     overflow: hidden;
   }
 
   .image-block {
     display: flex;
-
-    /* When the image is nested in a group, section, etc, respect the parent's horizontal alignment */
     justify-content: var(--horizontal-alignment, 'inline-start');
+    max-height: var(--image-max-height, none);
+    max-width: var(--image-max-width-px, none);
+    opacity: var(--image-opacity, 1);
+    transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+    text-decoration: none;
+    box-sizing: border-box;
+    align-items: center;
+  }
+
+  .image-block:hover {
+    opacity: var(--image-hover-opacity, var(--image-opacity, 1));
   }
 
   .image-block--height-fill .image-block__image {
     height: 100%;
   }
 
-  .image-block__image {
+  .image-block--fit-cover .placeholder-image {
+    aspect-ratio: var(--ratio);
+  }
+
+  .image-block--fit-cover .image-block__image {
     object-fit: cover;
     aspect-ratio: var(--ratio);
+    max-height: var(--image-max-height, none);
+    max-width: var(--image-max-width-px, 100%);
+  }
+
+  .image-block--fit-contain {
+    align-items: center;
+  }
+
+  .image-block--fit-contain .image-block__image {
+    object-fit: contain;
+    max-height: var(--image-max-height, none);
+    max-width: var(--image-max-width-px, 100%);
+    width: auto;
+    height: auto;
+  }
+
+  .image-block--fit-contain .placeholder-image {
+    max-height: var(--image-max-height, none);
+    width: 100%;
+  }
+
+  .image-block--grayscale-always {
+    filter: grayscale(100%);
+  }
+
+  .image-block--grayscale-hover {
+    filter: grayscale(100%);
+  }
+
+  .image-block--grayscale-hover:hover {
+    filter: grayscale(0%);
+  }
+
+  .image-block--hover-scale:hover {
+    transform: scale(1.06);
+  }
+
+  .image-block--hover-lift:hover {
+    transform: translateY(-3px);
+  }
+
+  @media screen and (max-width: 749px) {
+    .image-block {
+      max-height: var(--image-max-height-mobile, var(--image-max-height, none));
+    }
+
+    .image-block--fit-contain .image-block__image {
+      max-height: var(--image-max-height-mobile, var(--image-max-height, none));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .image-block {
+      transition: none;
+    }
   }
 {% endstylesheet %}
 
@@ -131,6 +219,55 @@
     },
     {
       "type": "select",
+      "id": "object_fit",
+      "label": "Image fit mode",
+      "options": [
+        {
+          "value": "cover",
+          "label": "Cover (Fill area)"
+        },
+        {
+          "value": "contain",
+          "label": "Contain (Preserve logo / icon size)"
+        }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "range",
+      "id": "max_height",
+      "label": "Max height (px)",
+      "info": "Useful for brand logos, icons, and badges. Set to 0 for auto.",
+      "min": 0,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "max_height_mobile",
+      "label": "Max height on mobile (px)",
+      "info": "Set to 0 to inherit desktop max height.",
+      "min": 0,
+      "max": 400,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "max_width_px",
+      "label": "Max width (px)",
+      "info": "Set to 0 for no limit.",
+      "min": 0,
+      "max": 1200,
+      "step": 20,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "select",
       "id": "image_ratio",
       "label": "t:settings.aspect_ratio",
       "options": [
@@ -151,7 +288,8 @@
           "label": "t:options.landscape"
         }
       ],
-      "default": "adapt"
+      "default": "adapt",
+      "visible_if": "{{ block.settings.object_fit == 'cover' }}"
     },
     {
       "type": "select",
@@ -230,7 +368,75 @@
         }
       ],
       "default": "fit",
-      "visible_if": "{{ block.settings.image_ratio == 'adapt' }}"
+      "visible_if": "{{ block.settings.image_ratio == 'adapt' and block.settings.object_fit == 'cover' }}"
+    },
+    {
+      "type": "header",
+      "content": "Appearance & Effects"
+    },
+    {
+      "type": "range",
+      "id": "opacity",
+      "label": "Opacity",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "hover_opacity",
+      "label": "Hover opacity",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "select",
+      "id": "grayscale",
+      "label": "Grayscale filter",
+      "options": [
+        {
+          "value": "none",
+          "label": "None (Full color)"
+        },
+        {
+          "value": "always",
+          "label": "Always grayscale"
+        },
+        {
+          "value": "hover",
+          "label": "Grayscale (Color on hover)"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "select",
+      "id": "hover_effect",
+      "label": "Hover animation",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "fade",
+          "label": "Fade opacity"
+        },
+        {
+          "value": "scale",
+          "label": "Subtle scale"
+        },
+        {
+          "value": "lift",
+          "label": "Lift upward"
+        }
+      ],
+      "default": "none"
     },
     {
       "type": "header",
