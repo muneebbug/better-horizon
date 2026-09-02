@@ -33,16 +33,7 @@
   "
 >
   <div class="brands brands--grayscale-{{ section_settings.grayscale_mode }}{% if section_settings.hover_effect != 'none' %} brands--hover-{{ section_settings.hover_effect }}{% endif %}">
-    {%- if section_settings.heading != blank or section_settings.subheading != blank -%}
-      <div class="brands__header brands__header--{{ section_settings.heading_alignment }}">
-        {%- if section_settings.subheading != blank -%}
-          <p class="brands__subheading">{{ section_settings.subheading }}</p>
-        {%- endif -%}
-        {%- if section_settings.heading != blank -%}
-          <h2 class="brands__title {{ section_settings.heading_size }}">{{ section_settings.heading }}</h2>
-        {%- endif -%}
-      </div>
-    {%- endif -%}
+    {% content_for 'block', type: 'group', id: 'static-header' %}
 
     <div
       class="
@@ -66,67 +57,16 @@
   },
   "blocks": [
     {
-      "type": "@theme"
+      "type": "image"
     },
     {
-      "type": "@app"
+      "type": "text"
+    },
+    {
+      "type": "_heading"
     }
   ],
   "settings": [
-    {
-      "type": "header",
-      "content": "t:content.heading"
-    },
-    {
-      "type": "inline_richtext",
-      "id": "heading",
-      "label": "Heading"
-    },
-    {
-      "type": "inline_richtext",
-      "id": "subheading",
-      "label": "Subheading"
-    },
-    {
-      "type": "select",
-      "id": "heading_size",
-      "label": "Heading size",
-      "options": [
-        {
-          "value": "h4",
-          "label": "Small"
-        },
-        {
-          "value": "h3",
-          "label": "Medium"
-        },
-        {
-          "value": "h2",
-          "label": "Large"
-        }
-      ],
-      "default": "h3"
-    },
-    {
-      "type": "select",
-      "id": "heading_alignment",
-      "label": "Heading alignment",
-      "options": [
-        {
-          "value": "left",
-          "label": "Left"
-        },
-        {
-          "value": "center",
-          "label": "Center"
-        },
-        {
-          "value": "right",
-          "label": "Right"
-        }
-      ],
-      "default": "center"
-    },
     {
       "type": "header",
       "content": "t:content.size"
@@ -387,6 +327,43 @@
       "name": "Brands & Logo List",
       "category": "t:categories.basic",
       "blocks": {
+        "static-header": {
+          "type": "group",
+          "name": "t:names.header",
+          "static": true,
+          "settings": {
+            "content_direction": "row",
+            "vertical_on_mobile": false,
+            "horizontal_alignment": "center",
+            "vertical_alignment": "center",
+            "align_baseline": true,
+            "gap": 12,
+            "width": "fill",
+            "custom_width": 100,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "custom_height": 100,
+            "border": "none",
+            "padding-block-start": 0,
+            "padding-block-end": 24,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {
+            "heading": {
+              "type": "text",
+              "name": "t:names.heading",
+              "settings": {
+                "text": "<h3>Featured Brands</h3>",
+                "type_preset": "h3",
+                "width": "fit-content",
+                "alignment": "center"
+              }
+            }
+          },
+          "block_order": ["heading"]
+        },
         "image_1": {
           "type": "image",
           "settings": {
