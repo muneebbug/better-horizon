@@ -1,0 +1,4 @@
+config/settings_data.json
+
+templates/*.json
+templates/customers/*.json
